@@ -81,7 +81,6 @@ import { chair_20251216 } from './models/chair_20251216_slices.js';
 
 let scene, camera, renderer, stats, mixer;
 let controls;
-let idleTime=0;
 let threeContainer = document.getElementById("threeContainer");
 
 const clock = new THREE.Clock();
@@ -94,6 +93,9 @@ const CameraDefaultPos=new THREE.Vector3(-8.266,5.931,7.888);
 const ControlsTargetDefaultPos=new THREE.Vector3(1.029,0.409,0.051);
 
 let main_model= new THREE.Object3D();
+
+let idleTime=0;
+const hold_time=6;
 
 init();
 
@@ -124,6 +126,8 @@ function init()
   	controls.maxDistance = 500;
   	controls.target.copy( ControlsTargetDefaultPos );
   	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
   	controls.update();
 
   	///hdri 環境光源
@@ -183,13 +187,26 @@ function init()
 	///EventListener
   	window.addEventListener( 'resize', onWindowResize );  
 
-  	renderer.domElement.addEventListener("pointerdown", (event) => {
-    	FX.InputEvent();
+  		window.addEventListener("pointerdown", (event) => {
+		
 		idleTime=0;
-  	});
+		controls.autoRotate=false;
+		
+	});
 
-	renderer.domElement.addEventListener( 'pointermove', function(e) {idleTime=0;});
-  	renderer.domElement.addEventListener("wheel", (event) => {idleTime=0;});
+	window.addEventListener( 'pointermove', function(e) {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+  	window.addEventListener("wheel", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
 }
 
 
@@ -212,6 +229,13 @@ function animate()
 	const delta = clock.getDelta();
 
 	if ( mixer ) mixer.update( delta );
+
+	idleTime+=delta;
+	
+	if(idleTime>hold_time)
+	{
+		controls.autoRotate=true;
+	}
 
 }
 		</script>
