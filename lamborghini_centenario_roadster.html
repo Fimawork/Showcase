@@ -90,7 +90,7 @@ const modelPosition=new THREE.Vector3(0,0,0);
 const modelRotation=new THREE.Vector3(0,Math.PI*0.5, 0);
 const modeScale=0.02;
 
-const CameraDefaultPos=new THREE.Vector3(-12.213,4.595,-8);
+const CameraDefaultPos=new THREE.Vector3(-18.309,7.793,-10.893);
 const ControlsTargetDefaultPos=new THREE.Vector3(0.320,-0.537,-0.588);
 
 let main_model= new THREE.Object3D();
@@ -99,6 +99,7 @@ let idleTime=0;
 const hold_time=6;
 
 init();
+FX.Camera_Inspector(camera,controls);
 
 function init()
 {
