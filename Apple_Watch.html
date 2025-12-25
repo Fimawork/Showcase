@@ -50,6 +50,41 @@
 			{
 				opacity: 0.5;
 			}
+
+			#loadingUI{
+				position: absolute;
+				left: 50%;
+				top:50%;
+				width: 180px;
+				height:180px;
+				background-image: url(./images/portfolio_2023_loading.png);
+				background-size: 100% 100%; 
+				background-position: center;
+			}
+
+			@keyframes UI_rotate
+			{
+				0% {transform: rotate(0);}
+  				8.33% {transform: rotate(30deg);}
+				16.66% {transform: rotate(60deg);}
+				24.99% {transform: rotate(90deg);}
+				33.32%	{transform: rotate(120deg);}
+				41.65%	{transform: rotate(150deg);}
+				49.98%	{transform: rotate(180deg);}
+				58.31%	{transform: rotate(210deg);}
+				66.64%	{transform: rotate(240deg);}
+				74.97%	{transform: rotate(270deg);}
+				83.3%	{transform: rotate(300deg);}
+				91.63%	{transform: rotate(330deg);}
+				100% {transform: rotate(360deg);}
+			}
+
+			.rotate_anim{
+				animation: UI_rotate;
+				animation-duration: 1.5s;
+				animation-timing-function: step-end;
+				animation-iteration-count: infinite;
+			}
 			
 		</style>
 
@@ -66,6 +101,7 @@
 	
 	<body>
 		<div id="threeContainer" class="SceneCrossEffect_anim"></div> 
+		<div id="loadingUI" class="rotate_anim"></div>
 		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
 		<script type="module">
 
@@ -83,6 +119,7 @@ import { apple_watch_series8_45mm_20251217 } from './models/apple_watch_series8_
 let scene, camera, renderer, stats, mixer;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
+let _loadingUI = document.getElementById("loadingUI");
 
 const clock = new THREE.Clock();
 
@@ -170,6 +207,7 @@ function init()
 		scene.add(main_model);
 
 		animate();
+		setTimeout(() => {_loadingUI.remove();}, 600);
     },
     (error) => {
         console.error('Failed to load model:', error);
