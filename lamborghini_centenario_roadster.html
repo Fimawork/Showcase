@@ -1,0 +1,253 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<style type="text/css">
+
+			body
+			{
+				margin: 0;
+				padding:0; 
+				background-color: #000000;
+			}
+			
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
+
+			#threeContainer
+			{
+				position: absolute;
+				top: 0%;
+				left: 0%;
+				width: 100%;
+				height: 100%;
+			}
+
+			.fimawork_logo
+			{
+				position:absolute;
+				bottom:3%;
+				left: 1.5%;
+				height: 3.9%;
+				aspect-ratio: 192/33;
+				background-image: url(./images/fimawork_logo_C_white.png);
+				background-size: 100% 100%;
+				opacity: 1;
+				z-index: 99;
+				user-select: none;
+			}
+
+			.fimawork_logo:hover
+			{
+				opacity: 0.5;
+			}
+			
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<div id="threeContainer" class="SceneCrossEffect_anim"></div> 
+		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { Lamborghini_Centenario_roadster_20251218 } from './models/Lamborghini_Centenario_roadster_20251218_slices.js';
+
+let scene, camera, renderer, stats, mixer;
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+
+const clock = new THREE.Clock();
+
+const modelPosition=new THREE.Vector3(0,0,0);
+const modelRotation=new THREE.Vector3(0,Math.PI*0.5, 0);
+const modeScale=0.02;
+
+const CameraDefaultPos=new THREE.Vector3(-12.213,4.595,-8);
+const ControlsTargetDefaultPos=new THREE.Vector3(0.320,-0.537,-0.588);
+
+let main_model= new THREE.Object3D();
+
+let idleTime=0;
+const hold_time=6;
+
+init();
+
+function init()
+{
+	FX.SetupEnvironment("cloud");
+
+  	scene = new THREE.Scene();
+
+  	camera = new THREE.PerspectiveCamera( 25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 0.9;
+  	//document.body.appendChild( renderer.domElement );
+  	threeContainer.appendChild( renderer.domElement );
+
+  	camera.position.copy(CameraDefaultPos);
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+  	controls = new OrbitControls( camera, renderer.domElement );
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.maxDistance = 500;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+  	controls.update();
+
+  	///hdri 環境光源
+	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
+	
+	///Lamborghini_Centenario_roadster
+	const loader_Lamborghini_Centenario_roadster = new GLTFLoader();
+    loader_Lamborghini_Centenario_roadster.setDRACOLoader(FX.dracoLoader);
+	loader_Lamborghini_Centenario_roadster.parse(
+    FX.Base64ToArrayBuffer(Lamborghini_Centenario_roadster_20251218()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+		//InstMaterial(thisColor,thisRoughness,thisMetalness,thisTransmission,thisIor,thisReflectivity,isTransparent,thisOpacity,isDepthWrite)
+		//InstEtchingMaterial(thisColor,thisRoughness,thisMetalness,thisReflectivity,isTransparent,thisOpacity,map_src,map_repeat,map_offset,bumpMap_src,bumpMap_repeat,bumpMap_scale)
+		const inner_material=FXM.InstMaterial(0x000000,1,0.5,0,2.333,0.5,false,1,true);
+
+		const silver_paint_material=FXM.InstMaterial(0xd2dde5,0.45,0.9,0,2.333,1,false,1,true);
+
+		const wheel_frame_sliver_material=FXM.InstMaterial(0xeff3f6,0.3,0.6,0,2.333,1,false,1,true);
+
+		const window_material=FXM.InstMaterial(0xFFFFFF,0,0,0.96,1.5,1,true,1,false);
+
+		const red_light_material=FXM.InstMaterial(0xff0000,0,1,1,2.4,1,true,0.95,false);
+
+		const wipers_material=FXM.InstMaterial(0x000000,0.5,0.5,0,2.333,1,false,1,true);
+
+		const black_carbon_fiber_01_material=FXM.InstEtchingMaterial(0x585555,0.5,0.75,1,false,1,'./textures/Carbon_Fiber_10_B35F70.jpg',new THREE.Vector2(100,100),new THREE.Vector2(0,0),'./textures/Carbon_Fiber_10_B35F70.jpg',new THREE.Vector2(100, 100),0);
+
+		const brown_leather_material=FXM.InstEtchingMaterial(0xd2852d,0.5,0.1,0.5,false,1,'./textures/Leather.png',new THREE.Vector2(10,10),new THREE.Vector2(0,0),'./textures/Leather.png',new THREE.Vector2(15, 15),0);
+
+		const black_leather_material=FXM.InstEtchingMaterial(0x383838,0.5,0.1,0.5,false,1,'./textures/Leather.png',new THREE.Vector2(10,10),new THREE.Vector2(0,0),'./textures/Leather.png',new THREE.Vector2(15, 15),0);
+
+		const other_material=FXM.InstMaterial(0x000000,0,1,0,1.5,1,false,1,true);
+
+		FX.ReturnBufferGeometry(model.getObjectByName("silver_paint"),silver_paint_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("black_carbon_fiber"),black_carbon_fiber_01_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("leather_brown"),brown_leather_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("car_window"),window_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("red_light"),red_light_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("wheel_frame_black"),inner_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("wheel_frame_sliver"),wheel_frame_sliver_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("tire"),null,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("wipers"),wipers_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("inner"),inner_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("leather_black"),black_leather_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("inner_silver"),silver_paint_material,main_model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("other"),other_material,main_model,scene);
+
+		main_model.add(model.getObjectByName("logo"));
+
+		main_model.position.set(0,0,0);
+		main_model.rotation.set(0,Math.PI, 0);
+		main_model.scale.set(0.0024,0.0024,0.0024);
+
+		scene.add(main_model);
+		animate();
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+  		window.addEventListener("pointerdown", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+	window.addEventListener( 'pointermove', function(e) {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+  	window.addEventListener("wheel", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.updateProjectionMatrix();
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+}
+
+function animate() 
+{
+  	requestAnimationFrame( animate );
+
+  	controls.update();
+  	renderer.render( scene, camera );
+  	//UpdateCameraPosition(camera,controls);
+
+
+	const delta = clock.getDelta();
+
+	if ( mixer ) mixer.update( delta );
+
+	idleTime+=delta;
+	
+	if(idleTime>hold_time)
+	{
+		controls.autoRotate=true;
+	}
+
+}
+		</script>
+    </body>
+
+</html>
