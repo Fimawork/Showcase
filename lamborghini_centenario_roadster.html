@@ -8,6 +8,7 @@
 		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
 		<style type="text/css">
 
 			body
@@ -23,69 +24,6 @@
    				height: 100%;
 			}
 
-			#threeContainer
-			{
-				position: absolute;
-				top: 0%;
-				left: 0%;
-				width: 100%;
-				height: 100%;
-			}
-
-			.fimawork_logo
-			{
-				position:absolute;
-				bottom:3%;
-				left: 1.5%;
-				height: 3.9%;
-				aspect-ratio: 192/33;
-				background-image: url(./images/fimawork_logo_C_white.png);
-				background-size: 100% 100%;
-				opacity: 1;
-				z-index: 99;
-				user-select: none;
-			}
-
-			.fimawork_logo:hover
-			{
-				opacity: 0.5;
-			}
-
-			#loadingUI{
-				position: absolute;
-				left: 50%;
-				top:50%;
-				width: 180px;
-				height:180px;
-				background-image: url(./images/portfolio_2023_loading.png);
-				background-size: 100% 100%; 
-				background-position: center;
-			}
-
-			@keyframes UI_rotate
-			{
-				0% {transform: rotate(0);}
-  				8.33% {transform: rotate(30deg);}
-				16.66% {transform: rotate(60deg);}
-				24.99% {transform: rotate(90deg);}
-				33.32%	{transform: rotate(120deg);}
-				41.65%	{transform: rotate(150deg);}
-				49.98%	{transform: rotate(180deg);}
-				58.31%	{transform: rotate(210deg);}
-				66.64%	{transform: rotate(240deg);}
-				74.97%	{transform: rotate(270deg);}
-				83.3%	{transform: rotate(300deg);}
-				91.63%	{transform: rotate(330deg);}
-				100% {transform: rotate(360deg);}
-			}
-
-			.rotate_anim{
-				animation: UI_rotate;
-				animation-duration: 1.5s;
-				animation-timing-function: step-end;
-				animation-iteration-count: infinite;
-			}
-			
 		</style>
 
 		<script type="importmap">
