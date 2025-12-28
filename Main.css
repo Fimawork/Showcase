@@ -63,3 +63,17 @@
 	animation-timing-function: step-end;
 	animation-iteration-count: infinite;
 }
+
+.web3d_icon
+{
+	position:absolute;
+	top:6%;
+	right: 6%;
+	height: 12%;
+	aspect-ratio: 1/1;
+	background-image: url(./images/web3d_icon_gray.png);
+	background-size: 100% 100%;
+	opacity: 1;
+	z-index: 99;
+	user-select: none;
+}
