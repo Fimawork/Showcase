@@ -1,0 +1,271 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+
+			body
+			{
+				margin: 0;
+				padding:0; 
+			}
+			
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<div id="threeContainer" class="SceneCrossEffect_anim"></div> 
+		<div id="loadingUI" class="rotate_anim"></div>
+		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+		<div class="web3d_icon"></div>
+
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.9/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.9/fx_materials.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { draco_S1R_20260316 } from './models/draco_S1R_20260316_slices.js';
+
+let scene, camera, renderer, stats, mixer;
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+let _loadingUI = document.getElementById("loadingUI");
+
+const clock = new THREE.Clock();
+
+const modelPosition=new THREE.Vector3(0,0,0);
+const modelRotation=new THREE.Vector3(0,Math.PI*0.5, 0);
+const modeScale=0.02;
+
+const CameraDefaultPos=new THREE.Vector3(5.516,5.806,7.975);
+const ControlsTargetDefaultPos=new THREE.Vector3(-0.408,2.932,-0.552);
+
+let main_model= new THREE.Object3D();
+
+let idleTime=0;
+const hold_time=6;
+
+init();
+
+function init()
+{
+	FX.SetupEnvironment("cloud");
+
+  	scene = new THREE.Scene();
+
+	scene.background = new THREE.Color( 0x333333 );
+			scene.fog = new THREE.Fog( 0x333333, 1, 50 );
+			
+
+  	camera = new THREE.PerspectiveCamera( 45, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+  	//renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 0.9;
+  	renderer.shadowMap.enabled = true;
+  	threeContainer.appendChild( renderer.domElement );
+
+  	camera.position.copy(CameraDefaultPos);
+
+	// Ground
+	//		const plane = new THREE.Mesh(
+	//			new THREE.PlaneGeometry(100, 100 ),
+	//			new THREE.MeshLambertMaterial( { color: 0x333333 } )
+	//		);
+	//		plane.rotation.x = - Math.PI / 2;
+	//		plane.position.y = 0;
+	//		plane.receiveShadow = true;
+	//		scene.add( plane );
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+  	controls = new OrbitControls( camera, renderer.domElement );
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.maxDistance = 500;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+  	controls.update();
+
+  	///hdri 環境光源
+	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
+
+	// Lights
+			const hemiLight = new THREE.HemisphereLight( 0xFFFFFF, 0x333333, 1.5 );
+			scene.add( hemiLight );
+
+			const spotLight = new THREE.SpotLight();
+			spotLight.intensity = 10;
+			spotLight.angle = FX.ToThreeEulerAngle(30);
+			spotLight.penumbra = 0.5;
+			spotLight.castShadow = true;
+			spotLight.shadow.radius = 8;
+			spotLight.intensity=10;
+			spotLight.position.set( 3, 10, 0 );
+			scene.add( spotLight );
+
+			//scene.add( new THREE.SpotLightHelper( spotLight, 15 ) );
+	
+	///eames-chair
+	const loader_eames_chair = new GLTFLoader();
+    loader_eames_chair.setDRACOLoader(FX.dracoLoader);
+	loader_eames_chair.parse(
+    FX.Base64ToArrayBuffer(draco_S1R_20260316()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+
+		const new_scale=0.05;
+
+		model.scale.set(new_scale,new_scale,new_scale);
+		//(thisColor,thisRoughness,thisMetalness,thisReflectivity,isTransparent,thisOpacity,map_src,map_repeat,map_offset,bumpMap_src,bumpMap_repeat,bumpMap_scale)
+		const foam_material=FXM.InstEtchingMaterial(0x4c4c4c,1,0,0,false,1,'./textures/Expanded metal mesh_250_DB.jpg',new THREE.Vector2(45,45),new THREE.Vector2(0,0),'./textures/Expanded metal mesh_250_DB.jpg',new THREE.Vector2(45, 30),100);
+
+		const black_etching_material=FXM.InstEtchingMaterial(0x000000,0.6,0.6,1,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(50, 100),30);
+
+		const black_etching_material_2=FXM.InstEtchingMaterial(0x6e6e6e,0.4,0.75,1,false,1,'./textures/Gravel.png',new THREE.Vector2(12, 12),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(12, 12),8);
+
+		const wheel_material=FXM.InstMaterial(0x000000,0.1,0.5,0,2.33,1,false,1,true)
+		
+		const airMesh_texture =  new THREE.TextureLoader().load('./textures/officeChair_airMeshTexture.png');
+		const airMesh_material = new THREE.MeshPhysicalMaterial( { color: 0x000000,map: airMesh_texture,transparent: true,opacity:1 ,depthWrite: false,side: THREE.DoubleSide} );
+
+		airMesh_texture.colorSpace = THREE.SRGBColorSpace;
+
+		airMesh_texture.wrapS = THREE.RepeatWrapping;
+		airMesh_texture.wrapT = THREE.RepeatWrapping;
+		airMesh_texture.repeat.set(4, 2 );
+		airMesh_texture.offset.set(0.1, 0 );
+
+		model.traverse((child) => {
+
+			if (child.name.includes("metal") ) 
+			{
+				FX.ReturnBufferGeometry(child,black_etching_material_2,scene);
+			}
+		
+			if (child.name.includes("AirMesh") ) 
+			{
+				FX.ReturnBufferGeometry(child,airMesh_material,model,scene);
+			}
+		
+			if (child.name.includes("plastic") ) 
+			{
+				FX.ReturnBufferGeometry(child,black_etching_material,scene);
+			}
+		
+			if (child.name.includes("wheel") ) 
+			{
+				FX.ReturnBufferGeometry(child,wheel_material,model,scene);
+			}
+		
+			if (child.name.includes("seat") ) 
+			{
+				FX.ReturnBufferGeometry(child,foam_material,model,scene);
+			}
+
+		});
+
+		scene.add(model);
+
+		animate();
+		setTimeout(() => {_loadingUI.remove();}, 600);
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+  		window.addEventListener("pointerdown", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+	window.addEventListener( 'pointermove', function(e) {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+  	window.addEventListener("wheel", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.updateProjectionMatrix();
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+}
+
+function animate() 
+{
+  	requestAnimationFrame( animate );
+
+  	controls.update();
+  	renderer.render( scene, camera );
+  	//UpdateCameraPosition(camera,controls);
+
+
+	const delta = clock.getDelta();
+
+	if ( mixer ) mixer.update( delta );
+
+	idleTime+=delta;
+	
+	if(idleTime>hold_time)
+	{
+		controls.autoRotate=true;
+	}
+
+}
+		</script>
+    </body>
+
+</html>
