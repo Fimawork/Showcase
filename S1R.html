@@ -39,8 +39,8 @@
 	<body>
 		<div id="threeContainer" class="SceneCrossEffect_anim"></div> 
 		<div id="loadingUI" class="rotate_anim"></div>
-		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
-		<div class="web3d_icon"></div>
+		<div class="fimawork_logo" type="white" onclick="parent.open('https://fimawork.tw/')"></div>
+		<div class="web3d_icon" type="white"></div>
 
 		<script type="module">
 
@@ -54,6 +54,10 @@ import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { draco_S1R_20260316 } from './models/draco_S1R_20260316_slices.js';
+
+//Shadow
+import { HorizontalBlurShader } from 'three/addons/shaders/HorizontalBlurShader.js';
+import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
 
 let scene, camera, renderer, stats, mixer;
 let controls;
@@ -74,6 +78,38 @@ let main_model= new THREE.Object3D();
 let idleTime=0;
 const hold_time=6;
 
+//影子工具
+let shadowGroup, renderTarget, renderTargetBlur, shadowCamera, depthMaterial, horizontalBlurMaterial, verticalBlurMaterial;
+let plane, blurPlane, fillPlane;
+const PLANE_WIDTH = 100;
+const PLANE_HEIGHT = 100;
+const CAMERA_HEIGHT = 50;//必須高於模型，否則看不到
+const state = {
+	shadow: //影子
+	{
+		blur: 0.25,
+		darkness: 0.4,
+		opacity: 0.45,
+	},
+	plane: //地板材質
+	{
+		color: '#ffffffff',
+		opacity: 0,
+	},
+	
+	showWireframe: false,
+};
+
+
+let anim_step=[
+	{pos:new THREE.Vector3(3.753,5.948,-3.956),target:new THREE.Vector3(0.490,5.936,-1.531)},
+	{pos:new THREE.Vector3(4.743,4.800,4.399),target:new THREE.Vector3(0.161,4.818,-1.084)},
+	{pos:new THREE.Vector3(3.235,3.549,3.616),target:new THREE.Vector3(-0.287,3.272,-0.455)},
+	{pos:new THREE.Vector3(-4.646,2.624,4.495),target:new THREE.Vector3(-0.295,1.559,-0.379)},
+	{pos:new THREE.Vector3(-4.675,2.618,-5.295),target:new THREE.Vector3(-0.228,2.415,-0.398)},
+	{pos:new THREE.Vector3(0.158,5.491,-6.797),target:new THREE.Vector3(-0.026,4.156,-0.317)}
+]
+
 init();
 
 function init()
@@ -82,17 +118,17 @@ function init()
 
   	scene = new THREE.Scene();
 
-	scene.background = new THREE.Color( 0x333333 );
-			scene.fog = new THREE.Fog( 0x333333, 1, 50 );
+	scene.background = new THREE.Color( 0x999999 );
+	scene.fog = new THREE.Fog( 0x999999, 1, 50 );
 			
 
   	camera = new THREE.PerspectiveCamera( 45, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
   	renderer = new THREE.WebGLRenderer({ antialias: true });
   	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
 
-  	//renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	//renderer.setClearColor(0xFFFFFF, 0.0);//需加入這一條，否則看不到CSS的底圖
   	renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  	renderer.toneMappingExposure = 1.0;
+  	renderer.toneMappingExposure = 0.9;
   	renderer.shadowMap.enabled = true;
   	threeContainer.appendChild( renderer.domElement );
 
@@ -114,8 +150,10 @@ function init()
   	controls.panSpeed = 0.4;
   	controls.enableDamping = true;
   	controls.dampingFactor =0.015;
-  	controls.maxDistance = 500;
+	controls.minDistance = 2;
+  	controls.maxDistance = 15;
   	controls.target.copy( ControlsTargetDefaultPos );
+	controls.maxPolarAngle=FX.ToThreeEulerAngle(96);
   	controls.zoomSpeed=0.5;
 	controls.autoRotate=false;
 	controls.autoRotateSpeed=0.3;
@@ -158,7 +196,7 @@ function init()
 
 		const black_etching_material=FXM.InstEtchingMaterial(0x000000,0.6,0.6,1,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(50, 100),30);
 
-		const black_etching_material_2=FXM.InstEtchingMaterial(0x6e6e6e,0.4,0.75,1,false,1,'./textures/Gravel.png',new THREE.Vector2(12, 12),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(12, 12),8);
+		const black_etching_material_2=FXM.InstEtchingMaterial(0x6e6e6e,0.5,0.75,1,false,1,'./textures/Gravel.png',new THREE.Vector2(12, 12),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(12, 12),8);
 
 		const wheel_material=FXM.InstMaterial(0x000000,0.1,0.5,0,2.33,1,false,1,true)
 		
@@ -211,27 +249,115 @@ function init()
     }
 	);
 
+	///影子工具
+	// the container, if you need to move the plane just move this
+	shadowGroup = new THREE.Group();
+	shadowGroup.position.y = 0;
+	scene.add( shadowGroup );
+
+	// the render target that will show the shadows in the plane texture
+	renderTarget = new THREE.WebGLRenderTarget( 512, 512 );
+	renderTarget.texture.generateMipmaps = false;
+
+	// the render target that we will use to blur the first render target
+	renderTargetBlur = new THREE.WebGLRenderTarget( 512, 512 );
+	renderTargetBlur.texture.generateMipmaps = false;
+	
+	// make a plane and make it face up
+	const planeGeometry = new THREE.PlaneGeometry( PLANE_WIDTH, PLANE_HEIGHT ).rotateX( Math.PI / 2 );
+	const planeMaterial = new THREE.MeshBasicMaterial( {
+		map: renderTarget.texture,//地板使用影子攝影機的renderTexture材質球
+		opacity: state.shadow.opacity,
+		transparent: true,
+		depthWrite: false,
+	} );
+					
+	plane = new THREE.Mesh( planeGeometry, planeMaterial );
+				// make sure it's rendered after the fillPlane
+	plane.renderOrder = 1;
+	shadowGroup.add( plane );
+
+	// the y from the texture is flipped!
+	plane.scale.y = - 1;
+
+	// the plane onto which to blur the texture
+	blurPlane = new THREE.Mesh( planeGeometry );
+	blurPlane.visible = false;
+	shadowGroup.add( blurPlane );
+
+	// the plane with the color of the ground
+	const fillPlaneMaterial = new THREE.MeshBasicMaterial( {
+		color: state.plane.color,
+		opacity: state.plane.opacity,
+		transparent: true,
+		depthWrite: false,
+	} );
+
+	fillPlane = new THREE.Mesh( planeGeometry, fillPlaneMaterial );
+	fillPlane.rotateX( Math.PI );
+	shadowGroup.add( fillPlane );
+
+	//利用相機從正上方錄製正投影畫面，製作成影子
+	// the camera to render the depth material from
+	shadowCamera = new THREE.OrthographicCamera( - PLANE_WIDTH / 2, PLANE_WIDTH / 2, PLANE_HEIGHT / 2, - PLANE_HEIGHT / 2, 0,CAMERA_HEIGHT );
+	shadowCamera.rotation.x = Math.PI / 2; // get the camera to look up
+	shadowGroup.add( shadowCamera );
+
+	shadowGroup.position.set(0,0,0);//整組移動
+
+	// like MeshDepthMaterial, but goes from black to transparent
+	depthMaterial = new THREE.MeshDepthMaterial();
+	depthMaterial.userData.darkness = { value: state.shadow.darkness };
+	depthMaterial.onBeforeCompile = function ( shader ) {
+
+		shader.uniforms.darkness = depthMaterial.userData.darkness;
+		shader.fragmentShader = /* glsl */`
+		uniform float darkness;
+		${shader.fragmentShader.replace(
+		'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
+		'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) * darkness );'
+		)}
+	`;
+
+	};
+	
+	depthMaterial.depthTest = false;
+	depthMaterial.depthWrite = false;
+
+	horizontalBlurMaterial = new THREE.ShaderMaterial( HorizontalBlurShader );
+	horizontalBlurMaterial.depthTest = false;
+
+	verticalBlurMaterial = new THREE.ShaderMaterial( VerticalBlurShader );
+	verticalBlurMaterial.depthTest = false;
+
+	depthMaterial.userData.darkness.value = state.shadow.darkness;
+	plane.material.opacity = state.shadow.opacity;
+	fillPlane.material.color = new THREE.Color( state.plane.color );
+	fillPlane.material.opacity = state.plane.opacity;
+	shadowGroup.visible=true;
+
+
 	///EventListener
   	window.addEventListener( 'resize', onWindowResize );  
 
   		window.addEventListener("pointerdown", (event) => {
 		
 		idleTime=0;
-		controls.autoRotate=false;
+		//controls.autoRotate=false;
 		
 	});
 
 	window.addEventListener( 'pointermove', function(e) {
 		
 		idleTime=0;
-		controls.autoRotate=false;
+		//controls.autoRotate=false;
 		
 	});
 
   	window.addEventListener("wheel", (event) => {
 		
 		idleTime=0;
-		controls.autoRotate=false;
+		//controls.autoRotate=false;
 		
 	});
 }
@@ -261,9 +387,99 @@ function animate()
 	
 	if(idleTime>hold_time)
 	{
-		controls.autoRotate=true;
+		//controls.autoRotate=true;
+		AnimationEvent();
 	}
 
+	///shadow
+	ShaderTargetTextureRendering();
+}
+
+let animation_index=0;
+
+function AnimationEvent()
+{
+	const t=0.004;
+	const threshold=0.1;
+
+	if(camera.position.distanceTo(new THREE.Vector3(anim_step[animation_index].pos.x,anim_step[animation_index].pos.y,anim_step[animation_index].pos.z))>threshold)
+	{
+		camera.position.x=FX.LerpFloat(camera.position.x,anim_step[animation_index].pos.x,t);
+		camera.position.y=FX.LerpFloat(camera.position.y,anim_step[animation_index].pos.y,t);
+		camera.position.z=FX.LerpFloat(camera.position.z,anim_step[animation_index].pos.z,t);
+		controls.target.x=FX.LerpFloat(controls.target.x,anim_step[animation_index].target.x,t);
+		controls.target.y=FX.LerpFloat(controls.target.y,anim_step[animation_index].target.y,t);
+		controls.target.z=FX.LerpFloat(controls.target.z,anim_step[animation_index].target.z,t);
+	}
+
+	else
+	{
+		animation_index++;
+
+		if(animation_index>(anim_step.length-1))
+		{
+			animation_index=0;
+		}
+	}
+	
+}
+
+  ///影子功能
+function ShaderTargetTextureRendering()
+{
+	// remove the background
+	const initialBackground = scene.background;
+	scene.background = null;
+
+	// force the depthMaterial to everything
+	scene.overrideMaterial = depthMaterial;
+
+	// set renderer clear alpha
+	const initialClearAlpha = renderer.getClearAlpha();
+	renderer.setClearAlpha( 0 );
+
+	// render to the render target to get the depths
+	renderer.setRenderTarget( renderTarget );
+	renderer.render( scene, shadowCamera );
+
+	// and reset the override material
+	scene.overrideMaterial = null;
+
+	blurShadow( state.shadow.blur );
+
+	// a second pass to reduce the artifacts
+	// (0.4 is the minimum blur amount so that the artifacts are gone)
+	blurShadow( state.shadow.blur * 0.4 );
+
+	// reset and render the normal scene
+	renderer.setRenderTarget( null );
+	renderer.setClearAlpha( initialClearAlpha );
+	scene.background = initialBackground;
+
+	function blurShadow( amount ) 
+	{
+
+		blurPlane.visible = true;
+
+		// blur horizontally and draw in the renderTargetBlur
+		blurPlane.material = horizontalBlurMaterial;
+		blurPlane.material.uniforms.tDiffuse.value = renderTarget.texture;
+		horizontalBlurMaterial.uniforms.h.value = amount * 1 / 256;
+
+		renderer.setRenderTarget( renderTargetBlur );
+		renderer.render( blurPlane, shadowCamera );
+
+		// blur vertically and draw in the main renderTarget
+		blurPlane.material = verticalBlurMaterial;
+		blurPlane.material.uniforms.tDiffuse.value = renderTargetBlur.texture;
+		verticalBlurMaterial.uniforms.v.value = amount * 1 / 256;
+
+		renderer.setRenderTarget( renderTarget );
+		renderer.render( blurPlane, shadowCamera );
+
+		blurPlane.visible = false;
+
+	}
 }
 		</script>
     </body>
