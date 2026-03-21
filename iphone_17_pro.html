@@ -1,0 +1,263 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+
+			body
+			{
+				margin: 0;
+				padding:0; 
+			}
+			
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<div id="loadingUI" class="rotate_anim"></div>
+		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+		<div class="web3d_icon"></div>
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import {CameraManager,UpdateCameraPosition, InputEvent,Camera_Inspector,SetDefaultCameraStatus,InstFBXLoader,InstGLTFLoader,FindMataterialByName,posData,dracoLoader,LoadHDRWithPMREM} from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.2/fx_functions.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+import { iphone_17_pro_withCase } from './models/iphone_17_pro_withCase_slices.js';
+
+let _loadingUI = document.getElementById("loadingUI");
+
+let scene, camera, renderer, stats, mixer;
+let controls;
+let idleTime=0;
+
+const clock = new THREE.Clock();
+
+const modelPosition=new THREE.Vector3(0,0,0);
+const modelRotation=new THREE.Vector3(0,-Math.PI*0.5, 0);
+const modeScale=0.2;
+
+const CameraDefaultPos=new THREE.Vector3(-5,0,0);
+const ControlsTargetDefaultPos=new THREE.Vector3(0,0,0);
+
+const hold_time=6;
+
+
+init();
+
+function init()
+{
+  	scene = new THREE.Scene();
+
+  	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	renderer.setSize(window.innerWidth , window.innerHeight);
+
+  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 0.5;
+  	document.body.appendChild( renderer.domElement );
+
+	
+  	camera.position.copy(CameraDefaultPos);
+  	posData[0]={ camera_pos:CameraDefaultPos, controlsTarget_pos:ControlsTargetDefaultPos};
+
+
+	//加密模組
+	function base64ToArrayBuffer(base64) 
+	{
+		// 去除所有非 base64 字元
+		base64 = base64.replace(/[^A-Za-z0-9+/=]/g, "");
+
+    	const binary = atob(base64);
+    	const len = binary.length;
+    	const bytes = new Uint8Array(len);
+
+    	for (let i = 0; i < len; i++) 
+		{
+    	    bytes[i] = binary.charCodeAt(i);
+    	}
+
+    	return bytes.buffer;
+	}
+
+	const arrayBuffer = base64ToArrayBuffer(iphone_17_pro_withCase());
+
+	//draco模組
+	dracoLoader.setDecoderPath( 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/libs/draco/' );
+	dracoLoader.preload();
+
+	const loader = new GLTFLoader();
+	loader.setDRACOLoader(dracoLoader);
+	loader.parse(
+		arrayBuffer,
+		'',
+		(gltf) => {
+			
+	
+			const model = gltf.scene;
+			model.position.copy(modelPosition);
+			model.rotation.set(modelRotation.x, modelRotation.y, modelRotation.z);
+			model.scale.set(modeScale,modeScale,modeScale);
+			model.name="iphone with case";
+			
+			const glassMaterial = new THREE.MeshPhysicalMaterial( {
+			color: 0xffffff, 
+			transparent:true,//沒設定，畫面會出錯
+			transmission: 1,
+			metalness: 0.5, 
+			roughness: 0, 
+			ior:1,//<1畫面會不穩定
+			depthWrite:false
+			} );
+
+			let pc_case=model.getObjectByName("case");
+
+			pc_case.traverse( function ( object ) {				
+				if ( object.isMesh )
+				{
+					object.material=glassMaterial;
+				}
+			})
+			
+			scene.add(model);
+			animate();
+
+			setTimeout(() => {_loadingUI.remove();}, 600);
+		},
+		(error) => {
+			console.error('Failed to load model:', error);
+		}
+	);
+
+		
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+  	controls = new OrbitControls( camera, renderer.domElement );
+  	controls.enablePan = false;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.maxDistance = 500;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.2;
+  	controls.update();
+
+  	///hdri 環境光源
+
+	LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer) 
+
+	///光源
+	
+
+	const pointLight = new THREE.PointLight( 0xffffff, 15 );
+	pointLight.position.set(-0.3,2.1,-1);
+
+	const helper = new THREE.PointLightHelper(pointLight);
+	//scene.add(helper);
+
+	scene.add( pointLight );
+
+	///桌布
+
+	let HUD = new THREE.Object3D();
+
+	const loader_HUD = new TIFFLoader();
+
+	const geometry_HUD = new THREE.PlaneGeometry();
+
+	loader_HUD.load( './images/iphone_wallpaper.tif', function ( texture ) {
+
+		texture.colorSpace = THREE.SRGBColorSpace;
+
+		const material_HUD = new THREE.MeshBasicMaterial( { map: texture, transparent: true,blending: THREE.AdditiveBlending,opacity:0.9 ,depthWrite: false } );
+
+		const mesh_HUD = new THREE.Mesh( geometry_HUD, material_HUD );
+		const img_scale =0.16;
+
+		mesh_HUD.position.set( 0.09, 0, 0 );
+		mesh_HUD.scale.set(img_scale*8.4,img_scale*18.17,1);
+		mesh_HUD.rotation.y=Math.PI/2;
+		HUD.add(mesh_HUD);
+
+		scene.add( HUD );
+	} );
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+  	renderer.domElement.addEventListener("pointerdown", (event) => {
+		idleTime=0;
+		controls.autoRotate=false;
+  	});
+
+	renderer.domElement.addEventListener( 'pointermove', function(e) {
+		idleTime=0;
+		controls.autoRotate=false;
+	});
+  	renderer.domElement.addEventListener("wheel", (event) => {
+		idleTime=0;
+		controls.autoRotate=false;
+	});
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight);
+}
+
+function animate() 
+{
+  	requestAnimationFrame( animate );
+
+  	controls.update();
+  	renderer.render( scene, camera );
+  	UpdateCameraPosition(camera,controls);
+
+
+	const delta = clock.getDelta();
+
+	if ( mixer ) mixer.update( delta );
+
+	idleTime+=delta;
+
+	if(idleTime>hold_time)
+	{
+		idleTime=0;
+		controls.autoRotate=true;
+	}
+}
+		</script>
+    </body>
+
+</html>

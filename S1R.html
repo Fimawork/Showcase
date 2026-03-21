@@ -9,6 +9,7 @@
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
 		<link rel="stylesheet" type="text/css" href="Main.css">
+		<link rel="stylesheet" type="text/css" href="S1R_UI.css">
 		<style type="text/css">
 
 			body
@@ -41,6 +42,47 @@
 		<div id="loadingUI" class="rotate_anim"></div>
 		<div class="fimawork_logo" type="white" onclick="parent.open('https://fimawork.tw/')"></div>
 		<div class="web3d_icon" type="white"></div>
+
+		<!-- UI Concept Design -->
+		<div class="hero-container glass-effect">
+			<h1 class="product-title">Concept</h1>
+			<p class="product-tagline">Precision Engineering for Ultimate Comfort</p>
+		</div>
+
+		<div class="config-panel glass-effect">
+			<span class="config-label">Fabric Finish</span>
+			<div class="color-options">
+				<div class="color-dot active" data-color="#111" style="background: #111;" onclick="updateModelColor('#111', 0x4c4c4c)"></div>
+				<div class="color-dot" data-color="#9c9c9c" style="background: #9c9c9c;" onclick="updateModelColor('#9c9c9c', 0x9c9c9c)"></div>
+				<div class="color-dot" data-color="#eee5c0" style="background: #eee5c0;" onclick="updateModelColor('#eee5c0', 0xeee5c0)"></div>
+			</div>
+			
+			<span class="config-label" style="margin-top: 10px;">Frame Style</span>
+			<div class="color-options">
+				<div class="color-dot active" data-color="#111" style="background: #111;" onclick="updateFrameColor('#111', 0x6e6e6e)"></div>
+				<div class="color-dot" data-color="#ccc" style="background: #ccc;" onclick="updateFrameColor('#ccc', 0xcccccc)"></div>
+			</div>
+		</div>
+
+		<div class="features-container">
+			<div class="feature-card glass-effect" onclick="RESETCAMERA()">
+				<span class="feature-icon">📐</span>
+				<div class="feature-text">Reset Camera</div>
+			</div>
+			<div class="feature-card glass-effect" onclick="">
+				<span class="feature-icon">✨</span>
+				<div class="feature-text">Lighting</div>
+			</div>
+			<div class="feature-card glass-effect" onclick="">
+				<span class="feature-icon">🌀</span>
+				<div class="feature-text">Background</div>
+			</div>
+		</div>
+
+		<div class="action-bar glass-effect">
+			<div class="price-tag">$599</div>
+			<button class="buy-button">Customize Now</button>
+		</div>
 
 		<script type="module">
 
@@ -100,6 +142,12 @@ const state = {
 	showWireframe: false,
 };
 
+const polishMetal_material=FXM.InstMaterial(0xb1afaf,0.1,0.75,0,2.4,1,false,1,true);
+
+const black_etching_material_2=FXM.InstEtchingMaterial(0x6e6e6e,0.5,0.75,1,false,1,'./textures/Gravel.png',new THREE.Vector2(12, 12),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(12, 12),8);
+
+//InstMaterial(thisColor,thisRoughness,thisMetalness,thisTransmission,thisIor,thisReflectivity,isTransparent,thisOpacity,isDepthWrite)
+
 
 let anim_step=[
 	{pos:new THREE.Vector3(3.753,5.948,-3.956),target:new THREE.Vector3(0.490,5.936,-1.531)},
@@ -133,16 +181,6 @@ function init()
   	threeContainer.appendChild( renderer.domElement );
 
   	camera.position.copy(CameraDefaultPos);
-
-	// Ground
-	//		const plane = new THREE.Mesh(
-	//			new THREE.PlaneGeometry(100, 100 ),
-	//			new THREE.MeshLambertMaterial( { color: 0x333333 } )
-	//		);
-	//		plane.rotation.x = - Math.PI / 2;
-	//		plane.position.y = 0;
-	//		plane.receiveShadow = true;
-	//		scene.add( plane );
   
   	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
   	controls = new OrbitControls( camera, renderer.domElement );
@@ -196,7 +234,7 @@ function init()
 
 		const black_etching_material=FXM.InstEtchingMaterial(0x000000,0.6,0.6,1,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(50, 100),30);
 
-		const black_etching_material_2=FXM.InstEtchingMaterial(0x6e6e6e,0.5,0.75,1,false,1,'./textures/Gravel.png',new THREE.Vector2(12, 12),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(12, 12),8);
+		
 
 		const wheel_material=FXM.InstMaterial(0x000000,0.1,0.5,0,2.33,1,false,1,true)
 		
@@ -248,6 +286,72 @@ function init()
         console.error('Failed to load model:', error);
     }
 	);
+
+	window.updateModelColor = (cssColor, hexColor) => {
+		document.querySelectorAll('.config-panel .color-dot').forEach(dot => {
+			
+			if(dot.dataset.color === cssColor)
+			{
+				dot.classList.add('active');
+			} 
+			
+			else if(!dot.parentNode.previousElementSibling.textContent.includes('Frame')) 
+			{
+				dot.classList.remove('active');
+			}
+
+		});
+
+		scene.traverse((child) => {
+			if (child.isMesh && child.name.includes("seat")) 
+			{
+				child.material.color.setHex(hexColor);
+			}
+		});
+	};
+
+	window.updateFrameColor = (cssColor, hexColor) => {
+		document.querySelectorAll('.config-panel .color-dot').forEach(dot => {
+
+			if(dot.dataset.color === cssColor) 
+			{
+				dot.classList.add('active');
+			}
+
+			else if(dot.parentNode.previousElementSibling.textContent.includes('Frame')) 
+			{
+				dot.classList.remove('active');
+			}
+
+		});
+
+
+		scene.traverse((child) => {
+
+			if (child.isMesh && (child.name.includes("metal"))) 
+			{
+				if(cssColor=="#111")
+				{
+					child.material=black_etching_material_2;
+				}
+
+				if(cssColor=="#ccc")
+				{
+					child.material=polishMetal_material;
+				}
+				
+			}
+		});
+	};
+
+	
+	window.RESETCAMERA = () => 
+	{
+		camera.position.copy(CameraDefaultPos);
+		controls.target.copy( ControlsTargetDefaultPos );
+	};
+
+
 
 	///影子工具
 	// the container, if you need to move the plane just move this
@@ -343,21 +447,19 @@ function init()
   		window.addEventListener("pointerdown", (event) => {
 		
 		idleTime=0;
-		//controls.autoRotate=false;
-		
+
 	});
 
 	window.addEventListener( 'pointermove', function(e) {
 		
 		idleTime=0;
-		//controls.autoRotate=false;
+
 		
 	});
 
   	window.addEventListener("wheel", (event) => {
 		
 		idleTime=0;
-		//controls.autoRotate=false;
 		
 	});
 }
@@ -376,9 +478,7 @@ function animate()
 
   	controls.update();
   	renderer.render( scene, camera );
-  	//UpdateCameraPosition(camera,controls);
-
-
+  	
 	const delta = clock.getDelta();
 
 	if ( mixer ) mixer.update( delta );
@@ -481,6 +581,7 @@ function ShaderTargetTextureRendering()
 
 	}
 }
+
 		</script>
     </body>
 
