@@ -1,0 +1,1422 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+	<meta name="viewport" content="width=device-width" , initial-scale="1.0" , maximum-scale="1.0" ,
+		user-scalable="no" />
+	<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+	<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+	<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+	<style type="text/css">
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			background: radial-gradient(circle at 50% 50%, #fdfbf7 0%, #e8e2d6 50%, #d4cdc1 100%);
+			height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		canvas {
+			width: 100%;
+			height: 100%;
+		}
+
+		.sample_background {
+			position: absolute;
+			left: 0%;
+			top: 0%;
+			width: 100%;
+			height: 100%;
+			background-image: url('https://images.pexels.com/photos/7130546/pexels-photo-7130546.jpeg?_gl=1*ji9vc8*_ga*OTg5MDA4NDUyLjE3NTcxMzgwNzc.*_ga_8JE65Q40S6*czE3NTgzNDU0NDQkbzQkZzEkdDE3NTgzNDU1MDkkajU5JGwwJGgw');
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: center;
+			opacity: 0.15;
+			mix-blend-mode: soft-light;
+			pointer-events: none;
+		}
+
+		#banner {
+			position: relative;
+			width: 92%;
+			height: 88%;
+			background: rgba(255, 255, 255, 0.05);
+			backdrop-filter: blur(40px) saturate(120%);
+			-webkit-backdrop-filter: blur(40px) saturate(120%);
+			border-radius: 40px;
+			border: 1px solid rgba(255, 255, 255, 0.4);
+			box-shadow: 
+				0 25px 50px -12px rgba(0, 0, 0, 0.15),
+				inset 0 0 80px rgba(255, 255, 255, 0.2);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			overflow: hidden;
+			z-index: 5;
+			background-image: url('https://images.pexels.com/photos/7130546/pexels-photo-7130546.jpeg?_gl=1*ji9vc8*_ga*OTg5MDA4NDUyLjE3NTcxMzgwNzc.*_ga_8JE65Q40S6*czE3NTgzNDU0NDQkbzQkZzEkdDE3NTgzNDU1MDkkajU5JGwwJGgw');
+		}
+
+		#banner::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
+			pointer-events: none;
+		}
+
+		#threeContainer {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 2;
+		}
+
+		.product-info {
+			position: absolute;
+			top: 12%;
+			left: 6%;
+			z-index: 10;
+			color: #4a4238;
+			width: 320px;
+			font-family: 'Outfit', 'Inter', sans-serif;
+			pointer-events: none;
+			opacity: 0.9;
+		}
+
+		.product-tag {
+			display: inline-block;
+			padding: 5px 15px;
+			background: rgba(255, 255, 255, 0.4);
+			border: 1px solid rgba(255, 255, 255, 0.6);
+			border-radius: 30px;
+			font-size: 11px;
+			text-transform: uppercase;
+			letter-spacing: 1.5px;
+			margin-bottom: 20px;
+			color: #7c7267;
+			backdrop-filter: blur(5px);
+		}
+
+		.product-name {
+			font-size: 48px;
+			font-weight: 800;
+			margin-bottom: 5px;
+			letter-spacing: -0.5px;
+			line-height: 1;
+			color: #332d26;
+			transition: opacity 0.6s ease, transform 0.6s ease;
+		}
+
+		.product-desc {
+			font-size: 15px;
+			line-height: 1.7;
+			color: #6d645a;
+			margin-top: 15px;
+			max-width: 260px;
+			transition: opacity 0.6s ease, transform 0.6s ease;
+		}
+
+		.subTitle {
+			position: absolute;
+			bottom: 8%;
+			right: 6%;
+			padding: 15px 35px;
+			background: rgba(255, 255, 255, 0.3);
+			border: 1px solid rgba(255, 255, 255, 0.5);
+			border-radius: 50px;
+			font-family: "Outfit", sans-serif;
+			color: #4a4238;
+			font-size: 13px;
+			letter-spacing: 2px;
+			backdrop-filter: blur(10px);
+			transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+			cursor: pointer;
+			z-index: 20;
+			text-transform: uppercase;
+			font-weight: 600;
+		}
+
+		.subTitle:hover {
+			background: #fff;
+			transform: scale(1.05) translateY(-2px);
+			box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+		}
+
+		.btn_panel {
+			position: absolute;
+			bottom: 8%;
+			left: 50%;
+			display: flex;
+			gap: 20px;
+			transform: translateX(-50%);
+			z-index: 20;
+			align-items: center;
+		}
+
+		.btn {
+			width: 12px;
+			height: 12px;
+			background: rgba(74, 66, 56, 0.15);
+			border: 1px solid rgba(74, 66, 56, 0.1);
+			border-radius: 50%;
+			transition: all 0.4s ease;
+			cursor: pointer;
+		}
+
+		.btn.active {
+			background: #4a4238;
+			transform: scale(1.4);
+			box-shadow: 0 0 15px rgba(74, 66, 56, 0.2);
+		}
+
+		.fimawork_logo {
+			position: absolute;
+			left: 50%;
+			top: 9%;
+			height: 30px;
+			aspect-ratio: 192/33;
+			background-image: url('./images/fimawork_logo_C_white.png');
+			background-size: contain;
+			background-repeat: no-repeat;
+			opacity: 1;
+			z-index: 99;
+			user-select: none;
+			transform: translate(-50%,0%);
+			/*filter: invert(0.2); /* Make it darker for the light background */
+		}
+
+		@media screen and (max-width: 1024px) {
+			.product-info { top: 8%; left: 40px; }
+			.product-name { font-size: 38px; }
+		}
+
+		@media screen and (max-width: 896px) {
+			.product-info { left: 30px; top: 10%; width: 280px; }
+			.product-name { font-size: 32px; }
+			#banner { border-radius: 30px; height: 92%; }
+			.subTitle { right: 50%; transform: translateX(50%); bottom: 15%; }
+			.btn_panel { bottom: 6%; }
+
+			.fimawork_logo {top: 7%;left: 50%;}
+		}
+	</style>
+
+	<script type="importmap">
+			{
+			  "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+</head>
+
+<body>
+	<div class="sample_background"></div>
+	<div id="banner">
+		<div id="threeContainer"></div>
+		<div class="product-info">
+			<div class="product-tag">Concept Edition</div>
+			<div class="product-name" id="productName">Cabinet Handle</div>
+			<div class="product-desc" id="productDesc">A synthesis of industrial precision and sculptural elegance, designed to redefine modern hardware.</div>
+		</div>
+		<div class="subTitle" onclick="BackgroundDemo()">Explore</div>
+		<div class="btn_panel">
+			<div class="btn" id="btn_0" onclick="FocusToItem(0)"></div>
+			<div class="btn" id="btn_1" onclick="FocusToItem(1)"></div>
+			<div class="btn" id="btn_2" onclick="FocusToItem(2)"></div>
+			<div class="btn" id="btn_3" onclick="FocusToItem(3)"></div>
+			<div class="btn" id="btn_4" onclick="FocusToItem(4)"></div>
+			<div class="btn" id="btn_5" onclick="FocusToItem(5)"></div>
+		</div>
+	</div>
+
+	<div class="fimawork_logo"></div>
+
+	<script src="https://kit.fontawesome.com/28b78de879.js" crossorigin="anonymous"></script>
+
+	<script type="module">
+
+		import * as THREE from 'three';
+
+		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+		import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.9/fx_functions.js';
+		import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+		import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+		//Outline
+		import { HorizontalBlurShader } from 'three/addons/shaders/HorizontalBlurShader.js';
+		import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
+
+		import { draco_Pull_128_20500921 } from './models/draco_Pull_128_20500921_slices.js';
+		import { draco_FC001_128_B } from './models/draco_FC001_128_B_slices.js';
+		import { draco_FC005_128 } from './models/draco_FC005_128_slices.js';
+		import { draco_FC003 } from './models/draco_FC003_slices.js';
+		import { draco_Pull_128_Type_A } from './models/draco_Pull_128_Type_A_slices.js';
+		import { draco_Knob_20250921 } from './models/draco_Knob_20250921_slices.js';
+
+		const param_01 = {
+			color: 0xe5e5dc,
+			roughness: 0.45,
+			metalness: 1,
+			texture_img: './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg',
+			texture_repeat_x: 50,
+			texture_repeat_y: 50,
+			texture_offset_x: 0,
+			texture_offset_y: 0,
+			normalMap_img: null,
+			normal_scale: 0,
+			transparent: false,
+			alphahash: false,
+			opacity: 1
+		};
+
+
+		const param_02 = {
+			color: 0xe5e5dc,
+			roughness: 0.45,
+			metalness: 1,
+			texture_img: './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg',
+			texture_repeat_x: 25,
+			texture_repeat_y: 25,
+			texture_offset_x: 0,
+			texture_offset_y: 0,
+			normalMap_img: null,
+			normal_scale: 0,
+			transparent: false,
+			alphahash: false,
+			opacity: 1
+		};
+
+
+		const param_03 = {
+			color: 0xcc991b,
+			roughness: 0.40,
+			metalness: 1,
+			texture_img: './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg',
+			texture_repeat_x: 5,
+			texture_repeat_y: 1,
+			texture_offset_x: 0,
+			texture_offset_y: 0,
+			normalMap_img: null,
+			normal_scale: 0,
+			transparent: false,
+			alphahash: false,
+			opacity: 1
+		};
+
+
+		const param_04 = {
+			color: 0xcc991b,
+			roughness: 0.40,
+			metalness: 1,
+			texture_img: './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg',
+			texture_repeat_x: 0.5,
+			texture_repeat_y: 0.5,
+			texture_offset_x: 0,
+			texture_offset_y: 0,
+			normalMap_img: null,
+			normal_scale: 0,
+			transparent: false,
+			alphahash: false,
+			opacity: 1
+		};
+
+		const param_05 = {
+			color: 0xcc991b,
+			roughness: 0.40,
+			metalness: 1,
+			texture_img: './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg',
+			texture_repeat_x: 0.5,
+			texture_repeat_y: 2.5,
+			texture_offset_x: 0,
+			texture_offset_y: 0,
+			normalMap_img: null,
+			normal_scale: 0,
+			transparent: false,
+			alphahash: false,
+			opacity: 1
+		};
+
+		const param_06 = {
+			color: 0xcc991b,
+			roughness: 0.40,
+			metalness: 1,
+			texture_img: './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg',
+			texture_repeat_x: 2.5,
+			texture_repeat_y: 0.5,
+			texture_offset_x: 0,
+			texture_offset_y: 0,
+			normalMap_img: null,
+			normal_scale: 0,
+			transparent: false,
+			alphahash: false,
+			opacity: 1
+		};
+
+		const param_07 = {
+			color: 0xffc500,
+			roughness: 0.40,
+			metalness: 1,
+			texture_img: './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg',
+			texture_repeat_x: 1.2,
+			texture_repeat_y: 0.5,
+			texture_offset_x: 0,
+			texture_offset_y: 0,
+			normalMap_img: null,
+			normal_scale: 0,
+			transparent: false,
+			alphahash: false,
+			opacity: 1
+		};
+
+
+		let scene, camera, renderer, stats, mixer;
+		let controls;
+		let idleTime = 0;
+		let threeContainer = document.getElementById("threeContainer");
+		let _btn_0 = document.getElementById("btn_0");
+		let _btn_1 = document.getElementById("btn_1");
+		let _btn_2 = document.getElementById("btn_2");
+		let _btn_3 = document.getElementById("btn_3");
+		let _btn_4 = document.getElementById("btn_4");
+		let _btn_5 = document.getElementById("btn_5");
+
+		let _banner = document.getElementById("banner");
+		let productName = document.getElementById("productName");
+		let productDesc = document.getElementById("productDesc");
+
+		const productData = [
+			{ name: "Classic Pull", desc: "Timeless design with a polished finish, perfect for traditional cabinetry." },
+			{ name: "Modern Bar", desc: "Minimalist aesthetic featuring clean lines and a comfortable grip." },
+			{ name: "Sleek Arc", desc: "A graceful curve that adds a touch of elegance to any drawer or door." },
+			{ name: "Industrial Grip", desc: "Rugged and functional, designed for high-traffic environments." },
+			{ name: "Premium T-Bar", desc: "Bold and contemporary, a statement piece for modern kitchens." },
+			{ name: "Minimalist Knob", desc: "Simple yet sophisticated, providing a subtle accent for your furniture." }
+		];
+
+
+		const clock = new THREE.Clock();
+
+		const modelPosition = new THREE.Vector3(60, 0, 0);
+		const modelRotation = new THREE.Vector3(0, Math.PI, 0);
+		const modeScale = 0.12;
+
+		const CameraDefaultPos = new THREE.Vector3(66, 12, -12);
+		const ControlsTargetDefaultPos = new THREE.Vector3(60, 0, 0);
+
+		let carouselManu = new THREE.Object3D();
+		let rotationTarget = new THREE.Object3D();
+		const item_num = 6;
+		const divisionAngle = 2 * Math.PI / item_num;//2*Math.PI為360度
+
+		const quaternion_rotationTarget = new THREE.Quaternion();
+		const quaternion_carouselManu = new THREE.Quaternion();
+
+		let item_01 = new THREE.Object3D();
+		let item_02 = new THREE.Object3D();
+		let item_03 = new THREE.Object3D();
+		let item_04 = new THREE.Object3D();
+		let item_05 = new THREE.Object3D();
+		let item_06 = new THREE.Object3D();
+
+
+		let mousePos = { x: undefined, y: undefined };
+		let hoverPos = { x: undefined, y: undefined };
+		let current_INTERSECTED, INTERSECTED;
+		//////Raycaster工具//////
+		const raycaster = new THREE.Raycaster();
+		const pointer = new THREE.Vector2();
+
+		//影子工具
+		const PLANE_WIDTH = 100;
+		const PLANE_HEIGHT = 100;
+		const CAMERA_HEIGHT = 20;//必須高於模型，否則看不到
+
+		let isShowStart = false;
+		let isRotateOn = false;
+		const normal_rpm = 0.018;
+		let rpm = 0.018;//變數，按鍵選單時可提高轉速
+
+		const state = {
+			shadow: //影子
+			{
+				blur: 1.2,
+				darkness: 1,
+				opacity: 0.5,
+			},
+			plane: //地板材質
+			{
+				color: '#ffffff',
+				opacity: 0,
+			},
+
+			showWireframe: false,
+		};
+
+		let shadowGroup, renderTarget, renderTargetBlur, shadowCamera, depthMaterial, horizontalBlurMaterial, verticalBlurMaterial;
+
+		let plane, blurPlane, fillPlane;
+
+		let item_list = [];
+		let btn_list = [];
+
+		const hold_time = 2.7;
+
+		let item_index = 0;
+
+		let backgroundImageSrc =
+			[
+				"https://images.pexels.com/photos/7130546/pexels-photo-7130546.jpeg?_gl=1*ji9vc8*_ga*OTg5MDA4NDUyLjE3NTcxMzgwNzc.*_ga_8JE65Q40S6*czE3NTgzNDU0NDQkbzQkZzEkdDE3NTgzNDU1MDkkajU5JGwwJGgw",
+				"https://images.pexels.com/photos/2341290/pexels-photo-2341290.jpeg",
+				"https://images.pexels.com/photos/1487835/pexels-photo-1487835.jpeg"
+			]
+
+		let background_index = 0;
+
+		let Material_01 = new THREE.MeshPhysicalMaterial();;
+		let Material_02 = new THREE.MeshPhysicalMaterial();;
+		let Material_03 = new THREE.MeshPhysicalMaterial();;
+		let Material_04 = new THREE.MeshPhysicalMaterial();;
+		let Material_05 = new THREE.MeshPhysicalMaterial();;
+		let Material_06 = new THREE.MeshPhysicalMaterial();;
+		let Material_07 = new THREE.MeshPhysicalMaterial();;
+
+
+		init();
+		//animate();
+
+		function init() {
+			FX.SetupEnvironment("cloud");
+
+			scene = new THREE.Scene();
+			//scene.background= new THREE.Color( 0xFFFFFF );
+
+			let newFOV = threeContainer.clientWidth / threeContainer.clientHeight < 1.5 ? 70 : 45;
+
+			camera = new THREE.PerspectiveCamera(newFOV, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000);//非全螢幕比例設定
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			//renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight );//非全螢幕比例設定
+
+			//提高渲染解析度渲染後縮小顯示
+			renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+			renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+			renderer.toneMapping = THREE.ACESFilmicToneMapping;
+			renderer.toneMappingExposure = 0.9;
+			//document.body.appendChild( renderer.domElement );
+			threeContainer.appendChild(renderer.domElement);
+
+
+			camera.position.copy(CameraDefaultPos);
+			FX.posData[0] = { camera_pos: CameraDefaultPos, controlsTarget_pos: ControlsTargetDefaultPos };
+
+
+			///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+			controls = new OrbitControls(camera, renderer.domElement);
+			controls.enablePan = true;//右鍵平移效果
+			controls.panSpeed = 0.4;
+			controls.enableDamping = true;
+			controls.dampingFactor = 0.05;
+			controls.maxDistance = 500;
+			controls.target.copy(ControlsTargetDefaultPos);
+			controls.maxPolarAngle=FX.ToThreeEulerAngle(87);
+			controls.zoomSpeed = 0.5;
+			controls.update();
+
+			///hdri 環境光源
+			FX.LoadHDRWithPMREM('./textures/hdri/brown_photostudio_02_1k.hdr', scene, renderer)
+
+			// 櫥窗燈光 - Showcase Lighting
+			const mainSpot = new THREE.SpotLight(0xfff5e6, 80, 150, Math.PI / 8, 0.4, 1.5);
+			mainSpot.position.set(60, 45, 15);
+			mainSpot.target.position.set(60, 0, 0);
+			scene.add(mainSpot);
+			scene.add(mainSpot.target);
+
+			const rimLight = new THREE.PointLight(0xffffff, 30);
+			rimLight.position.set(40, 20, -20);
+			scene.add(rimLight);
+
+			const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+			scene.add(ambient);
+
+			scene.add(carouselManu);
+			carouselManu.position.x = 25;
+
+			///主要物件
+			const defaultScenes =
+
+				[
+					() => new Promise((resolve) => setTimeout(() => { threeContainer.style.cssText = `filter: blur(6px);`; resolve(); }, 0)),
+
+					() => new Promise((resolve) => setTimeout(() => { InstItem_01(); resolve(); }, 10)),
+					() => new Promise((resolve) => setTimeout(() => { InstItem_02(); resolve(); }, 20)),
+					() => new Promise((resolve) => setTimeout(() => { InstItem_03(); resolve(); }, 30)),
+					() => new Promise((resolve) => setTimeout(() => { InstItem_04(); resolve(); }, 40)),
+					() => new Promise((resolve) => setTimeout(() => { InstItem_05(); resolve(); }, 50)),
+					() => new Promise((resolve) => setTimeout(() => { InstItem_06(); resolve(); }, 60)),
+					//() => new Promise((resolve) => setTimeout(() => { AddPedestals(); resolve(); }, 70)),
+
+					() => new Promise((resolve) => setTimeout(() => { SetupItemGroup(); resolve(); }, 100)),
+
+					() => new Promise((resolve) => setTimeout(() => { threeContainer.style.cssText = `filter: blur(4.5px);`; resolve(); }, 250)),
+
+					() => new Promise((resolve) => setTimeout(() => { threeContainer.style.cssText = `filter: blur(3px);`; resolve(); }, 500)),
+
+					() => new Promise((resolve) => setTimeout(() => { SceneFadeIn(); resolve(); }, 600)),//isShowStart=true開始計算idleTime
+
+					() => new Promise((resolve) => setTimeout(() => { threeContainer.style.cssText = `filter: blur(1.5px);`; resolve(); }, 750)),
+
+					() => new Promise((resolve) => setTimeout(() => { threeContainer.style.cssText = `filter: blur(0px);`; resolve(); }, 1000)),
+
+				];
+
+			function InstItem_01() {
+				const arrayBuffer = FX.Base64ToArrayBuffer(draco_Pull_128_20500921());
+
+				const loader = new GLTFLoader();
+				loader.setDRACOLoader(FX.dracoLoader);
+
+				loader.parse(
+					arrayBuffer,
+					'',
+					(gltf) => {
+
+						const model = gltf.scene;
+						model.position.copy(modelPosition);
+						model.rotation.set(modelRotation.x, modelRotation.y, modelRotation.z);
+						model.scale.set(modeScale, modeScale, modeScale);
+						model.name = "item_01";
+
+						item_01.add(model);
+						carouselManu.add(item_01);
+						item_01.rotation.y = divisionAngle * 6;
+					},
+
+					(error) => {
+						console.error('Failed to load model:', error);
+					}
+				);
+			}
+
+			function InstItem_02() {
+				const arrayBuffer = FX.Base64ToArrayBuffer(draco_FC001_128_B());
+
+				const loader = new GLTFLoader();
+				loader.setDRACOLoader(FX.dracoLoader);
+
+				loader.parse(
+					arrayBuffer,
+					'',
+					(gltf) => {
+
+						const model = gltf.scene;
+						model.position.copy(modelPosition);
+						model.rotation.set(modelRotation.x, modelRotation.y, modelRotation.z);
+						model.scale.set(modeScale, modeScale, modeScale);
+						model.name = "item_02";
+
+						FX.SafeTraverse(model, (obj) => {
+
+    					    if(obj.name==="FC001-128-B_Body")
+                  			{
+                  			 	const targetMaterial = new THREE.MeshPhysicalMaterial();
+							
+							    targetMaterial.color.set(param_03.color);
+    							targetMaterial.roughness=param_03.roughness;
+    							targetMaterial.metalness=param_03.metalness;
+
+								const loader = new THREE.TextureLoader();
+        						targetMaterial.map = loader.load(param_03.texture_img);
+        						targetMaterial.map.wrapS = THREE.RepeatWrapping;
+        						targetMaterial.map.wrapT = THREE.RepeatWrapping;
+        						targetMaterial.map.repeat.set(param_03.texture_repeat_x, param_03.texture_repeat_y);
+        						targetMaterial.map.offset.set(param_03.texture_offset_x, param_03.texture_offset_y);
+
+								targetMaterial.transparent= param_03.transparent;
+    							targetMaterial.alphaHash= param_03.alphahash;
+    							targetMaterial.opacity = param_03.opacity;
+    							targetMaterial.needsUpdate = true;
+
+								FX.SafeTraverse(obj, (child) => {
+    							    if ( child.isMesh )
+    							    {	
+    							        child.material=targetMaterial;
+    							    }
+    							});
+                  			}
+
+							if(obj.name==="FC001-128-B_Body_2")
+                  			{
+                  			  	const targetMaterial = new THREE.MeshPhysicalMaterial();
+							
+							    targetMaterial.color.set(param_04.color);
+    							targetMaterial.roughness=param_04.roughness;
+    							targetMaterial.metalness=param_04.metalness;
+
+								const loader = new THREE.TextureLoader();
+        						targetMaterial.map = loader.load(param_04.texture_img);
+        						targetMaterial.map.wrapS = THREE.RepeatWrapping;
+        						targetMaterial.map.wrapT = THREE.RepeatWrapping;
+        						targetMaterial.map.repeat.set(param_04.texture_repeat_x, param_04.texture_repeat_y);
+        						targetMaterial.map.offset.set(param_04.texture_offset_x, param_04.texture_offset_y);
+
+								targetMaterial.transparent= param_04.transparent;
+    							targetMaterial.alphaHash= param_04.alphahash;
+    							targetMaterial.opacity = param_04.opacity;
+    							targetMaterial.needsUpdate = true;
+
+								FX.SafeTraverse(obj, (child) => {
+    							    if ( child.isMesh )
+    							    {	
+    							        child.material=targetMaterial;
+    							    }
+    							});
+
+                  			}
+
+							if(obj.name==="FC001-128-B_Body_3")
+                  			{
+                  			  	const targetMaterial = new THREE.MeshPhysicalMaterial();
+							
+							    targetMaterial.color.set(param_05.color);
+    							targetMaterial.roughness=param_05.roughness;
+    							targetMaterial.metalness=param_05.metalness;
+
+								const loader = new THREE.TextureLoader();
+        						targetMaterial.map = loader.load(param_05.texture_img);
+        						targetMaterial.map.wrapS = THREE.RepeatWrapping;
+        						targetMaterial.map.wrapT = THREE.RepeatWrapping;
+        						targetMaterial.map.repeat.set(param_05.texture_repeat_x, param_05.texture_repeat_y);
+        						targetMaterial.map.offset.set(param_05.texture_offset_x, param_05.texture_offset_y);
+
+								targetMaterial.transparent= param_05.transparent;
+    							targetMaterial.alphaHash= param_05.alphahash;
+    							targetMaterial.opacity = param_05.opacity;
+    							targetMaterial.needsUpdate = true;
+
+								FX.SafeTraverse(obj, (child) => {
+    							    if ( child.isMesh )
+    							    {	
+    							        child.material=targetMaterial;
+    							    }
+    							});
+                  			}
+
+							if(obj.name==="FC001-128-B_Body_4")
+                  			{
+                  			   const targetMaterial = new THREE.MeshPhysicalMaterial();
+							
+							    targetMaterial.color.set(param_06.color);
+    							targetMaterial.roughness=param_06.roughness;
+    							targetMaterial.metalness=param_06.metalness;
+
+								const loader = new THREE.TextureLoader();
+        						targetMaterial.map = loader.load(param_06.texture_img);
+        						targetMaterial.map.wrapS = THREE.RepeatWrapping;
+        						targetMaterial.map.wrapT = THREE.RepeatWrapping;
+        						targetMaterial.map.repeat.set(param_06.texture_repeat_x, param_06.texture_repeat_y);
+        						targetMaterial.map.offset.set(param_06.texture_offset_x, param_06.texture_offset_y);
+
+								targetMaterial.transparent= param_06.transparent;
+    							targetMaterial.alphaHash= param_06.alphahash;
+    							targetMaterial.opacity = param_06.opacity;
+    							targetMaterial.needsUpdate = true;
+
+								FX.SafeTraverse(obj, (child) => {
+    							    if ( child.isMesh )
+    							    {	
+    							        child.material=targetMaterial;
+    							    }
+    							});
+                  			}
+
+							if(obj.name==="FC001-128-B_BottomEdge_A")
+                  			{
+                  			   const targetMaterial = new THREE.MeshPhysicalMaterial();
+							
+							    targetMaterial.color.set(param_07.color);
+    							targetMaterial.roughness=param_07.roughness;
+    							targetMaterial.metalness=param_07.metalness;
+
+								const loader = new THREE.TextureLoader();
+        						targetMaterial.map = loader.load(param_07.texture_img);
+        						targetMaterial.map.wrapS = THREE.RepeatWrapping;
+        						targetMaterial.map.wrapT = THREE.RepeatWrapping;
+        						targetMaterial.map.repeat.set(param_07.texture_repeat_x, param_07.texture_repeat_y);
+        						targetMaterial.map.offset.set(param_07.texture_offset_x, param_07.texture_offset_y);
+
+								targetMaterial.transparent= param_07.transparent;
+    							targetMaterial.alphaHash= param_07.alphahash;
+    							targetMaterial.opacity = param_07.opacity;
+    							targetMaterial.needsUpdate = true;
+
+								FX.SafeTraverse(obj, (child) => {
+    							    if ( child.isMesh )
+    							    {	
+    							        child.material=targetMaterial;
+    							    }
+    							});
+                  			}
+
+							if(obj.name==="FC001-128-B_BottomEdge_B")
+                  			{
+                  			   const targetMaterial = new THREE.MeshPhysicalMaterial();
+							
+							    targetMaterial.color.set(param_07.color);
+    							targetMaterial.roughness=param_07.roughness;
+    							targetMaterial.metalness=param_07.metalness;
+
+								const loader = new THREE.TextureLoader();
+        						targetMaterial.map = loader.load(param_07.texture_img);
+        						targetMaterial.map.wrapS = THREE.RepeatWrapping;
+        						targetMaterial.map.wrapT = THREE.RepeatWrapping;
+        						targetMaterial.map.repeat.set(param_07.texture_repeat_x, param_07.texture_repeat_y);
+        						targetMaterial.map.offset.set(param_07.texture_offset_x, param_07.texture_offset_y);
+
+								targetMaterial.transparent= param_07.transparent;
+    							targetMaterial.alphaHash= param_07.alphahash;
+    							targetMaterial.opacity = param_07.opacity;
+    							targetMaterial.needsUpdate = true;
+
+								FX.SafeTraverse(obj, (child) => {
+    							    if ( child.isMesh )
+    							    {	
+    							        child.material=targetMaterial;
+    							    }
+    							});
+                  			}
+
+    					  }); 
+
+						item_02.add(model);
+						carouselManu.add(item_02);
+						item_02.rotation.y = divisionAngle * 5;
+					},
+
+					(error) => {
+						console.error('Failed to load model:', error);
+					}
+				);
+			}
+
+			function InstItem_03() {
+				const arrayBuffer = FX.Base64ToArrayBuffer(draco_FC005_128());
+
+				const loader = new GLTFLoader();
+				loader.setDRACOLoader(FX.dracoLoader);
+
+				loader.parse(
+					arrayBuffer,
+					'',
+					(gltf) => {
+
+						const model = gltf.scene;
+						model.position.copy(modelPosition);
+						model.rotation.set(modelRotation.x, modelRotation.y, modelRotation.z);
+						model.scale.set(modeScale * 0.8, modeScale * 0.8, modeScale * 0.8);
+						model.name = "item_03";
+
+						item_03.add(model);
+						carouselManu.add(item_03);
+						item_03.rotation.y = divisionAngle * 4;
+					},
+
+					(error) => {
+						console.error('Failed to load model:', error);
+					}
+				);
+			}
+
+			function InstItem_04() {
+				const arrayBuffer = FX.Base64ToArrayBuffer(draco_FC003());
+
+				const loader = new GLTFLoader();
+				loader.setDRACOLoader(FX.dracoLoader);
+
+				loader.parse(
+					arrayBuffer,
+					'',
+					(gltf) => {
+
+						const model = gltf.scene;
+						model.position.copy(modelPosition);
+						model.rotation.set(modelRotation.x, modelRotation.y, modelRotation.z);
+						model.scale.set(modeScale, modeScale, modeScale);
+						model.name = "item_04";
+
+						item_04.add(model);
+						carouselManu.add(item_04);
+						item_04.rotation.y = divisionAngle * 3;
+					},
+
+					(error) => {
+						console.error('Failed to load model:', error);
+					}
+				);
+			}
+
+			function InstItem_05() {
+				const arrayBuffer = FX.Base64ToArrayBuffer(draco_Pull_128_Type_A());
+
+				const loader = new GLTFLoader();
+				loader.setDRACOLoader(FX.dracoLoader);
+
+				loader.parse(
+					arrayBuffer,
+					'',
+					(gltf) => {
+
+						const model = gltf.scene;
+						model.position.copy(modelPosition);
+						model.rotation.set(modelRotation.x, modelRotation.y, modelRotation.z);
+						model.scale.set(modeScale, modeScale, modeScale);
+						model.name = "item_05";
+
+						FX.SafeTraverse(model, (obj) => {
+
+    					    if(obj.name==="Shell_Top")
+                  			{
+                  			 	const targetMaterial = new THREE.MeshPhysicalMaterial();
+							
+							    targetMaterial.color.set(param_01.color);
+    							targetMaterial.roughness=param_01.roughness;
+    							targetMaterial.metalness=param_01.metalness;
+
+								const loader = new THREE.TextureLoader();
+        						targetMaterial.map = loader.load(param_01.texture_img);
+        						targetMaterial.map.wrapS = THREE.RepeatWrapping;
+        						targetMaterial.map.wrapT = THREE.RepeatWrapping;
+        						targetMaterial.map.repeat.set(param_01.texture_repeat_x, param_01.texture_repeat_y);
+        						targetMaterial.map.offset.set(param_01.texture_offset_x, param_01.texture_offset_y);
+
+								targetMaterial.transparent= param_01.transparent;
+    							targetMaterial.alphaHash= param_01.alphahash;
+    							targetMaterial.opacity = param_01.opacity;
+    							targetMaterial.needsUpdate = true;
+
+								FX.SafeTraverse(obj, (child) => {
+    							    if ( child.isMesh )
+    							    {	
+    							        child.material=targetMaterial;
+    							    }
+    							});
+                  			}
+
+							if(obj.name==="Shell_Body")
+                  			{
+                  			  	const targetMaterial = new THREE.MeshPhysicalMaterial();
+							
+							    targetMaterial.color.set(param_02.color);
+    							targetMaterial.roughness=param_02.roughness;
+    							targetMaterial.metalness=param_02.metalness;
+
+								const loader = new THREE.TextureLoader();
+        						targetMaterial.map = loader.load(param_02.texture_img);
+        						targetMaterial.map.wrapS = THREE.RepeatWrapping;
+        						targetMaterial.map.wrapT = THREE.RepeatWrapping;
+        						targetMaterial.map.repeat.set(param_02.texture_repeat_x, param_02.texture_repeat_y);
+        						targetMaterial.map.offset.set(param_02.texture_offset_x, param_02.texture_offset_y);
+
+								targetMaterial.transparent= param_02.transparent;
+    							targetMaterial.alphaHash= param_02.alphahash;
+    							targetMaterial.opacity = param_02.opacity;
+    							targetMaterial.needsUpdate = true;
+
+								FX.SafeTraverse(obj, (child) => {
+    							    if ( child.isMesh )
+    							    {	
+    							        child.material=targetMaterial;
+    							    }
+    							});
+
+                  			}
+
+    					  }); 
+
+						item_05.add(model);
+						carouselManu.add(item_05);
+						item_05.rotation.y = divisionAngle * 2;
+					},
+
+					(error) => {
+						console.error('Failed to load model:', error);
+					}
+				);
+			}
+
+			function InstItem_06() {
+				const arrayBuffer = FX.Base64ToArrayBuffer(draco_Knob_20250921());
+
+				const loader = new GLTFLoader();
+				loader.setDRACOLoader(FX.dracoLoader);
+
+				loader.parse(
+					arrayBuffer,
+					'',
+					(gltf) => {
+
+						const model = gltf.scene;
+						model.position.copy(modelPosition);
+						model.rotation.set(modelRotation.x, modelRotation.y, modelRotation.z);
+						model.scale.set(modeScale, modeScale, modeScale);
+						model.name = "item_06";
+
+						//scene.add(model);
+						item_06.add(model);
+						carouselManu.add(item_06);
+						item_06.rotation.y = divisionAngle * 1;
+
+						animate();
+					},
+
+					(error) => {
+						console.error('Failed to load model:', error);
+					}
+				);
+			}
+
+			function AddPedestals() {
+				// Frosted Glass Material for the showcase feel
+				const pedestalGeo = new THREE.CylinderGeometry(5.2, 5.8, 1.2, 64);
+				const pedestalMat = new THREE.MeshPhysicalMaterial({
+					color: 0xffffff,
+					metalness: 0,
+					roughness: 0.1,
+					transmission: 0.95,
+					thickness: 2,
+					transparent: true,
+					opacity: 0.6
+				});
+
+				const items = [item_01, item_02, item_03, item_04, item_05, item_06];
+				items.forEach((item) => {
+					const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
+					pedestal.position.set(modelPosition.x, modelPosition.y - 4.5, modelPosition.z);
+					item.add(pedestal);
+
+					// Subtle light ring
+					const ringGeo = new THREE.TorusGeometry(5.4, 0.04, 16, 100);
+					const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
+					const ring = new THREE.Mesh(ringGeo, ringMat);
+					ring.rotation.x = Math.PI / 2;
+					ring.position.y = 0.65;
+					pedestal.add(ring);
+				});
+			}
+
+
+			async function SetupDefaultScene() {
+				for (const task of defaultScenes) {
+					await task(); // 確保每個任務依次完成
+				}
+
+				console.log('All scenes loaded');
+
+			}
+
+			SetupDefaultScene();
+			//InstItem_01()
+
+			function SetupItemGroup() {
+				//3D
+				item_list.push(item_01);
+				item_list.push(item_02);
+				item_list.push(item_03);
+				item_list.push(item_04);
+				item_list.push(item_05);
+				item_list.push(item_06);
+
+				item_01.visible = true;
+				item_02.visible = false;
+				item_03.visible = false;
+				item_04.visible = false;
+				item_05.visible = false;
+				item_06.visible = false;
+
+				//UI按鍵
+				btn_list.push(_btn_0);
+				btn_list.push(_btn_1);
+				btn_list.push(_btn_2);
+				btn_list.push(_btn_3);
+				btn_list.push(_btn_4);
+				btn_list.push(_btn_5);
+
+				//預設第一項active
+				_btn_0.classList.add("active");
+				if (productName && productDesc) {
+					productName.innerText = productData[0].name;
+					productDesc.innerText = productData[0].desc;
+				}
+			}
+
+
+			///影子工具
+			// the container, if you need to move the plane just move this
+			shadowGroup = new THREE.Group();
+			shadowGroup.position.y = 0;
+			scene.add(shadowGroup);
+
+			// the render target that will show the shadows in the plane texture
+			renderTarget = new THREE.WebGLRenderTarget(512, 512);
+			renderTarget.texture.generateMipmaps = false;
+
+			// the render target that we will use to blur the first render target
+			renderTargetBlur = new THREE.WebGLRenderTarget(512, 512);
+			renderTargetBlur.texture.generateMipmaps = false;
+
+
+			// make a plane and make it face up
+			const planeGeometry = new THREE.PlaneGeometry(PLANE_WIDTH, PLANE_HEIGHT).rotateX(Math.PI / 2);
+			const planeMaterial = new THREE.MeshBasicMaterial({
+				map: renderTarget.texture,//地板使用影子攝影機的renderTexture材質球
+				opacity: state.shadow.opacity,
+				transparent: true,
+				depthWrite: false,
+			});
+
+			plane = new THREE.Mesh(planeGeometry, planeMaterial);
+			// make sure it's rendered after the fillPlane
+			plane.renderOrder = 1;
+			shadowGroup.add(plane);
+
+			// the y from the texture is flipped!
+			plane.scale.y = - 1;
+
+			// the plane onto which to blur the texture
+			blurPlane = new THREE.Mesh(planeGeometry);
+			blurPlane.visible = false;
+			shadowGroup.add(blurPlane);
+
+			// the plane with the color of the ground
+			const fillPlaneMaterial = new THREE.MeshBasicMaterial({
+				color: state.plane.color,
+				opacity: state.plane.opacity,
+				transparent: true,
+				depthWrite: false,
+			});
+
+			fillPlane = new THREE.Mesh(planeGeometry, fillPlaneMaterial);
+			fillPlane.rotateX(Math.PI);
+			shadowGroup.add(fillPlane);
+
+			//利用相機從正上方錄製正投影畫面，製作成影子
+			// the camera to render the depth material from
+			shadowCamera = new THREE.OrthographicCamera(- PLANE_WIDTH / 2, PLANE_WIDTH / 2, PLANE_HEIGHT / 2, - PLANE_HEIGHT / 2, 0, CAMERA_HEIGHT);
+			shadowCamera.rotation.x = Math.PI / 2; // get the camera to look up
+			shadowGroup.add(shadowCamera);
+
+			shadowGroup.position.set(60, 0, 0);//整組移動
+
+			// like MeshDepthMaterial, but goes from black to transparent
+			depthMaterial = new THREE.MeshDepthMaterial();
+			depthMaterial.userData.darkness = { value: state.shadow.darkness };
+			depthMaterial.onBeforeCompile = function (shader) {
+
+				shader.uniforms.darkness = depthMaterial.userData.darkness;
+				shader.fragmentShader = /* glsl */`
+		uniform float darkness;
+		${shader.fragmentShader.replace(
+					'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
+					'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) * darkness );'
+				)}
+	`;
+
+			};
+
+			depthMaterial.depthTest = false;
+			depthMaterial.depthWrite = false;
+
+			horizontalBlurMaterial = new THREE.ShaderMaterial(HorizontalBlurShader);
+			horizontalBlurMaterial.depthTest = false;
+
+			verticalBlurMaterial = new THREE.ShaderMaterial(VerticalBlurShader);
+			verticalBlurMaterial.depthTest = false;
+
+			depthMaterial.userData.darkness.value = state.shadow.darkness;
+			plane.material.opacity = state.shadow.opacity;
+			fillPlane.material.color = new THREE.Color(state.plane.color);
+			fillPlane.material.opacity = state.plane.opacity;
+
+
+			///EventListener
+			window.addEventListener('resize', onWindowResize);
+
+			renderer.domElement.addEventListener("pointerdown", (event) => {
+				FX.InputEvent();
+				mousePos = { x: event.clientX, y: event.clientY };
+				onPointerMove(event);//改以點擊作為Raycast判斷的時間點，改善觸控螢幕誤判狀況
+				idleTime = 0;
+			});
+
+			renderer.domElement.addEventListener('pointermove', function (e) { idleTime = 0; });
+			renderer.domElement.addEventListener("wheel", (event) => { FX.InputEvent(); idleTime = 0; });
+
+		}
+
+
+		function onWindowResize() {
+			camera.aspect = threeContainer.clientWidth / threeContainer.clientHeight;//非全螢幕比例設定
+			camera.updateProjectionMatrix();
+			renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+		}
+
+		function animate() {
+			requestAnimationFrame(animate);
+
+			ShaderTargetTextureRendering();
+
+			controls.update();
+			renderer.render(scene, camera);
+
+			FX.UpdateCameraPosition(camera, controls);
+			RaycastFunction();
+
+			UpdateRotationManu();
+
+			const delta = clock.getDelta();
+
+			if (mixer) mixer.update(delta);
+
+			if (!isRotateOn && isShowStart) {
+				idleTime += delta;
+
+				if (idleTime > hold_time) {
+					idleTime = 0;
+
+					ManuRotate();
+				}
+			}
+		}
+
+
+		//////Raycaster工具//////
+		function onPointerMove(event) {
+			pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+			pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+		}
+
+		function RaycastFunction() {
+			// update the picking ray with the camera and pointer position
+			raycaster.setFromCamera(pointer, camera);
+
+			const intersects = raycaster.intersectObjects(scene.children);
+
+			if (intersects.length > 0) {
+				if (INTERSECTED != intersects[0].object) {
+					INTERSECTED = intersects[0].object;
+
+					INTERSECTED.traverseAncestors(function (object) {
+
+						if (object.parent === scene)
+						//往父層回推，將INTERSECTED重新指定為在scene底下第一層的type為Object3D的物件	
+						{
+							INTERSECTED = object;
+						}
+
+					});
+				}
+			}
+
+			else {
+				INTERSECTED = null;
+			}
+		}
+
+		function SceneFadeIn() {
+			if (!isShowStart) {
+				requestAnimationFrame(SceneFadeIn);
+			}
+
+			if (Math.abs(carouselManu.position.x) > 0.01)//絕對值
+			{
+				carouselManu.position.x = THREE.MathUtils.lerp(carouselManu.position.x, 0, 0.025);
+			}
+
+			if (Math.abs(carouselManu.position.x) <= 0.1) {
+				isShowStart = true;
+			}
+		}
+
+		function UpdateRotationManu() {
+			quaternion_rotationTarget.setFromEuler(rotationTarget.rotation);
+
+			if (quaternion_carouselManu.angleTo(quaternion_rotationTarget) > 0.01) {
+				quaternion_carouselManu.slerp(quaternion_rotationTarget, rpm);
+				isRotateOn = true;
+			}
+
+			else {
+				isRotateOn = false;
+				rpm = normal_rpm;//回復正常轉速
+			}
+
+			carouselManu.rotation.setFromQuaternion(quaternion_carouselManu);
+		}
+
+		function ManuRotate() {
+			try {
+				FX.CameraManager(0);
+				rotationTarget.rotation.y += divisionAngle;
+				item_index++;
+
+				if (item_index > item_num - 1) {
+					item_index = 0;
+					rotationTarget.rotation.y = 0;
+				}
+
+				ShowItem(item_index);
+			}
+
+			catch (error) {
+				console.log(`發生錯誤.${error}`);
+			}
+		}
+
+		function ShowItem(index) {
+			try {
+				item_list[index].visible = true;
+				//UI按鍵
+				btn_list.forEach((btn, i) => {
+					if (i === index) btn.classList.add("active");
+					else btn.classList.remove("active");
+				});
+
+				// Update labels with fade
+				if (productName && productDesc) {
+					productName.style.opacity = '0';
+					productDesc.style.opacity = '0';
+					setTimeout(() => {
+						productName.innerText = productData[index].name;
+						productDesc.innerText = productData[index].desc;
+						productName.style.opacity = '1';
+						productDesc.style.opacity = '1';
+					}, 400);
+				}
+
+				for (let i = 0; i < item_list.length; i++) {
+					if (i != index) {
+						setTimeout(() => { item_list[i].visible = false; }, 1000);//1000=1sec}
+					}
+				}
+			}
+
+			catch (error) {
+				console.log(`發生錯誤.${error}`);
+			}
+
+			finally {
+				item_list[index].visible = true;
+			}
+		}
+
+		///輪播進度按鍵
+		function FocusToItem(i) {
+			try {
+				if (!isRotateOn) {
+					ShowItem(i);
+
+					item_index = i;
+
+					FX.CameraManager(0);
+
+					rpm = 0.08;//使用較高的轉速
+
+					rotationTarget.rotation.y = divisionAngle * i;
+
+					idleTime = 0;
+				}
+			}
+
+			catch (error) {
+				console.log(`發生錯誤.${error}`);
+			}
+		}
+
+		///影子功能
+		function ShaderTargetTextureRendering() {
+			// remove the background
+			const initialBackground = scene.background;
+			scene.background = null;
+
+			// force the depthMaterial to everything
+			scene.overrideMaterial = depthMaterial;
+
+			// set renderer clear alpha
+			const initialClearAlpha = renderer.getClearAlpha();
+			renderer.setClearAlpha(0);
+
+			// render to the render target to get the depths
+			renderer.setRenderTarget(renderTarget);
+			renderer.render(scene, shadowCamera);
+
+			// and reset the override material
+			scene.overrideMaterial = null;
+
+			blurShadow(state.shadow.blur);
+
+			// a second pass to reduce the artifacts
+			// (0.4 is the minimum blur amount so that the artifacts are gone)
+			blurShadow(state.shadow.blur * 0.4);
+
+			// reset and render the normal scene
+			renderer.setRenderTarget(null);
+			renderer.setClearAlpha(initialClearAlpha);
+			scene.background = initialBackground;
+
+			function blurShadow(amount) {
+
+				blurPlane.visible = true;
+
+				// blur horizontally and draw in the renderTargetBlur
+				blurPlane.material = horizontalBlurMaterial;
+				blurPlane.material.uniforms.tDiffuse.value = renderTarget.texture;
+				horizontalBlurMaterial.uniforms.h.value = amount * 1 / 256;
+
+				renderer.setRenderTarget(renderTargetBlur);
+				renderer.render(blurPlane, shadowCamera);
+
+				// blur vertically and draw in the main renderTarget
+				blurPlane.material = verticalBlurMaterial;
+				blurPlane.material.uniforms.tDiffuse.value = renderTargetBlur.texture;
+				verticalBlurMaterial.uniforms.v.value = amount * 1 / 256;
+
+				renderer.setRenderTarget(renderTarget);
+				renderer.render(blurPlane, shadowCamera);
+
+				blurPlane.visible = false;
+
+			}
+		}
+
+		function BackgroundDemo() {
+			background_index++;
+
+			if (background_index > 2) {
+				background_index = 0;
+			}
+
+			_banner.style.backgroundImage = `url('${backgroundImageSrc[background_index]}')`;
+		}
+
+		window.FocusToItem = FocusToItem;
+		window.BackgroundDemo = BackgroundDemo;
+
+
+	</script>
+</body>
+
+</html>
