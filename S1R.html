@@ -24,6 +24,20 @@
    				height: 100%;
 			}
 
+			.ColorChart{
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				opacity: 0;
+			}
+
+			#background_color
+			{
+				width: 100%;
+				height: 100%;
+				opacity: 0;
+			}
+
 		</style>
 
 		<script type="importmap">
@@ -66,16 +80,13 @@
 
 		<div class="features-container">
 			<div class="feature-card glass-effect" onclick="RESETCAMERA()">
-				<span class="feature-icon">📐</span>
+				<span class="feature-icon" style="font-size: 2rem;padding-bottom: 0.6rem;">&#128247;</span>
 				<div class="feature-text">Reset Camera</div>
 			</div>
-			<div class="feature-card glass-effect" onclick="">
-				<span class="feature-icon">✨</span>
-				<div class="feature-text">Lighting</div>
-			</div>
-			<div class="feature-card glass-effect" onclick="">
-				<span class="feature-icon">🌀</span>
+			<div class="feature-card glass-effect" >
+				<span class="feature-icon">&#127775;</span>
 				<div class="feature-text">Background</div>
+				<div class="ColorChart"><input id="background_color" type="color" value="0x999999"></input></div>
 			</div>
 		</div>
 
@@ -83,6 +94,8 @@
 			<div class="price-tag">$599</div>
 			<button class="buy-button">Customize Now</button>
 		</div>
+
+		
 
 		<script type="module">
 
@@ -168,7 +181,15 @@ function init()
 
 	scene.background = new THREE.Color( 0x999999 );
 	scene.fog = new THREE.Fog( 0x999999, 1, 50 );
-			
+
+	//////顏色控制腳本
+	const backgroundColorInput = document.getElementById( 'background_color' );
+	backgroundColorInput.addEventListener( 'input', function () {
+
+		scene.background.set( this.value );
+		scene.fog.color.set( this.value );
+
+	});
 
   	camera = new THREE.PerspectiveCamera( 45, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
   	renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -201,18 +222,18 @@ function init()
 	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
 
 	// Lights
-			const hemiLight = new THREE.HemisphereLight( 0xFFFFFF, 0x333333, 1.5 );
-			scene.add( hemiLight );
+	const hemiLight = new THREE.HemisphereLight( 0xFFFFFF, 0x333333, 1.5 );
+	scene.add( hemiLight );
 
-			const spotLight = new THREE.SpotLight();
-			spotLight.intensity = 10;
-			spotLight.angle = FX.ToThreeEulerAngle(30);
-			spotLight.penumbra = 0.5;
-			spotLight.castShadow = true;
-			spotLight.shadow.radius = 8;
-			spotLight.intensity=10;
-			spotLight.position.set( 3, 10, 0 );
-			scene.add( spotLight );
+	const spotLight = new THREE.SpotLight();
+	spotLight.intensity = 10;
+	spotLight.angle = FX.ToThreeEulerAngle(30);
+	spotLight.penumbra = 0.5;
+	spotLight.castShadow = true;
+	spotLight.shadow.radius = 8;
+	spotLight.intensity=10;
+	spotLight.position.set( 3, 10, 0 );
+	scene.add( spotLight );
 
 			//scene.add( new THREE.SpotLightHelper( spotLight, 15 ) );
 	
@@ -349,6 +370,12 @@ function init()
 	{
 		camera.position.copy(CameraDefaultPos);
 		controls.target.copy( ControlsTargetDefaultPos );
+		idleTime=0;
+
+		setTimeout(() => {threeContainer.style.cssText = `filter: blur(6px);`;}, 0);//1000=1sec}
+		setTimeout(() => {threeContainer.style.cssText = `filter: blur(4px);`;}, 200);//1000=1sec}
+		setTimeout(() => {threeContainer.style.cssText = `filter: blur(2px);`;}, 400);//1000=1sec}
+		setTimeout(() => {threeContainer.style.cssText = `filter: blur(0px);`;}, 600);//1000=1sec}
 	};
 
 
