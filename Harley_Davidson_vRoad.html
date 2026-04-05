@@ -196,9 +196,10 @@
 
 import * as THREE from 'three';
 
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_functions.js';
-import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.9/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.9/fx_materials.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
@@ -210,6 +211,7 @@ import { HorizontalBlurShader } from 'three/addons/shaders/HorizontalBlurShader.
 import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
 
 let scene, camera, renderer, stats, mixer;
+let labelRenderer;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
 let _loadingUI = document.getElementById("loadingUI");
@@ -250,6 +252,11 @@ const state = {
 let idleTime=0;
 const hold_time=6;
 
+let  labelTarget_engine=new THREE.Object3D();
+let  labelTarget_frontBreak=new THREE.Object3D();
+let  labelTarget_rearBreak=new THREE.Object3D();
+let  labelTarget_seat=new THREE.Object3D();
+
 init();
 //FX.Camera_Inspector(camera,controls);
 
@@ -270,10 +277,18 @@ function init()
   	//document.body.appendChild( renderer.domElement );
   	threeContainer.appendChild( renderer.domElement );
 
+
+	labelRenderer = new CSS2DRenderer();
+	labelRenderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight );
+	labelRenderer.domElement.style.position = 'absolute';
+	labelRenderer.domElement.style.top = '0px';
+	threeContainer.appendChild( labelRenderer.domElement );
+
   	camera.position.copy(CameraDefaultPos);
   
   	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
-  	controls = new OrbitControls( camera, renderer.domElement );
+  	//controls = new OrbitControls( camera, renderer.domElement );
+	controls = new OrbitControls( camera, labelRenderer.domElement );
   	controls.enablePan = true;//右鍵平移效果
   	controls.panSpeed = 0.4;
   	controls.enableDamping = true;
@@ -403,6 +418,18 @@ function init()
 	);
 
 
+	 //LabelTarget
+    labelTarget_engine.position.set(-0.5,3,3);
+    labelTarget_frontBreak.position.set(-0.5, 1.7,5.7);
+    labelTarget_rearBreak.position.set(-0.5, 1.7,-0.9);
+    labelTarget_seat.position.set(0,3.5, 0);
+    scene.add(labelTarget_engine).add(labelTarget_frontBreak).add(labelTarget_rearBreak).add(labelTarget_seat);
+
+	InstAccessorySceneLabel(labelTarget_engine);
+	InstAccessorySceneLabel(labelTarget_frontBreak);
+	InstAccessorySceneLabel(labelTarget_rearBreak);
+	InstAccessorySceneLabel(labelTarget_seat);
+
 		///影子工具
 	// the container, if you need to move the plane just move this
 	shadowGroup = new THREE.Group();
@@ -522,6 +549,7 @@ function onWindowResize()
     camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
 	camera.updateProjectionMatrix();
     renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+	labelRenderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight );
 }
 
 function animate() 
@@ -530,6 +558,7 @@ function animate()
 
   	controls.update();
   	renderer.render( scene, camera );
+	labelRenderer.render( scene, camera );
   	//UpdateCameraPosition(camera,controls);
 
 
@@ -606,6 +635,49 @@ function ShaderTargetTextureRendering()
 		blurPlane.visible = false;
 
 	}
+}
+
+function InstAccessorySceneLabel(thisLabelTarget)
+{
+  const thisDiv = document.createElement( 'div' );
+
+  	Object.assign(thisDiv.style,{
+      	position: 'absolute',
+		width: '12px',
+		height: '12px',
+		borderRadius: '50%',
+		background: 'radial-gradient(circle, #ffc107,transparent)',
+		border: 'solid',
+		borderColor:'#ffc107',
+		borderWidth: '1px',
+		userSelect: 'none',
+		transition: 'width .24s,height .24s',
+		transformOrigin: 'center center',
+	});
+
+  const thisLabel = new CSS2DObject( thisDiv );
+  thisLabel.position.copy( thisLabelTarget.position);
+  thisLabel.center.set( 0.5, 0.5 );
+  thisLabelTarget.attach( thisLabel );
+  thisLabel.layers.set( 0 );
+  thisLabel.name="CSS2D_SceneLabel";
+
+   thisDiv.addEventListener("mouseover",function (event) {
+            
+        thisDiv.style.borderWidth="3px";
+		thisDiv.style.width="30px";
+		thisDiv.style.height="30px";
+
+    });
+
+    thisDiv.addEventListener("mouseleave",function (event) {
+
+        thisDiv.style.borderWidth="1px";
+		thisDiv.style.width="12px";
+		thisDiv.style.height="12px";
+
+    });
+
 }
 		</script>
     </body>
