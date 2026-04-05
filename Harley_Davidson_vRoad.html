@@ -1,0 +1,459 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+
+			body
+			{
+				margin: 0;
+				padding:0; 
+				background-color: #ffffff;
+			}
+			
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<div id="threeContainer"></div> 
+		<div id="loadingUI" class="rotate_anim"></div>
+		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+		<div class="web3d_icon"></div>
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { Harley_Davidson_vRoad } from './models/Harley_Davidson_vRoad_slices.js';
+
+//Shadow
+import { HorizontalBlurShader } from 'three/addons/shaders/HorizontalBlurShader.js';
+import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
+
+let scene, camera, renderer, stats, mixer;
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+let _loadingUI = document.getElementById("loadingUI");
+
+const clock = new THREE.Clock();
+
+const modelPosition=new THREE.Vector3(0,0,0);
+const modelRotation=new THREE.Vector3(0,Math.PI*0.5, 0);
+const modeScale=0.1;
+
+const CameraDefaultPos=new THREE.Vector3(-15.811,5.650,16.679);
+const ControlsTargetDefaultPos=new THREE.Vector3(1.254,2.575,1.858);
+
+let main_model= new THREE.Object3D();
+
+//影子工具
+let shadowGroup, renderTarget, renderTargetBlur, shadowCamera, depthMaterial, horizontalBlurMaterial, verticalBlurMaterial;
+let plane, blurPlane, fillPlane;
+const PLANE_WIDTH = 100;
+const PLANE_HEIGHT = 100;
+const CAMERA_HEIGHT = 50;//必須高於模型，否則看不到
+const state = {
+	shadow: //影子
+	{
+		blur: 0.25,
+		darkness: 0.4,
+		opacity: 0.45,
+	},
+	plane: //地板材質
+	{
+		color: '#ffffffff',
+		opacity: 0,
+	},
+	
+	showWireframe: false,
+};
+
+let idleTime=0;
+const hold_time=6;
+
+init();
+//FX.Camera_Inspector(camera,controls);
+
+function init()
+{
+	FX.SetupEnvironment("cloud");
+
+  	scene = new THREE.Scene();
+	scene.background = new THREE.Color( 0xf3f3f3 );
+
+  	camera = new THREE.PerspectiveCamera( 25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 0.9;
+  	//document.body.appendChild( renderer.domElement );
+  	threeContainer.appendChild( renderer.domElement );
+
+  	camera.position.copy(CameraDefaultPos);
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+  	controls = new OrbitControls( camera, renderer.domElement );
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.maxDistance = 500;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+  	controls.update();
+
+  	///hdri 環境光源
+	FX.LoadHDRWithPMREM('./textures/hdri/brown_photostudio_02_1k.hdr',scene,renderer);
+	scene.environmentRotation.y = FX.ToThreeEulerAngle(-180); 
+	
+	///Lamborghini_Centenario_roadster
+	const loader_Lamborghini_Centenario_roadster = new GLTFLoader();
+    loader_Lamborghini_Centenario_roadster.setDRACOLoader(FX.dracoLoader);
+	loader_Lamborghini_Centenario_roadster.parse(
+    FX.Base64ToArrayBuffer(Harley_Davidson_vRoad()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+
+		model.position.set(0,0,0);
+		model.rotation.set(0,FX.ToThreeEulerAngle(-90), 0);
+		model.scale.set(modeScale,modeScale,modeScale);
+
+		//thisColor,thisRoughness,thisMetalness,thisReflectivity,isTransparent,thisOpacity,map_src,map_repeat,map_offset,bumpMap_src,bumpMap_repeat,bumpMap_scale
+		const seat_material=FXM.InstEtchingMaterial(0x292929,0.6,0.15,0.75,false,1,'./textures/Leather.png',new THREE.Vector2(10,10),new THREE.Vector2(0,0),'./textures/Leather.png',new THREE.Vector2(50, 50),5);
+
+		const tire_material=FXM.InstEtchingMaterial(0x292929,0.66,0.5,0.9,false,1,'./textures/Leather.png',new THREE.Vector2(10,10),new THREE.Vector2(0,0),'./textures/Leather.png',new THREE.Vector2(100, 80),100);
+
+		//(thisColor,thisRoughness,thisMetalness,thisTransmission,thisIor,thisReflectivity,isTransparent,thisOpacity,isDepthWrite)
+		const red_housing_material=FXM.InstMaterial(0x500202,0.1,0.2,0,1.27,0.3,false,1,true);
+
+		const light_material=FXM.InstMaterial(0xffffff,0,1,1,2.4,1,true,0.9,true);
+
+		const red_light_material=FXM.InstMaterial(0x610000,0.1,1,1,1,1,true,1,true);
+
+		const disk_material=FXM.InstEtchingMaterial(0xdedede,0.15,1,0,false,1,'./textures/Radial_Brush_01.jpg',new THREE.Vector2(1,1),new THREE.Vector2(0.36,0.08),'./textures/Radial_Brush_01.jpg',new THREE.Vector2(1, 1),0);
+
+		const black_housing_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.75,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(600, 600),2);
+
+		const engine_material=FXM.InstMaterial(0x919191,0.3,0.9,0,1.27,0,false,1,true);
+
+		const darkMetal_material=FXM.InstMaterial(0x1c1c1c,0.2,0.2,0,1.27,0.5,false,1,true);
+
+		const chromePolish_material=FXM.InstMaterial(0xf0f0f0,0,0.9,0,1.27,1,false,1,true);
+
+		model.traverse( function ( object ) {	
+                  
+            if(object.name.includes("seat"))
+            {
+              FX.ReturnBufferGeometry(object,seat_material,null,scene);
+            }
+
+			if(object.name.includes("handle"))
+            {
+              FX.ReturnBufferGeometry(object,tire_material,null,scene);
+            }
+
+			 if(object.name.includes("tire"))
+            {
+              FX.ReturnBufferGeometry(object,tire_material,null,scene);
+            }
+
+			if(object.name.includes("housing"))
+            {
+              FX.ReturnBufferGeometry(object,red_housing_material,null,scene);
+            }
+
+			if(object.name==="light")
+            {
+              FX.ReturnBufferGeometry(object,light_material,null,scene);
+            }
+
+			if(object.name.includes("lightRed"))
+            {
+              FX.ReturnBufferGeometry(object,red_light_material,null,scene);
+            }
+
+			if(object.name.includes("disk"))
+            {
+              FX.ReturnBufferGeometry(object,disk_material,null,scene);
+            }
+
+			if(object.name.includes("blackHousing"))
+            {
+              FX.ReturnBufferGeometry(object,black_housing_material,null,scene);
+            }
+
+			if(object.name.includes("engine"))
+            {
+              FX.ReturnBufferGeometry(object,engine_material,null,scene);
+            }
+
+			if(object.name.includes("darkMetal"))
+            {
+              FX.ReturnBufferGeometry(object,darkMetal_material,null,scene);
+            }
+
+			if(object.name.includes("chromePolish"))
+            {
+              FX.ReturnBufferGeometry(object,chromePolish_material,null,scene);
+            }
+
+        })
+
+		scene.add(model);
+		animate();
+		setTimeout(() => {_loadingUI.remove();}, 600);
+
+		//setTimeout(() => {FX.Material_Inspector(scene);}, 1000);
+
+		console.log()
+		
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+
+		///影子工具
+	// the container, if you need to move the plane just move this
+	shadowGroup = new THREE.Group();
+	shadowGroup.position.y = 0;
+	scene.add( shadowGroup );
+
+	// the render target that will show the shadows in the plane texture
+	renderTarget = new THREE.WebGLRenderTarget( 512, 512 );
+	renderTarget.texture.generateMipmaps = false;
+
+	// the render target that we will use to blur the first render target
+	renderTargetBlur = new THREE.WebGLRenderTarget( 512, 512 );
+	renderTargetBlur.texture.generateMipmaps = false;
+	
+	// make a plane and make it face up
+	const planeGeometry = new THREE.PlaneGeometry( PLANE_WIDTH, PLANE_HEIGHT ).rotateX( Math.PI / 2 );
+	const planeMaterial = new THREE.MeshBasicMaterial( {
+		map: renderTarget.texture,//地板使用影子攝影機的renderTexture材質球
+		opacity: state.shadow.opacity,
+		transparent: true,
+		depthWrite: false,
+	} );
+					
+	plane = new THREE.Mesh( planeGeometry, planeMaterial );
+				// make sure it's rendered after the fillPlane
+	plane.renderOrder = 1;
+	shadowGroup.add( plane );
+
+	// the y from the texture is flipped!
+	plane.scale.y = - 1;
+
+	// the plane onto which to blur the texture
+	blurPlane = new THREE.Mesh( planeGeometry );
+	blurPlane.visible = false;
+	shadowGroup.add( blurPlane );
+
+	// the plane with the color of the ground
+	const fillPlaneMaterial = new THREE.MeshBasicMaterial( {
+		color: state.plane.color,
+		opacity: state.plane.opacity,
+		transparent: true,
+		depthWrite: false,
+	} );
+
+	fillPlane = new THREE.Mesh( planeGeometry, fillPlaneMaterial );
+	fillPlane.rotateX( Math.PI );
+	shadowGroup.add( fillPlane );
+
+	//利用相機從正上方錄製正投影畫面，製作成影子
+	// the camera to render the depth material from
+	shadowCamera = new THREE.OrthographicCamera( - PLANE_WIDTH / 2, PLANE_WIDTH / 2, PLANE_HEIGHT / 2, - PLANE_HEIGHT / 2, 0,CAMERA_HEIGHT );
+	shadowCamera.rotation.x = Math.PI / 2; // get the camera to look up
+	shadowGroup.add( shadowCamera );
+
+	shadowGroup.position.set(0,0,0);//整組移動
+
+	// like MeshDepthMaterial, but goes from black to transparent
+	depthMaterial = new THREE.MeshDepthMaterial();
+	depthMaterial.userData.darkness = { value: state.shadow.darkness };
+	depthMaterial.onBeforeCompile = function ( shader ) {
+
+		shader.uniforms.darkness = depthMaterial.userData.darkness;
+		shader.fragmentShader = /* glsl */`
+		uniform float darkness;
+		${shader.fragmentShader.replace(
+		'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
+		'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) * darkness );'
+		)}
+	`;
+
+	};
+	
+	depthMaterial.depthTest = false;
+	depthMaterial.depthWrite = false;
+
+	horizontalBlurMaterial = new THREE.ShaderMaterial( HorizontalBlurShader );
+	horizontalBlurMaterial.depthTest = false;
+
+	verticalBlurMaterial = new THREE.ShaderMaterial( VerticalBlurShader );
+	verticalBlurMaterial.depthTest = false;
+
+	depthMaterial.userData.darkness.value = state.shadow.darkness;
+	plane.material.opacity = state.shadow.opacity;
+	fillPlane.material.color = new THREE.Color( state.plane.color );
+	fillPlane.material.opacity = state.plane.opacity;
+	shadowGroup.visible=true;
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+  		window.addEventListener("pointerdown", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+	
+	});
+
+	window.addEventListener( 'pointermove', function(e) {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+  	window.addEventListener("wheel", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+	
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.updateProjectionMatrix();
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+}
+
+function animate() 
+{
+  	requestAnimationFrame( animate );
+
+  	controls.update();
+  	renderer.render( scene, camera );
+  	//UpdateCameraPosition(camera,controls);
+
+
+	const delta = clock.getDelta();
+
+	if ( mixer ) mixer.update( delta );
+
+//	idleTime+=delta;
+//	
+//	if(idleTime>hold_time)
+//	{
+//		controls.autoRotate=true;
+//	}
+
+ShaderTargetTextureRendering();
+
+//FX.WebGLInspector(threeContainer, renderer);
+
+}
+
+  ///影子功能
+function ShaderTargetTextureRendering()
+{
+	// remove the background
+	const initialBackground = scene.background;
+	scene.background = null;
+
+	// force the depthMaterial to everything
+	scene.overrideMaterial = depthMaterial;
+
+	// set renderer clear alpha
+	const initialClearAlpha = renderer.getClearAlpha();
+	renderer.setClearAlpha( 0 );
+
+	// render to the render target to get the depths
+	renderer.setRenderTarget( renderTarget );
+	renderer.render( scene, shadowCamera );
+
+	// and reset the override material
+	scene.overrideMaterial = null;
+
+	blurShadow( state.shadow.blur );
+
+	// a second pass to reduce the artifacts
+	// (0.4 is the minimum blur amount so that the artifacts are gone)
+	blurShadow( state.shadow.blur * 0.4 );
+
+	// reset and render the normal scene
+	renderer.setRenderTarget( null );
+	renderer.setClearAlpha( initialClearAlpha );
+	scene.background = initialBackground;
+
+	function blurShadow( amount ) 
+	{
+
+		blurPlane.visible = true;
+
+		// blur horizontally and draw in the renderTargetBlur
+		blurPlane.material = horizontalBlurMaterial;
+		blurPlane.material.uniforms.tDiffuse.value = renderTarget.texture;
+		horizontalBlurMaterial.uniforms.h.value = amount * 1 / 256;
+
+		renderer.setRenderTarget( renderTargetBlur );
+		renderer.render( blurPlane, shadowCamera );
+
+		// blur vertically and draw in the main renderTarget
+		blurPlane.material = verticalBlurMaterial;
+		blurPlane.material.uniforms.tDiffuse.value = renderTargetBlur.texture;
+		verticalBlurMaterial.uniforms.v.value = amount * 1 / 256;
+
+		renderer.setRenderTarget( renderTarget );
+		renderer.render( blurPlane, shadowCamera );
+
+		blurPlane.visible = false;
+
+	}
+}
+		</script>
+    </body>
+
+</html>
