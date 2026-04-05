@@ -10,18 +10,138 @@
 		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
 		<link rel="stylesheet" type="text/css" href="Main.css">
 		<style type="text/css">
+			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
 			body
 			{
 				margin: 0;
 				padding:0; 
-				background-color: #ffffff;
+				background-color: #d6d6d6;
+				font-family: 'Inter', sans-serif;
+				overflow: hidden;
 			}
 			
 			canvas
 			{
 				width: 100%;
    				height: 100%;
+			}
+
+			.bg-text {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				font-size: 15vw;
+				font-weight: 900;
+				color: #ffffff;
+				letter-spacing: 1.5rem;
+				z-index: -1;
+				text-transform: uppercase;
+				user-select: none;
+				white-space: nowrap;
+			}
+
+			#threeContainer {
+				position: absolute;
+				top: 0; left: 0;
+				width: 100%; height: 100%;
+				z-index: 10;
+			}
+
+			.top-nav {
+				position: absolute;
+				top: 40px;
+				right: 40px;
+				display: flex;
+				align-items: center;
+				gap: 30px;
+				z-index: 20;
+			}
+
+			.top-nav a {
+				text-decoration: none;
+				color: #000;
+				font-size: 14px;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+			}
+
+			.hamburger {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+				cursor: pointer;
+			}
+
+			.hamburger span {
+				display: block;
+				width: 24px;
+				height: 2px;
+				background-color: #000;
+				transition: 0.3s;
+			}
+
+			.side-year {
+				position: absolute;
+				top: 50%;
+				left: 40px;
+				transform: translateY(-50%) rotate(-90deg);
+				font-size: 14px;
+				font-weight: 700;
+				color: #000;
+				letter-spacing: 4px;
+				z-index: 20;
+			}
+
+			.buy-button {
+				position: absolute;
+				bottom: 40px;
+				right: 40px;
+				background-color: #000000;
+				color: #ffffff;
+				padding: 16px 40px;
+				border-radius: 50px;
+				font-size: 14px;
+				font-weight: 800;
+				letter-spacing: 2px;
+				text-transform: uppercase;
+				border: none;
+				cursor: pointer;
+				z-index: 20;
+				transition: transform 0.2s, background-color 0.2s;
+			}
+			.buy-button:hover {
+				transform: scale(1.05);
+				background-color: #222;
+			}
+
+			.specs-grid {
+				position: absolute;
+				bottom: 40px;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				gap: 60px;
+				text-align: center;
+				z-index: 20;
+			}
+
+			.spec-cell label {
+				display: block;
+				font-size: 12px;
+				color: #777777;
+				margin-bottom: 8px;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+				font-weight: 700;
+			}
+
+			.spec-cell span {
+				font-size: 18px;
+				font-weight: 900;
+				color: #000000;
 			}
 
 		</style>
@@ -38,10 +158,40 @@
 	</head>
 	
 	<body>
+		<div class="bg-text">V-ROD</div>
+		
+		<div class="top-nav">
+			<a href="#">Contact</a>
+			<a href="#">About</a>
+			<div class="hamburger">
+				<span></span><span></span><span></span>
+			</div>
+		</div>
+
+		<div class="side-year">2018</div>
+
 		<div id="threeContainer"></div> 
 		<div id="loadingUI" class="rotate_anim"></div>
-		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
-		<div class="web3d_icon"></div>
+		<div class="fimawork_logo" style="top: 3%;"onclick="parent.open('https://fimawork.tw/')"></div>
+		<!--<div class="web3d_icon"></div>-->
+
+		<div class="specs-grid">
+			<div class="spec-cell">
+				<label>Torque</label>
+				<span>115 Nm</span>
+			</div>
+			<div class="spec-cell">
+				<label>Weight</label>
+				<span>289 kg</span>
+			</div>
+			<div class="spec-cell">
+				<label>Engine</label>
+				<span>1250 cc</span>
+			</div>
+		</div>
+
+		<button class="buy-button">BUY</button>
+
 		<script type="module">
 
 import * as THREE from 'three';
@@ -108,10 +258,10 @@ function init()
 	FX.SetupEnvironment("cloud");
 
   	scene = new THREE.Scene();
-	scene.background = new THREE.Color( 0xf3f3f3 );
+	scene.background = null;
 
   	camera = new THREE.PerspectiveCamera( 25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
-  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
 
   	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
@@ -133,6 +283,10 @@ function init()
   	controls.zoomSpeed=0.5;
 	controls.autoRotate=false;
 	controls.autoRotateSpeed=0.3;
+	controls.maxAzimuthAngle=FX.ToThreeEulerAngle(0);
+	controls.minAzimuthAngle=FX.ToThreeEulerAngle(-150);
+	controls.maxPolarAngle=FX.ToThreeEulerAngle(90);
+	controls.minPolarAngle=FX.ToThreeEulerAngle(-90);
   	controls.update();
 
   	///hdri 環境光源
