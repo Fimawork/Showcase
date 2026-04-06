@@ -144,6 +144,67 @@
 				color: #000000;
 			}
 
+			.model_info
+			{
+				position: absolute;
+				bottom:4%;
+				left: 3%;
+				font-family:Arial;
+				font-weight:lighter;
+				font-size: 12px;
+				color: rgba(255, 255, 255, 0.75);
+				display: grid;
+				grid-template-columns: 1fr 4fr;
+				z-index: 99;
+				padding: 10px;
+			}
+
+			.titlePanel
+			{				
+				width: 25%;
+				height: 100%;
+			}
+
+			.detailPanel
+			{
+				width: 50%;
+				height: 100%;
+			}
+
+			.detail_title
+			{
+				height: 16.7%;
+				text-align: left;
+				
+				white-space: nowrap;
+			}
+
+			.detail_value
+			{
+				height: 16.7%;
+				padding-left: 10px;
+				white-space: nowrap;
+			}
+
+			@media screen and (max-width:768px)/*手機*/
+			{
+				.model_info
+				{
+					display: none;
+				}
+
+				#contact_btn
+				{
+					display: none;
+				}
+
+				#about_btn
+				{
+					display: none;
+				}
+
+			}
+
 		</style>
 
 		<script type="importmap">
@@ -161,8 +222,8 @@
 		<div class="bg-text">V-ROD</div>
 		
 		<div class="top-nav">
-			<a href="#">Contact</a>
-			<a href="#">About</a>
+			<a href="#" id="contact_btn">Contact</a>
+			<a href="#" id="about_btn">About</a>
 			<div class="hamburger">
 				<span></span><span></span><span></span>
 			</div>
@@ -189,6 +250,21 @@
 				<span>1250 cc</span>
 			</div>
 		</div>
+
+		
+		<div class="model_info">
+			<div class="titlePanel">
+				<p class="detail_title">Model</p>
+				<p class="detail_title">Author</p>
+				<p class="detail_title">Link</p>
+			</div>
+			<div class="detailPanel">
+				<p class="detail_value">Harley Davidson vRoad</p>
+				<p class="detail_value">juan fernando</p>
+				<p class="detail_value">https://grabcad.com/library/harley-davidson-vroad-1</p>
+			</div>
+		</div>
+	
 
 		<button class="buy-button">BUY</button>
 
