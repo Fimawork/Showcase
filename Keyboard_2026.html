@@ -1,0 +1,652 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+		<style type="text/css">
+
+			body
+			{
+				margin: 0;
+				padding:0; 
+				background: radial-gradient(circle at 50% 50%, #1a2a47 0%, #080d1a 100%);
+				overflow: hidden;
+				font-family: 'Rajdhani', sans-serif;
+				color: #fff;
+			}
+			
+			canvas
+			{
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 1;
+			}
+
+			:root {
+				--neon-cyan: #00f2ff;
+				--neon-magenta: #ff00ea;
+				--bg-glass: rgba(10, 20, 40, 0.6);
+				--border-glass: rgba(0, 242, 255, 0.3);
+				--font-main: 'Rajdhani', sans-serif;
+				--font-tech: 'Orbitron', sans-serif;
+			}
+
+			/* UI Layer Positioning */
+			.ui-overlay {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				pointer-events: none;
+				z-index: 10;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				padding: 30px;
+				box-sizing: border-box;
+			}
+
+			.ui-overlay * {
+				/*pointer-events: auto;*/
+			}
+
+			/* Glassmorphism Panel */
+			.glass-panel {
+				background: var(--bg-glass);
+				backdrop-filter: blur(12px);
+				-webkit-backdrop-filter: blur(12px);
+				border: 1px solid var(--border-glass);
+				border-radius: 4px;
+				padding: 20px;
+				box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+			}
+
+			/* Header Styles */
+			.header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 20px;
+			}
+
+			.brand-title {
+				font-family: var(--font-tech);
+				font-weight: 700;
+				font-size: 24px;
+				letter-spacing: 4px;
+				background: linear-gradient(90deg, #fff, var(--neon-cyan));
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				text-transform: uppercase;
+			}
+
+			.model-name {
+				font-family: var(--font-tech);
+				font-size: 14px;
+				color: var(--neon-magenta);
+				letter-spacing: 2px;
+				border-left: 2px solid var(--neon-magenta);
+				padding-left: 15px;
+			}
+
+			/* Main Layout */
+			.main-content {
+				display: flex;
+				justify-content: space-between;
+				flex-grow: 1;
+				align-items: center;
+			}
+
+			.side-panel {
+				width: 280px;
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+			}
+
+			.panel-title {
+				font-family: var(--font-tech);
+				font-size: 12px;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				color: var(--neon-cyan);
+				margin-bottom: 15px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.panel-title::after {
+				content: '';
+				flex-grow: 1;
+				height: 1px;
+				background: linear-gradient(90deg, var(--neon-cyan), transparent);
+			}
+
+			/* Stats List */
+			.stat-item {
+				display: flex;
+				justify-content: space-between;
+				margin-bottom: 12px;
+				font-size: 14px;
+				border-bottom: 1px solid rgba(255,255,255,0.05);
+				padding-bottom: 5px;
+			}
+
+			.stat-label {
+				color: rgba(255, 255, 255, 0.6);
+				text-transform: uppercase;
+			}
+
+			.stat-value {
+				color: #fff;
+				font-weight: 700;
+			}
+
+			/* Buttons */
+			.control-btn {
+				background: rgba(255, 255, 255, 0.05);
+				border: 1px solid rgba(255, 255, 255, 0.2);
+				color: #fff;
+				padding: 10px 15px;
+				font-family: var(--font-tech);
+				font-size: 10px;
+				text-transform: uppercase;
+				cursor: pointer;
+				transition: all 0.3s ease;
+				text-align: center;
+				border-radius: 2px;
+				margin-bottom: 10px;
+				letter-spacing: 1px;
+			}
+
+			.control-btn:hover {
+				background: var(--neon-cyan);
+				color: #000;
+				box-shadow: 0 0 15px var(--neon-cyan);
+				border-color: var(--neon-cyan);
+			}
+
+			.control-btn.active {
+				background: var(--neon-magenta);
+				border-color: var(--neon-magenta);
+				box-shadow: 0 0 10px var(--neon-magenta);
+			}
+
+			/* Footer */
+			.footer {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-end;
+				margin-top: 20px;
+			}
+
+			.cta-button {
+				background: linear-gradient(135deg, var(--neon-cyan), #00a2ff);
+				color: #000;
+				padding: 15px 40px;
+				font-family: var(--font-tech);
+				font-weight: 700;
+				text-transform: uppercase;
+				border: none;
+				clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+				cursor: pointer;
+				transition: transform 0.2s ease, box-shadow 0.2s ease;
+			}
+
+			.cta-button:hover {
+				transform: skew(-2deg) scale(1.05);
+				box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
+			}
+
+			/* Animations */
+			@keyframes scanline {
+				0% { transform: translateY(-100%); }
+				100% { transform: translateY(1000%); }
+			}
+
+			.scan {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 2px;
+				background: rgba(0, 242, 255, 0.1);
+				opacity: 0.5;
+				pointer-events: none;
+				z-index: 100;
+				animation: scanline 8s linear infinite;
+			}
+
+			@media (max-width: 900px) {
+				.side-panel {
+					width: 200px;
+				}
+				.brand-title {
+					font-size: 18px;
+				}
+			}
+
+			@media (max-width: 600px) {
+				.main-content {
+					flex-direction: column;
+					justify-content: center;
+					gap: 20px;
+				}
+				.side-panel {
+					width: 100%;
+				}
+				.ui-overlay {
+					padding: 15px;
+				}
+			}
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<div id="loadingUI" class="rotate_anim"></div>
+		
+		<div class="scan"></div>
+
+		<!-- UI Overlay -->
+		<div class="ui-overlay">
+			<!-- Top Section -->
+			<div class="header">
+				<div class="brand-title">VANGUARD K-2026</div>
+				<div class="model-name">PRO SERIES // MECHANICAL</div>
+			</div>
+
+			<!-- Middle Section -->
+			<div class="main-content">
+				<!-- Left Stats -->
+				<div class="side-panel">
+					<div class="glass-panel">
+						<div class="panel-title">System Specs</div>
+						<div class="stat-item">
+							<span class="stat-label">Polling Rate</span>
+							<span class="stat-value">8000Hz</span>
+						</div>
+						<div class="stat-item">
+							<span class="stat-label">Response Time</span>
+							<span class="stat-value">0.125ms</span>
+						</div>
+						<div class="stat-item">
+							<span class="stat-label">Switch Type</span>
+							<span class="stat-value">Optical Gold</span>
+						</div>
+						<div class="stat-item">
+							<span class="stat-label">Lifecycle</span>
+							<span class="stat-value">100M Clicks</span>
+						</div>
+					</div>
+
+					<div class="glass-panel">
+						<div class="panel-title">Connectivity</div>
+						<div class="stat-item">
+							<span class="stat-label">Latency</span>
+							<span class="stat-value">Ultra-Low</span>
+						</div>
+						<div class="stat-item">
+							<span class="stat-label">Protocol</span>
+							<span class="stat-value">HyperSpeed 2.0</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Right Controls -->
+				<div class="side-panel">
+					<div class="glass-panel">
+						<div class="panel-title">Lighting Engine</div>
+						<div class="control-btn active" onclick="setLighting('rgb', event)">Neural RGB</div>
+						<div class="control-btn" onclick="setLighting('static', event)">Static Frost</div>
+						<div class="control-btn" onclick="setLighting('breathe', event)">Heartbeat</div>
+						<div class="control-btn" onclick="setLighting('pulse', event)">Gamma Pulse</div>
+					</div>
+
+					<div class="glass-panel">
+						<div class="panel-title">Performance Mode</div>
+						<div class="control-btn" onclick="togglePerformance(event)">Standard</div>
+						<div class="control-btn active" onclick="togglePerformance(event)">Overclocked</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Bottom Section -->
+			<div class="footer">
+				<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+				<button class="cta-button">Configure Now</button>
+			</div>
+		</div>
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.8/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { keyboard_2026 } from './models/keyboard_2026_slices.js';
+
+let scene, camera, renderer, stats, mixer,container;
+let composer;
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+let _loadingUI = document.getElementById("loadingUI");
+
+const clock = new THREE.Clock();
+
+const CameraDefaultPos=new THREE.Vector3(-7.846,7.053,16.771);
+const ControlsTargetDefaultPos=new THREE.Vector3(-2.293,1.425,3.045);
+
+//let keyboardModule = new THREE.Object3D();
+//let screenModule = new THREE.Object3D();
+//let RotatePivot = new THREE.Object3D();
+
+let idleTime=0;
+const hold_time=6;
+
+// 設定 Bloom 參數
+const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    2.1,  // 強度 (strength)
+    0.6,  // 半徑 (radius)
+    1  // 閾值 (threshold) - 只有亮度超過此值的區域會發光
+);
+
+
+
+init();
+
+function init()
+{
+	FX.SetupEnvironment("cloud");
+
+	container = document.createElement( 'div' );
+ 	document.body.appendChild( container );
+
+  	scene = new THREE.Scene();
+
+  	camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	renderer.setSize( window.innerWidth, window.innerHeight);
+
+  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 0.6;
+  	document.body.appendChild( renderer.domElement );
+
+	// 初始化 Composer
+	composer = new EffectComposer(renderer);
+	composer.addPass(new RenderPass(scene, camera));
+	composer.addPass(bloomPass);
+
+  	camera.position.copy(CameraDefaultPos);
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+  	controls = new OrbitControls( camera, renderer.domElement );
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+  	controls.update();
+
+  	///hdri 環境光源
+	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_1k.hdr',scene,renderer);
+
+	const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 1.5 );
+	hemiLight.position.set( 0, 20, 0 );
+	scene.add( hemiLight );
+
+	const dirLight = new THREE.DirectionalLight( 0xffffff,6 );
+				dirLight.position.set( - 3, 10, - 10 );
+				dirLight.castShadow = true;
+				dirLight.shadow.camera.top = 2;
+				dirLight.shadow.camera.bottom = - 2;
+				dirLight.shadow.camera.left = - 2;
+				dirLight.shadow.camera.right = 2;
+				dirLight.shadow.camera.near = 0.1;
+				dirLight.shadow.camera.far = 40;
+				scene.add( dirLight );
+
+	const loader_keyboard = new GLTFLoader();
+    loader_keyboard.setDRACOLoader(FX.dracoLoader);
+	loader_keyboard.parse(
+    FX.Base64ToArrayBuffer(keyboard_2026()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+
+		model.position.set(0,0,0);
+		model.rotation.set(FX.ToThreeEulerAngle(45),FX.ToThreeEulerAngle(0), FX.ToThreeEulerAngle(0));
+		model.scale.set(0.05,0.05,0.05);
+
+		const button_material=FXM.InstMaterial(0x000000,0.5,0.5,0,1.27,1,false,1,true);
+
+		model.traverse( function ( object ) {
+
+			if(object.name.includes("button"))
+        	{
+			  FX.ReturnBufferGeometry(object,button_material,null,scene);
+        	}
+
+			if(object.name.includes("base"))
+        	{
+			  FX.ReturnBufferGeometry(object,button_material,null,scene);
+        	}
+
+			if(object.name.includes("light"))
+        	{
+			  for(let i=0;i<object.children.length;i++)
+			  {
+
+				const color_code = object.children[i].name.split(/_\d+/)[0];
+				InstLight(object.children[i],color_code);
+				//console.log(color_code);
+			  }
+        	}
+		});
+
+	
+	//	model.traverse((child) => {
+//
+	//	
+//
+	//	});
+
+		scene.add(model);
+
+
+		//scene.environment.rotation = FX.ToThreeEulerAngle(45);
+
+		scene.environmentRotation.y = FX.ToThreeEulerAngle(-30); 
+		//scene.backgroundRotation.y = FX.ToThreeEulerAngle(-45);
+
+
+		animate();
+		setTimeout(() => {_loadingUI.remove();}, 600);
+
+        //FX.Material_Inspector(scene);
+		
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	//FX.Camera_Inspector(camera,controls);
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+  		window.addEventListener("pointerdown", (event) => {
+
+		idleTime=0;
+		controls.autoRotate=false;
+
+	});
+
+	window.addEventListener( 'pointermove', function(e) {
+
+		idleTime=0;
+		controls.autoRotate=false;
+
+	});
+
+  	window.addEventListener("wheel", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+
+	});
+
+	// UI Interaction Links
+	window.setLighting = function(mode, e) {
+		console.log("Lighting mode:", mode);
+		document.querySelectorAll('.glass-panel:nth-child(1) .control-btn').forEach(btn => btn.classList.remove('active'));
+		e.currentTarget.classList.add('active');
+		
+		if(mode === 'rgb') {
+			bloomPass.strength = 2.1;
+		} else if(mode === 'static') {
+			bloomPass.strength = 0.5;
+		} else if(mode === 'breathe') {
+			bloomPass.strength = 1.0;
+		} else {
+			bloomPass.strength = 1.5;
+		}
+	};
+
+	window.togglePerformance = function(e) {
+		const btn = e.currentTarget;
+		const isActive = btn.classList.contains('active');
+		
+		const btns = document.querySelectorAll('.glass-panel:nth-child(2) .control-btn');
+		btns.forEach(b => b.classList.remove('active'));
+		btn.classList.add('active');
+
+		if(btn.innerText.includes("Overclocked")) {
+			controls.autoRotate = true;
+			controls.autoRotateSpeed = 2.0;
+		} else {
+			controls.autoRotate = false;
+		}
+	};
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight);
+}
+
+function animate() 
+{
+  	requestAnimationFrame( animate );
+
+  	controls.update();
+	
+  	//renderer.render( scene, camera );
+	composer.render();
+  	//UpdateCameraPosition(camera,controls);
+	//FX.WebGLInspector(container, renderer);
+
+	const delta = clock.getDelta();
+
+	if ( mixer ) mixer.update( delta );
+
+	idleTime+=delta;
+	
+	if(idleTime>hold_time)
+	{
+		//controls.autoRotate=true;
+	}
+
+	//if(RotatePivot.rotation.z>FX.ToThreeEulerAngle(-115))
+	//{
+	//	RotatePivot.rotation.z-=0.01;
+	//}
+	
+	//console.log(RotatePivot.rotation.z)
+
+}
+
+function InstLight(target,thisColor)
+{
+	let center= new THREE.Vector3();
+    const box = new THREE.Box3();
+    
+    target.traverse((child) => {
+        // 只計算有幾何體且可見的網格 (Mesh)
+        if (child.isMesh && child.visible) {
+            // 更新包圍盒
+            child.geometry.computeBoundingBox();
+    
+            // 將該子物件的世界包圍盒合併
+            const childBox = new THREE.Box3().copy(child.geometry.boundingBox);
+            child.updateMatrixWorld(true);
+            childBox.applyMatrix4(child.matrixWorld);
+    
+            box.union(childBox);
+        }
+    });
+    
+    // 現在顯示出來的 box 就會精準很多
+    //const helper = new THREE.Box3Helper(Box, 0xffff00);
+    //scene.add(helper);
+    
+    box.getCenter(center);
+
+	const light = new THREE.PointLight(  thisColor, 3.3, 1 );
+	light.castShadow = true;
+	light.shadow.bias = - 0.005; // reduces self-shadowing on double-sided objects
+	light.shadow.mapSize.width = 128;
+	light.shadow.radius = 10;
+	light.position.copy( center);
+	target.add(light);
+
+	
+	const helper = new THREE.PointLightHelper(light, 1);
+	target.add(helper);
+}
+		</script>
+    </body>
+
+</html>
