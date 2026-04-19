@@ -26,12 +26,8 @@
 			
 			canvas
 			{
-				position: absolute;
-				top: 0;
-				left: 0;
 				width: 100%;
-				height: 100%;
-				z-index: 1;
+   				height: 100%;
 			}
 
 			:root {
@@ -240,17 +236,10 @@
 				}
 			}
 
-			@media (max-width: 600px) {
-				.main-content {
-					flex-direction: column;
-					justify-content: center;
-					gap: 20px;
-				}
-				.side-panel {
-					width: 100%;
-				}
+			@media screen and (max-width:768px)/*手機*/
+			{
 				.ui-overlay {
-					padding: 15px;
+					display: none;
 				}
 			}
 
@@ -269,9 +258,8 @@
 	
 	<body>
 		<div id="loadingUI" class="rotate_anim"></div>
+		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
 		
-		<div class="scan"></div>
-
 		<!-- UI Overlay -->
 		<div class="ui-overlay">
 			<!-- Top Section -->
@@ -334,12 +322,6 @@
 					</div>
 				</div>
 			</div>
-
-			<!-- Bottom Section -->
-			<div class="footer">
-				<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
-				<button class="cta-button">Configure Now</button>
-			</div>
 		</div>
 		<script type="module">
 
@@ -379,7 +361,7 @@ const hold_time=6;
 // 設定 Bloom 參數
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    2.1,  // 強度 (strength)
+    2.4,  // 強度 (strength)
     0.6,  // 半徑 (radius)
     1  // 閾值 (threshold) - 只有亮度超過此值的區域會發光
 );
@@ -398,7 +380,7 @@ function init()
   	scene = new THREE.Scene();
 
   	camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );//非全螢幕比例設定
-  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	renderer = new THREE.WebGLRenderer({ antialias: true,alpha: true });
   	renderer.setSize( window.innerWidth, window.innerHeight);
 
   	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
@@ -596,7 +578,7 @@ function animate()
 	
 	if(idleTime>hold_time)
 	{
-		//controls.autoRotate=true;
+		controls.autoRotate=true;
 	}
 
 	//if(RotatePivot.rotation.z>FX.ToThreeEulerAngle(-115))
