@@ -348,8 +348,8 @@ let _loadingUI = document.getElementById("loadingUI");
 
 const clock = new THREE.Clock();
 
-const CameraDefaultPos=new THREE.Vector3(-7.846,7.053,16.771);
-const ControlsTargetDefaultPos=new THREE.Vector3(-2.293,1.425,3.045);
+const CameraDefaultPos=new THREE.Vector3(-13.217,5.203,11.497);
+const ControlsTargetDefaultPos=new THREE.Vector3(-4.236,0.614,1.933);
 
 //let keyboardModule = new THREE.Object3D();
 //let screenModule = new THREE.Object3D();
@@ -362,7 +362,7 @@ const hold_time=6;
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
     2.4,  // 強度 (strength)
-    0.6,  // 半徑 (radius)
+    1,  // 半徑 (radius)
     1  // 閾值 (threshold) - 只有亮度超過此值的區域會發光
 );
 
@@ -415,15 +415,15 @@ function init()
 	scene.add( hemiLight );
 
 	const dirLight = new THREE.DirectionalLight( 0xffffff,6 );
-				dirLight.position.set( - 3, 10, - 10 );
-				dirLight.castShadow = true;
-				dirLight.shadow.camera.top = 2;
-				dirLight.shadow.camera.bottom = - 2;
-				dirLight.shadow.camera.left = - 2;
-				dirLight.shadow.camera.right = 2;
-				dirLight.shadow.camera.near = 0.1;
-				dirLight.shadow.camera.far = 40;
-				scene.add( dirLight );
+	dirLight.position.set( - 3, 10, - 10 );
+	dirLight.castShadow = true;
+	dirLight.shadow.camera.top = 2;
+	dirLight.shadow.camera.bottom = - 2;
+	dirLight.shadow.camera.left = - 2;
+	dirLight.shadow.camera.right = 2;
+	dirLight.shadow.camera.near = 0.1;
+	dirLight.shadow.camera.far = 40;
+	scene.add( dirLight );
 
 	const loader_keyboard = new GLTFLoader();
     loader_keyboard.setDRACOLoader(FX.dracoLoader);
@@ -578,7 +578,7 @@ function animate()
 	
 	if(idleTime>hold_time)
 	{
-		controls.autoRotate=true;
+		//controls.autoRotate=true;
 	}
 
 	//if(RotatePivot.rotation.z>FX.ToThreeEulerAngle(-115))
@@ -592,41 +592,55 @@ function animate()
 
 function InstLight(target,thisColor)
 {
-	let center= new THREE.Vector3();
-    const box = new THREE.Box3();
-    
-    target.traverse((child) => {
+//	let center= new THREE.Vector3();
+//    const box = new THREE.Box3();
+//    
+//    target.traverse((child) => {
+//        // 只計算有幾何體且可見的網格 (Mesh)
+//        if (child.isMesh && child.visible) {
+//            // 更新包圍盒
+//            child.geometry.computeBoundingBox();
+//    
+//            // 將該子物件的世界包圍盒合併
+//            const childBox = new THREE.Box3().copy(child.geometry.boundingBox);
+//            child.updateMatrixWorld(true);
+//            childBox.applyMatrix4(child.matrixWorld);
+//    
+//            box.union(childBox);
+//        }
+//    });
+//    
+//    // 現在顯示出來的 box 就會精準很多
+//    //const helper = new THREE.Box3Helper(Box, 0xffff00);
+//    //scene.add(helper);
+//    
+//    box.getCenter(center);
+//
+//	const light = new THREE.PointLight(  thisColor, 3.3, 1 );
+//	light.castShadow = true;
+//	light.shadow.bias = - 0.005; // reduces self-shadowing on double-sided objects
+//	light.shadow.mapSize.width = 128;
+//	light.shadow.radius = 10;
+//	light.position.copy( center);
+//	target.add(light);
+//
+//	
+//	const helper = new THREE.PointLightHelper(light, 1);
+//	target.add(helper);
+
+	const keyMaterial = new THREE.MeshStandardMaterial({
+	    color: thisColor,       // 鍵帽本體顏色（深色）
+	    emissive: thisColor,    // 發光顏色（起始為綠色）
+	    emissiveIntensity: 3,  // 發光強度，配合 Bloom 效果更佳
+	});
+
+	target.traverse((child) => {
         // 只計算有幾何體且可見的網格 (Mesh)
-        if (child.isMesh && child.visible) {
-            // 更新包圍盒
-            child.geometry.computeBoundingBox();
-    
-            // 將該子物件的世界包圍盒合併
-            const childBox = new THREE.Box3().copy(child.geometry.boundingBox);
-            child.updateMatrixWorld(true);
-            childBox.applyMatrix4(child.matrixWorld);
-    
-            box.union(childBox);
+        if (child.isMesh) {
+            child.material=keyMaterial;
+           
         }
     });
-    
-    // 現在顯示出來的 box 就會精準很多
-    //const helper = new THREE.Box3Helper(Box, 0xffff00);
-    //scene.add(helper);
-    
-    box.getCenter(center);
-
-	const light = new THREE.PointLight(  thisColor, 3.3, 1 );
-	light.castShadow = true;
-	light.shadow.bias = - 0.005; // reduces self-shadowing on double-sided objects
-	light.shadow.mapSize.width = 128;
-	light.shadow.radius = 10;
-	light.position.copy( center);
-	target.add(light);
-
-	
-	const helper = new THREE.PointLightHelper(light, 1);
-	target.add(helper);
 }
 		</script>
     </body>
