@@ -321,6 +321,19 @@
 						<div class="control-btn active" onclick="togglePerformance(event)">Overclocked</div>
 					</div>
 				</div>
+
+				<div class="model_info" style="top: 75%;">
+					<div class="titlePanel">
+						<p class="detail_title">Model</p>
+						<p class="detail_title">Author</p>
+						<p class="detail_title">Link</p>
+					</div>
+					<div class="detailPanel">
+						<p class="detail_value">keyboard</p>
+						<p class="detail_value">SIMONS</p>
+						<p class="detail_value">https://grabcad.com/library/keyboard-43</p>
+					</div>
+				</div>
 			</div>
 		</div>
 		<script type="module">
@@ -380,7 +393,7 @@ function init()
   	scene = new THREE.Scene();
 
   	camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );//非全螢幕比例設定
-  	renderer = new THREE.WebGLRenderer({ antialias: true,alpha: true });
+  	renderer = new THREE.WebGLRenderer({ antialias: true});
   	renderer.setSize( window.innerWidth, window.innerHeight);
 
   	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
@@ -405,6 +418,10 @@ function init()
   	controls.zoomSpeed=0.5;
 	controls.autoRotate=false;
 	controls.autoRotateSpeed=0.3;
+	controls.minDistance = 8;
+	controls.maxDistance = 40;
+	controls.maxPolarAngle=FX.ToThreeEulerAngle(105);
+	controls.minPolarAngle=FX.ToThreeEulerAngle(-105);
   	controls.update();
 
   	///hdri 環境光源
@@ -623,16 +640,17 @@ function InstEmissiveWords(target,thisColor)
 	const keyMaterial = new THREE.MeshStandardMaterial({
 	    color: thisColor,       // 鍵帽本體顏色（深色）
 	    emissive: thisColor,    // 發光顏色（起始為綠色）
-	    emissiveIntensity: 0.1,  // 發光強度，配合 Bloom 效果更佳
+	    emissiveIntensity: 0.2,  // 發光強度，配合 Bloom 效果更佳
 	});
 
-	target.traverse((child) => {
-        // 只計算有幾何體且可見的網格 (Mesh)
-        if (child.isMesh) {
-            child.material=keyMaterial;
-           
-        }
-    });
+	//target.traverse((child) => {
+    //    // 只計算有幾何體且可見的網格 (Mesh)
+    //    if (child.isMesh) {
+    //        child.material=keyMaterial;
+    //    }
+    //});
+
+	FX.ReturnBufferGeometry(target,keyMaterial,null,scene);
 }
 		</script>
     </body>
