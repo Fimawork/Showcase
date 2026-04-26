@@ -1,0 +1,629 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>2026 Diamond Collection | Fimawork Premium Showcase</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+			:root {
+				--cartier-red: #b80000;
+				--premium-gold: #D4AF37;
+				--bg-light: #fdfdfd;
+				--text-main: #1a1a1a;
+				--text-secondary: #666;
+				--transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+			}
+
+			body {
+				margin: 0;
+				padding: 0;
+				background-color: var(--bg-light);
+				font-family: 'Montserrat', sans-serif;
+				color: var(--text-main);
+				overflow-x: hidden;
+			}
+
+			/* Typography */
+			h1, h2, h3, .serif {
+				font-family: 'Playfair Display', serif;
+				font-weight: 500;
+				letter-spacing: 0.02em;
+			}
+
+			/* Header */
+			header {
+				position: fixed;
+				top: 0;
+				width: 100%;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 20px 50px;
+				background: rgba(255, 255, 255, 0.95);
+				backdrop-filter: blur(10px);
+				z-index: 1000;
+				box-sizing: border-box;
+				border-bottom: 1px solid rgba(0,0,0,0.05);
+			}
+
+			.logo {
+				font-family: 'Playfair Display', serif;
+				font-size: 24px;
+				font-weight: 700;
+				letter-spacing: 2px;
+				cursor: pointer;
+				text-transform: uppercase;
+			}
+
+			nav ul {
+				display: flex;
+				list-style: none;
+				gap: 40px;
+				margin: 0;
+				padding: 0;
+			}
+
+			nav a {
+				text-decoration: none;
+				color: var(--text-main);
+				font-size: 13px;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+				transition: var(--transition);
+			}
+
+			nav a:hover {
+				color: var(--cartier-red);
+			}
+
+			/* Main Layout */
+			.product-container {
+				display: flex;
+				min-height: 100vh;
+				padding-top: 80px;
+				box-sizing: border-box;
+			}
+
+			#threeContainer {
+				flex: 1.2;
+				position: sticky;
+				top: 80px;
+				height: calc(100vh - 80px);
+				background: radial-gradient(circle at center, #ffffff 0%, #f0f0f0 100%);
+			}
+
+			.product-info {
+				flex: 0.8;
+				padding: 80px 60px;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				background: #fff;
+			}
+
+			.brand-label {
+				color: var(--cartier-red);
+				font-size: 14px;
+				text-transform: uppercase;
+				letter-spacing: 3px;
+				margin-bottom: 20px;
+				font-weight: 600;
+			}
+
+			h1 {
+				font-size: 48px;
+				margin: 0 0 10px 0;
+				line-height: 1.2;
+			}
+
+			.sku {
+				font-size: 12px;
+				color: var(--text-secondary);
+				margin-bottom: 30px;
+			}
+
+			.price {
+				font-family: 'Playfair Display', serif;
+				font-size: 28px;
+				margin-bottom: 40px;
+				color: var(--text-main);
+			}
+
+			.description {
+				font-size: 15px;
+				line-height: 1.8;
+				color: var(--text-secondary);
+				margin-bottom: 50px;
+				max-width: 500px;
+			}
+
+			/* Buttons */
+			.cta-group {
+				display: flex;
+				flex-direction: column;
+				gap: 15px;
+				max-width: 400px;
+			}
+
+			.btn {
+				padding: 18px 30px;
+				text-align: center;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				font-size: 13px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: var(--transition);
+				border: none;
+			}
+
+			.btn-primary {
+				background: var(--cartier-red);
+				color: #fff;
+			}
+
+			.btn-primary:hover {
+				background: #8e0000;
+				transform: translateY(-2px);
+				box-shadow: 0 10px 20px rgba(184, 0, 0, 0.2);
+			}
+
+			.btn-secondary {
+				background: transparent;
+				border: 1px solid #ddd;
+				color: var(--text-main);
+			}
+
+			.btn-secondary:hover {
+				border-color: var(--text-main);
+				background: #f9f9f9;
+			}
+
+			/* Details Section */
+			.details-reveal {
+				padding: 120px 10%;
+				background: #fff;
+				text-align: center;
+			}
+
+			.details-grid {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 60px;
+				margin-top: 80px;
+			}
+
+			.detail-item h3 {
+				font-size: 20px;
+				margin-bottom: 15px;
+			}
+
+			.detail-item p {
+				font-size: 14px;
+				color: var(--text-secondary);
+				line-height: 1.6;
+			}
+
+			/* Footer */
+			footer {
+				padding: 80px 50px;
+				background: #1a1a1a;
+				color: #fff;
+				text-align: center;
+			}
+
+			.footer-logo {
+				font-size: 24px;
+				letter-spacing: 4px;
+				margin-bottom: 30px;
+			}
+
+			.footer-links {
+				display: flex;
+				justify-content: center;
+				gap: 30px;
+				margin-bottom: 40px;
+			}
+
+			.footer-links a {
+				color: #888;
+				text-decoration: none;
+				font-size: 12px;
+				text-transform: uppercase;
+				transition: var(--transition);
+			}
+
+			.footer-links a:hover {
+				color: #fff;
+			}
+
+			.copyright {
+				font-size: 11px;
+				color: #555;
+				letter-spacing: 1px;
+			}
+
+			/* Utility Animations */
+			.fade-up {
+				opacity: 0;
+				transform: translateY(30px);
+				transition: all 0.8s ease-out;
+			}
+
+			.fade-up.active {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			.loading-overlay {
+				position: fixed;
+				top:0; left:0; width: 100%; height: 100%;
+				background: #fff;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				z-index: 2000;
+				transition: opacity 0.6s ease;
+			}
+
+			.loader-rings {
+				width: 50px;
+				height: 50px;
+				border: 2px solid #eee;
+				border-top-color: var(--cartier-red);
+				border-radius: 50%;
+				animation: spin 1s infinite linear;
+			}
+
+			@keyframes spin {
+				to { transform: rotate(360deg); }
+			}
+
+			/* Responsive */
+			@media (max-width: 1024px) {
+				.product-container { flex-direction: column; }
+				#threeContainer { height: 50vh; position: relative; top: 0; }
+				.product-info { padding: 40px 30px; }
+				.details-grid { grid-template-columns: 1fr; }
+			}
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<!--<div id="loadingUI" class="loading-overlay">
+			<div class="loader-rings"></div>
+		</div>-->
+
+		<header>
+			<div class="logo" onclick="parent.open('https://fimawork.tw/')">Fimawork</div>
+			<nav>
+				<ul>
+					<li><a href="#">High Jewelry</a></li>
+					<li><a href="#">Rings</a></li>
+					<li><a href="#">Contact</a></li>
+				</ul>
+			</nav>
+		</header>
+
+		<main class="product-container">
+			<div id="threeContainer"></div>
+			
+			<div class="product-info">
+				<span class="brand-label">JEWELRY 3D SHOWCASE</span>
+				<h1>Diamond Brilliance Ring</h1>
+				<p class="sku">REF: FW-2026-DIAMOND</p>
+				<p class="price">$12,500.00</p>
+				
+				<p class="description">
+					True luxury is found in the details. Our immersive 3D experience allows you to explore the intricate craftsmanship of every facet and setting. Witness the mesmerizing dance of light and the authentic fire of our diamonds, recreated with physical accuracy. It’s more than a viewing—it’s a digital private viewing tailored just for you.
+				</p>
+
+				<div class="cta-group">
+					<button class="btn btn-primary">Add to Shopping Bag</button>
+					<button class="btn btn-secondary">Request a Consultation</button>
+				</div>
+			</div>
+		</main>
+
+		<section class="details-reveal">
+			<h2 class="serif" style="font-size: 32px;">Craftsmanship & Details</h2>
+			<div class="details-grid">
+				<div class="detail-item fade-up">
+					<h3 class="serif">The Diamond</h3>
+					<p>Round brilliant-cut diamond, selected for exceptional clarity and fire. GIA certified.</p>
+				</div>
+				<div class="detail-item fade-up">
+					<h3 class="serif">The Setting</h3>
+					<p>Hand-polished platinum 950. A minimalist four-prong setting that elevates the stone.</p>
+				</div>
+				<div class="detail-item fade-up">
+					<h3 class="serif">Signature Design</h3>
+					<p>The 2026 Collection represents our studio's commitment to timeless elegance and 3D precision.</p>
+				</div>
+			</div>
+		</section>
+
+		<footer>
+			<div class="footer-logo serif">FIMAWORK</div>
+			<div class="footer-links">
+				<a href="#">Services</a>
+				<a href="#">Sustainability</a>
+				<a href="#">Care Instructions</a>
+			</div>
+			<p class="copyright">&copy; 2026 FIMAWORK STUDIO. ALL RIGHTS RESERVED.</p>
+		</footer>
+
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { Diamond_2026 } from './models/Diamond_2026_slices.js';
+
+let scene, camera, renderer, stats, mixer;
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+let _loadingUI = document.getElementById("loadingUI");
+
+const clock = new THREE.Clock();
+
+const CameraDefaultPos=new THREE.Vector3(-29.105,91.313,36.017);
+const ControlsTargetDefaultPos=new THREE.Vector3(0.615,3.216,-0.802);
+
+let main_model= new THREE.Object3D();
+
+let idleTime=0;
+const hold_time=6;
+
+init();
+//FX.Camera_Inspector(camera,controls);
+
+function init()
+{
+	FX.SetupEnvironment("cloud");
+
+  	scene = new THREE.Scene();
+
+  	camera = new THREE.PerspectiveCamera( 25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 1;
+  	//document.body.appendChild( renderer.domElement );
+  	threeContainer.appendChild( renderer.domElement );
+
+  	camera.position.copy(CameraDefaultPos);
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+  	controls = new OrbitControls( camera, renderer.domElement );
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.maxDistance =400;
+	controls.minDistance = 60;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+  	controls.update();
+
+  	///hdri 環境光源
+	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
+
+
+	///Apple Watch
+	const loader_diamond_2026 = new GLTFLoader();
+    loader_diamond_2026.setDRACOLoader(FX.dracoLoader);
+	loader_diamond_2026.parse(
+    FX.Base64ToArrayBuffer(Diamond_2026()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+
+		const diamondMaterial = new THREE.MeshPhysicalMaterial( {
+			color: 0xffffff, 
+			transparent:true,//沒設定，畫面會出錯
+			transmission: 1,
+			metalness: 0.3, 
+			thickness: 0.5,
+			roughness: 0, 
+			reflectivity:1,
+			specularIntensity: 1,
+  			clearcoat: 1,
+  			envMapIntensity: 1.5,//鑽石本身不發光，它的美來自對環境光的反射。
+			ior:2.4,//<1畫面會不穩定
+			depthWrite:false
+		} );
+
+		const R_diamondMaterial = new THREE.MeshPhysicalMaterial( {
+			color: 0xff0000, 
+			transparent:true,//沒設定，畫面會出錯
+			transmission: 1,
+			metalness: 0.75, 
+			thickness: 0.5,
+			roughness: 0, 
+			reflectivity:1,
+			specularIntensity: 1,
+  			clearcoat: 1,
+  			envMapIntensity: 1.5,//鑽石本身不發光，它的美來自對環境光的反射。
+			ior:2.4,//<1畫面會不穩定
+			depthWrite:false,
+			blending: THREE.AdditiveBlending,
+			opacity:0.75
+		} );
+
+		const G_diamondMaterial = new THREE.MeshPhysicalMaterial( {
+			color: 0x00ff00, 
+			transparent:true,//沒設定，畫面會出錯
+			transmission: 1,
+			metalness: 0.75, 
+			thickness: 0.5,
+			roughness: 0, 
+			reflectivity:1,
+			specularIntensity: 1,
+  			clearcoat: 1,
+  			envMapIntensity: 1.5,//鑽石本身不發光，它的美來自對環境光的反射。
+			ior:2.42,//<1畫面會不穩定
+			depthWrite:false,
+			blending: THREE.AdditiveBlending,
+			opacity:0.75
+		} );
+
+		const B_diamondMaterial = new THREE.MeshPhysicalMaterial( {
+			color: 0x0000ff, 
+			transparent:true,//沒設定，畫面會出錯
+			transmission: 1,
+			metalness: 0.75, 
+			thickness: 0.5,
+			roughness: 0, 
+			reflectivity:1,
+			specularIntensity: 1,
+  			clearcoat: 1,
+  			envMapIntensity: 1.5,//鑽石本身不發光，它的美來自對環境光的反射。
+			ior:2.44,//<1畫面會不穩定
+			depthWrite:false,
+			blending: THREE.AdditiveBlending,
+			opacity:0.75
+		} );
+
+		let G_diamond=new THREE.Object3D();
+		let B_diamond=new THREE.Object3D();
+
+		model.traverse( function ( object ) {
+
+			if(object.name.includes("subDiamond"))
+        	{
+			  FX.ReturnBufferGeometry(object,diamondMaterial,null,scene);
+        	}
+
+			if(object.name==="mainDiamond")
+        	{
+				G_diamond=object.clone();
+				B_diamond=object.clone();
+
+				FX.ReturnBufferGeometry(object,R_diamondMaterial,null,scene);
+				FX.ReturnBufferGeometry(G_diamond,G_diamondMaterial,null,scene);
+				FX.ReturnBufferGeometry(B_diamond,B_diamondMaterial,null,scene);
+        	}
+
+		});
+	
+
+
+		scene.add(model);
+		//FX.Material_Inspector(scene);
+
+		animate();
+		
+		// Setup Scroll Animations
+		const observerOptions = { threshold: 0.1 };
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					entry.target.classList.add('active');
+				}
+			});
+		}, observerOptions);
+
+		document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+		//setTimeout(() => {
+		//	_loadingUI.style.opacity = '0';
+		//	setTimeout(() => _loadingUI.remove(), 600);
+		//}, 800);
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	
+	
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+  		window.addEventListener("pointerdown", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+	window.addEventListener( 'pointermove', function(e) {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+  	window.addEventListener("wheel", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.updateProjectionMatrix();
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+}
+
+function animate() 
+{
+  	requestAnimationFrame( animate );
+
+  	controls.update();
+  	renderer.render( scene, camera );
+  	//UpdateCameraPosition(camera,controls);
+
+
+	const delta = clock.getDelta();
+
+	if ( mixer ) mixer.update( delta );
+
+	idleTime+=delta;
+	
+	if(idleTime>hold_time)
+	{
+		controls.autoRotate=true;
+	}
+
+}
+		</script>
+    </body>
+
+</html>
