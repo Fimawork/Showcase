@@ -417,7 +417,7 @@ function init()
 
   	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
   	renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  	renderer.toneMappingExposure = 1;
+  	renderer.toneMappingExposure = 0.84;
   	//document.body.appendChild( renderer.domElement );
   	threeContainer.appendChild( renderer.domElement );
 
@@ -473,8 +473,8 @@ function init()
 			color: 0xff0000, 
 			transparent:true,//沒設定，畫面會出錯
 			transmission: 1,
-			metalness: 0.75, 
-			thickness: 0.5,
+			metalness: 0.9, 
+			thickness: 0.9,
 			roughness: 0, 
 			reflectivity:1,
 			specularIntensity: 1,
@@ -483,15 +483,15 @@ function init()
 			ior:2.4,//<1畫面會不穩定
 			depthWrite:false,
 			blending: THREE.AdditiveBlending,
-			opacity:0.75
+			opacity:0.1
 		} );
 
 		const G_diamondMaterial = new THREE.MeshPhysicalMaterial( {
 			color: 0x00ff00, 
 			transparent:true,//沒設定，畫面會出錯
 			transmission: 1,
-			metalness: 0.75, 
-			thickness: 0.5,
+			metalness: 0.9, 
+			thickness: 0.9,
 			roughness: 0, 
 			reflectivity:1,
 			specularIntensity: 1,
@@ -500,15 +500,15 @@ function init()
 			ior:2.42,//<1畫面會不穩定
 			depthWrite:false,
 			blending: THREE.AdditiveBlending,
-			opacity:0.75
+			opacity:0.1
 		} );
 
 		const B_diamondMaterial = new THREE.MeshPhysicalMaterial( {
 			color: 0x0000ff, 
 			transparent:true,//沒設定，畫面會出錯
 			transmission: 1,
-			metalness: 0.75, 
-			thickness: 0.5,
+			metalness: 0.9, 
+			thickness: 0.9,
 			roughness: 0, 
 			reflectivity:1,
 			specularIntensity: 1,
@@ -517,7 +517,7 @@ function init()
 			ior:2.44,//<1畫面會不穩定
 			depthWrite:false,
 			blending: THREE.AdditiveBlending,
-			opacity:0.75
+			opacity:0.1
 		} );
 
 		let R_diamond=new THREE.Object3D();
@@ -534,6 +534,11 @@ function init()
 			if(object.name.includes("subDiamond"))
         	{
 			  FX.ReturnBufferGeometry(object,diamondMaterial,null,scene);
+        	}
+
+			if(object.name.includes("reflection"))
+        	{
+			  FX.ReturnBufferGeometry(object,null,null,scene);
         	}
 
 			if(object.name==="mainDiamond")
