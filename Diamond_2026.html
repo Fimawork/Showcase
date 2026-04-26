@@ -143,6 +143,7 @@
 				color: var(--text-secondary);
 				margin-bottom: 50px;
 				max-width: 500px;
+				white-space: pre-line;
 			}
 
 			/* Buttons */
@@ -290,7 +291,7 @@
 			/* Responsive */
 			@media (max-width: 1024px) {
 				.product-container { flex-direction: column; }
-				#threeContainer { height: 50vh; position: absolute; top: 0; }
+				#threeContainer { height: 80vh; position: absolute; top: 0; }
 				.product-info { padding: 40px 30px; }
 				.details-grid { grid-template-columns: 1fr; }
 			}
@@ -334,6 +335,8 @@
 				
 				<p class="description">
 					True luxury is found in the details. Our immersive 3D experience allows you to explore the intricate craftsmanship of every facet and setting. Witness the mesmerizing dance of light and the authentic fire of our diamonds, recreated with physical accuracy. It’s more than a viewing—it’s a digital private viewing tailored just for you.
+
+					Model Source:https://grabcad.com/library/3d-rings-enagagement-free-3d-model-2
 				</p>
 
 				<div class="cta-group">
@@ -437,8 +440,6 @@ function init()
   	///hdri 環境光源
 	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
 
-
-	///Apple Watch
 	const loader_diamond_2026 = new GLTFLoader();
     loader_diamond_2026.setDRACOLoader(FX.dracoLoader);
 	loader_diamond_2026.parse(
