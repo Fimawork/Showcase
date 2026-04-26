@@ -451,7 +451,7 @@ function init()
 
 		//InstMaterial(thisColor,thisRoughness,thisMetalness,thisTransmission,thisIor,thisReflectivity,isTransparent,thisOpacity,isDepthWrite)
 
-		const metal_material=FXM.InstMaterial(0xe6e6e6,0.15,1,0,1.33,1,false,1,true);
+		const metal_material=FXM.InstMaterial(0xe6e6e6,0.1,1,0,1.33,1,false,1,true);
 
 		const diamondMaterial = new THREE.MeshPhysicalMaterial( {
 			color: 0xffffff, 
@@ -575,7 +575,7 @@ function init()
 
 
 		scene.add(model);
-		FX.Material_Inspector(scene);
+		//FX.Material_Inspector(scene);
 
 		animate();
 		
