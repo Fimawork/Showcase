@@ -466,32 +466,16 @@ function init()
   			envMapIntensity: 3,//鑽石本身不發光，它的美來自對環境光的反射。
 			ior:2.4,//<1畫面會不穩定
 			depthWrite:false,
-			opacity:0.5,
+			opacity:0.1,
 			blending: THREE.AdditiveBlending,
-		} );
-
-		const sub_DiamondMaterial = new THREE.MeshPhysicalMaterial( {
-			color: 0xffffff, 
-			transparent:true,//沒設定，畫面會出錯
-			transmission: 1,
-			metalness: 0.6, 
-			thickness: 0.5,
-			roughness: 0, 
-			reflectivity:1,
-			specularIntensity: 1,
-  			clearcoat: 1,
-  			envMapIntensity: 3,//鑽石本身不發光，它的美來自對環境光的反射。
-			ior:2.4,//<1畫面會不穩定
-			depthWrite:false,
-			opacity:1
 		} );
 
 		const R_diamondMaterial = new THREE.MeshPhysicalMaterial( {
 			color: 0xff0000, 
 			transparent:true,//沒設定，畫面會出錯
 			transmission: 1,
-			metalness: 0.9, 
-			thickness: 0.9,
+			metalness: 1, 
+			thickness: 0.5,
 			roughness: 0, 
 			reflectivity:1,
 			specularIntensity: 1,
@@ -500,15 +484,15 @@ function init()
 			ior:2.4,//<1畫面會不穩定
 			depthWrite:false,
 			blending: THREE.AdditiveBlending,
-			opacity:0.1
+			opacity:0.3
 		} );
 
 		const G_diamondMaterial = new THREE.MeshPhysicalMaterial( {
 			color: 0x00ff00, 
 			transparent:true,//沒設定，畫面會出錯
 			transmission: 1,
-			metalness: 0.9, 
-			thickness: 0.9,
+			metalness: 1, 
+			thickness: 0.5,
 			roughness: 0, 
 			reflectivity:1,
 			specularIntensity: 1,
@@ -517,15 +501,15 @@ function init()
 			ior:2.42,//<1畫面會不穩定
 			depthWrite:false,
 			blending: THREE.AdditiveBlending,
-			opacity:0.1
+			opacity:0.3
 		} );
 
 		const B_diamondMaterial = new THREE.MeshPhysicalMaterial( {
 			color: 0x0000ff, 
 			transparent:true,//沒設定，畫面會出錯
 			transmission: 1,
-			metalness: 0.9, 
-			thickness: 0.9,
+			metalness: 1, 
+			thickness: 0.5,
 			roughness: 0, 
 			reflectivity:1,
 			specularIntensity: 1,
@@ -534,12 +518,8 @@ function init()
 			ior:2.44,//<1畫面會不穩定
 			depthWrite:false,
 			blending: THREE.AdditiveBlending,
-			opacity:0.1
+			opacity:0.3
 		} );
-
-		let R_diamond=new THREE.Object3D();
-		let G_diamond=new THREE.Object3D();
-		let B_diamond=new THREE.Object3D();
 
 		model.traverse( function ( object ) {
 
@@ -550,7 +530,18 @@ function init()
 
 			if(object.name.includes("subDiamond"))
         	{
-			  FX.ReturnBufferGeometry(object,sub_DiamondMaterial,null,scene);
+				let R_diamond=new THREE.Object3D();
+				let G_diamond=new THREE.Object3D();
+				let B_diamond=new THREE.Object3D();
+
+				R_diamond=object.clone();
+				G_diamond=object.clone();
+				B_diamond=object.clone();
+
+			  	FX.ReturnBufferGeometry(object,diamondMaterial,null,scene);
+			  	FX.ReturnBufferGeometry(R_diamond,R_diamondMaterial,null,scene);
+				FX.ReturnBufferGeometry(G_diamond,G_diamondMaterial,null,scene);
+				FX.ReturnBufferGeometry(B_diamond,B_diamondMaterial,null,scene);
         	}
 
 			if(object.name.includes("reflection"))
@@ -560,6 +551,10 @@ function init()
 
 			if(object.name==="mainDiamond")
         	{
+				let R_diamond=new THREE.Object3D();
+				let G_diamond=new THREE.Object3D();
+				let B_diamond=new THREE.Object3D();
+
 				R_diamond=object.clone();
 				G_diamond=object.clone();
 				B_diamond=object.clone();
