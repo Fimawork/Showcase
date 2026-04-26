@@ -448,19 +448,24 @@ function init()
         
 		const model = gltf.scene;
 
+		//InstMaterial(thisColor,thisRoughness,thisMetalness,thisTransmission,thisIor,thisReflectivity,isTransparent,thisOpacity,isDepthWrite)
+
+		const metal_material=FXM.InstMaterial(0xe6e6e6,0.15,1,0,1.33,1,false,1,true);
+
 		const diamondMaterial = new THREE.MeshPhysicalMaterial( {
 			color: 0xffffff, 
 			transparent:true,//沒設定，畫面會出錯
 			transmission: 1,
-			metalness: 0.3, 
+			metalness: 0.6, 
 			thickness: 0.5,
 			roughness: 0, 
 			reflectivity:1,
 			specularIntensity: 1,
   			clearcoat: 1,
-  			envMapIntensity: 1.5,//鑽石本身不發光，它的美來自對環境光的反射。
+  			envMapIntensity: 3,//鑽石本身不發光，它的美來自對環境光的反射。
 			ior:2.4,//<1畫面會不穩定
-			depthWrite:false
+			depthWrite:false,
+			opacity:1
 		} );
 
 		const R_diamondMaterial = new THREE.MeshPhysicalMaterial( {
@@ -514,10 +519,16 @@ function init()
 			opacity:0.75
 		} );
 
+		let R_diamond=new THREE.Object3D();
 		let G_diamond=new THREE.Object3D();
 		let B_diamond=new THREE.Object3D();
 
 		model.traverse( function ( object ) {
+
+			if(object.name.includes("metal"))
+        	{
+			  FX.ReturnBufferGeometry(object,metal_material,null,scene);
+        	}
 
 			if(object.name.includes("subDiamond"))
         	{
@@ -526,10 +537,12 @@ function init()
 
 			if(object.name==="mainDiamond")
         	{
+				R_diamond=object.clone();
 				G_diamond=object.clone();
 				B_diamond=object.clone();
 
-				FX.ReturnBufferGeometry(object,R_diamondMaterial,null,scene);
+				FX.ReturnBufferGeometry(object,diamondMaterial ,null,scene);
+				FX.ReturnBufferGeometry(R_diamond,R_diamondMaterial,null,scene);
 				FX.ReturnBufferGeometry(G_diamond,G_diamondMaterial,null,scene);
 				FX.ReturnBufferGeometry(B_diamond,B_diamondMaterial,null,scene);
         	}
