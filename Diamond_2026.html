@@ -378,6 +378,10 @@
 
 import * as THREE from 'three';
 
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
@@ -388,6 +392,7 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { Diamond_2026 } from './models/Diamond_2026_slices.js';
 
 let scene, camera, renderer, stats, mixer;
+let composer;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
 let _loadingUI = document.getElementById("loadingUI");
@@ -402,6 +407,14 @@ let main_model= new THREE.Object3D();
 let idleTime=0;
 const hold_time=6;
 
+// 設定 Bloom 參數
+const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(threeContainer.clientWidth, threeContainer.clientHeight),
+    0.1,  // 強度 (strength)
+    0.15,  // 半徑 (radius)
+   	1.8 // 閾值 (threshold) - 只有亮度超過此值的區域會發光
+);
+
 init();
 //FX.Camera_Inspector(camera,controls);
 
@@ -412,14 +425,19 @@ function init()
   	scene = new THREE.Scene();
 
   	camera = new THREE.PerspectiveCamera( 25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
-  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	renderer = new THREE.WebGLRenderer({ antialias: true});
   	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
 
-  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.setClearColor(0x000000, 0);//需加入這一條，否則看不到CSS的底圖
   	renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  	renderer.toneMappingExposure = 1;
+  	renderer.toneMappingExposure = 0.9;
   	//document.body.appendChild( renderer.domElement );
   	threeContainer.appendChild( renderer.domElement );
+
+	// 初始化 Composer
+	composer = new EffectComposer(renderer);
+	composer.addPass(new RenderPass(scene, camera));
+	composer.addPass(bloomPass);
 
   	camera.position.copy(CameraDefaultPos);
   
@@ -440,6 +458,9 @@ function init()
   	///hdri 環境光源
 	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
 
+	
+	scene.background = new THREE.Color(0xf2efe8);
+
 	const loader_diamond_2026 = new GLTFLoader();
     loader_diamond_2026.setDRACOLoader(FX.dracoLoader);
 	loader_diamond_2026.parse(
@@ -451,7 +472,10 @@ function init()
 
 		//InstMaterial(thisColor,thisRoughness,thisMetalness,thisTransmission,thisIor,thisReflectivity,isTransparent,thisOpacity,isDepthWrite)
 
-		const metal_material=FXM.InstMaterial(0xe6e6e6,0.1,1,0,1.33,1,false,1,true);
+		const metal_material=FXM.InstMaterial(0xe6e6e6,0.3,1,0,1.33,1,false,1,true);
+
+		const opacity_value=0.3;
+		const reflectivity_value=1;
 
 		const diamondMaterial = new THREE.MeshPhysicalMaterial( {
 			color: 0xffffff, 
@@ -463,10 +487,10 @@ function init()
 			reflectivity:1,
 			specularIntensity: 1,
   			clearcoat: 1,
-  			envMapIntensity: 3,//鑽石本身不發光，它的美來自對環境光的反射。
+  			envMapIntensity: 1,//鑽石本身不發光，它的美來自對環境光的反射。
 			ior:2.4,//<1畫面會不穩定
 			depthWrite:false,
-			opacity:0.1,
+			opacity:0.3,
 			blending: THREE.AdditiveBlending,
 		} );
 
@@ -477,14 +501,14 @@ function init()
 			metalness: 1, 
 			thickness: 0.5,
 			roughness: 0, 
-			reflectivity:1,
+			reflectivity:reflectivity_value,
 			specularIntensity: 1,
   			clearcoat: 1,
   			envMapIntensity: 1.5,//鑽石本身不發光，它的美來自對環境光的反射。
 			ior:2.4,//<1畫面會不穩定
 			depthWrite:false,
 			blending: THREE.AdditiveBlending,
-			opacity:0.3
+			opacity:opacity_value
 		} );
 
 		const G_diamondMaterial = new THREE.MeshPhysicalMaterial( {
@@ -494,14 +518,14 @@ function init()
 			metalness: 1, 
 			thickness: 0.5,
 			roughness: 0, 
-			reflectivity:1,
+			reflectivity:reflectivity_value,
 			specularIntensity: 1,
   			clearcoat: 1,
   			envMapIntensity: 1.5,//鑽石本身不發光，它的美來自對環境光的反射。
 			ior:2.42,//<1畫面會不穩定
 			depthWrite:false,
 			blending: THREE.AdditiveBlending,
-			opacity:0.3
+			opacity:opacity_value
 		} );
 
 		const B_diamondMaterial = new THREE.MeshPhysicalMaterial( {
@@ -511,14 +535,14 @@ function init()
 			metalness: 1, 
 			thickness: 0.5,
 			roughness: 0, 
-			reflectivity:1,
+			reflectivity:reflectivity_value,
 			specularIntensity: 1,
   			clearcoat: 1,
   			envMapIntensity: 1.5,//鑽石本身不發光，它的美來自對環境光的反射。
 			ior:2.44,//<1畫面會不穩定
 			depthWrite:false,
 			blending: THREE.AdditiveBlending,
-			opacity:0.3
+			opacity:opacity_value
 		} );
 
 		model.traverse( function ( object ) {
@@ -638,6 +662,7 @@ function animate()
 
   	controls.update();
   	renderer.render( scene, camera );
+	composer.render();
   	//UpdateCameraPosition(camera,controls);
 
 
