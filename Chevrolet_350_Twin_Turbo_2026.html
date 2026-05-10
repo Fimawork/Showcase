@@ -5,107 +5,225 @@
 		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 		<title>Chevrolet 350 Twin Turbo</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
 		<style type="text/css">
 
+			:root {
+				--accent-color: #ffffff;
+				--accent-glow: rgba(255, 59, 48, 0.5);
+				--panel-bg: rgba(10, 10, 10, 0.18);
+				--border-color: rgba(255, 255, 255, 0.1);
+				--text-main: #ffffff;
+				--text-dim: rgba(255, 255, 255, 0.6);
+			}
 			
 			body
 			{
 				margin: 0;
 				padding:0; 
+				background-color: #050505;
+				color: var(--text-main);
+				font-family: 'Inter', sans-serif;
+				overflow: hidden;
 			}
 			
 			canvas
 			{
 				width: 100%;
-   				height: 100%;
+    			height: 100%;
+				display: block;
 			}
 			
 			#threeContainer
 			{
 				position: absolute;
-				top: 0%;
-				left: 0%;
+				top: 0;
+				left: 0;
 				width: 100%;
 				height: 100%;
+				z-index: 1;
 			}
 
-			.fimawork_logo
-			{
-				position:absolute;
-				bottom:3%;
-				left: 1.5%;
-				height: 3.9%;
+			/* UI Overlay */
+			#ui-overlay {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 10;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				padding: 30px;
+				box-sizing: border-box;
+				pointer-events: none;
+			}
+
+			/* Header */
+			.header {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+			}
+
+			.title-group h1 {
+				margin: 0;
+				font-family: 'Space Mono', monospace;
+				font-size: 1.8rem;
+				letter-spacing: 2px;
+				text-transform: uppercase;
+				color: var(--text-main);
+			}
+
+			.title-group .subtitle {
+				font-size: 0.8rem;
+				color: var(--accent-color);
+				letter-spacing: 4px;
+				text-transform: uppercase;
+				margin-top: 5px;
+			}
+
+			.system-status {
+				text-align: right;
+				font-family: 'Space Mono', monospace;
+				font-size: 0.7rem;
+				color: var(--text-dim);
+			}
+
+			.status-blink {
+				display: inline-block;
+				width: 8px;
+				height: 8px;
+				background: var(--accent-color);
+				border-radius: 50%;
+				margin-right: 8px;
+				box-shadow: 0 0 10px var(--accent-glow);
+				animation: blink 1.5s infinite;
+			}
+
+			@keyframes blink {
+				0%, 100% { opacity: 1; }
+				50% { opacity: 0.3; }
+			}
+
+			/* Bottom Control Bar */
+			.bottom-bar {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 15px;
+				pointer-events: fill;
+			}
+
+			.control-deck {
+				width: 600px;
+				background: var(--panel-bg);
+				backdrop-filter: blur(15px);
+				border: 1px solid var(--border-color);
+				padding: 20px 40px;
+				border-radius: 4px;
+				display: flex;
+				flex-direction: column;
+				gap: 15px;
+			}
+
+			.slider-header {
+				display: flex;
+				justify-content: space-between;
+				font-family: 'Space Mono', monospace;
+				font-size: 0.7rem;
+				color: var(--text-dim);
+				text-transform: uppercase;
+			}
+
+			#scrubber {
+				-webkit-appearance: none;
+				width: 100%;
+				height: 4px;
+				background: rgba(255, 255, 255, 0.1);
+				outline: none;
+				border-radius: 2px;
+			}
+
+			#scrubber::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 20px;
+				height: 20px;
+				background: var(--accent-color);
+				cursor: pointer;
+				border-radius: 50%;
+				box-shadow: 0 0 15px var(--accent-glow);
+				border: 4px solid #111;
+			}
+
+			/* Logos */
+			.fimawork_logo {
+				position: static; /* Moved inside UI overlay grid */
+				height: 24px;
 				aspect-ratio: 192/33;
 				background-image: url(./images/fimawork_logo_C_white.png);
-				background-size: 100% 100%;
+				background-size: contain;
+				background-repeat: no-repeat;
+				opacity: 0.8;
+				transition: opacity 0.3s;
+				cursor: pointer;
+			}
+
+			.fimawork_logo:hover {
 				opacity: 1;
-				z-index: 99;
-				user-select: none;
 			}
-
-			.fimawork_logo:hover
-			{
-				opacity: 0.5;
-			}
-
 
 			#loadingUI
 			{
-				position: absolute;
-				left: 50%;
-				top:50%;
-				width: 10%;
-				aspect-ratio: 1/1;
-				background-image: url(./images/portfolio_2023_loading.png);
-				background-size: 100% 100%; 
-				background-position: center;
+				position: fixed;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				background: #050505;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				z-index: 1000;
+				transition: opacity 0.8s ease-out;
 			}
 
-			@keyframes UI_rotate
-			{
-				0% {transform: rotate(0);}
-				8.33% {transform: rotate(30deg);}
-				16.66% {transform: rotate(60deg);}
-				24.99% {transform: rotate(90deg);}
-				33.32%	{transform: rotate(120deg);}
-				41.65%	{transform: rotate(150deg);}
-				49.98%	{transform: rotate(180deg);}
-				58.31%	{transform: rotate(210deg);}
-				66.64%	{transform: rotate(240deg);}
-				74.97%	{transform: rotate(270deg);}
-				83.3%	{transform: rotate(300deg);}
-				91.63%	{transform: rotate(330deg);}
-				100% {transform: rotate(360deg);}
+			.loading-spinner {
+				width: 80px;
+				height: 80px;
+				border: 2px solid rgba(255, 59, 48, 0.1);
+				border-top: 2px solid var(--accent-color);
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
+				position: relative;
 			}
 
-			.rotate_anim
-			{
-				animation: UI_rotate;
-				animation-duration: 1.5s;
-				animation-timing-function: step-end;
-				animation-iteration-count: infinite;
+			@keyframes spin {
+				0% { transform: rotate(0deg); }
+				100% { transform: rotate(360deg); }
 			}
 
 			.web3d_icon
 			{
-				position:absolute;
-				top:6%;
-				right: 6%;
-				height: 12%;
-				aspect-ratio: 1/1;
+				position: absolute;
+				bottom: 30px;
+				right: 30px;
+				width: 40px;
+				height: 40px;
 				background-image: url(./images/web3d_icon_white.png);
-				background-size: 100% 100%;
-				opacity: 1;
-				z-index: 99;
-				user-select: none;
+				background-size: contain;
+				opacity: 0.3;
 			}
-
 
 			/* Hotspots */
 			.hotspot {
 				position: absolute;
-				width: 0.6rem;
-				height: 0.6rem;
+				width: 0.8rem;
+				height: 0.8rem;
 				background: rgba(255, 255, 255, 0.3);
 				border: 2px solid #fff;
 				border-radius: 50%;
@@ -124,7 +242,6 @@
 				height: 100%;
 				border-radius: 50%;
 				border: 1px solid #fff;
-				animation: pulse 2s infinite;
 			}
 
 			.hotspot:hover {
@@ -132,18 +249,19 @@
 				background: #fff;
 			}
 
+
 			.hotspot-label {
 				position: absolute;
-				left: 30px;
+				left: 25px;
+				top: 50%;
+				transform: translateY(-50%);
+				padding: 5px 12px;
 				white-space: nowrap;
-				opacity: 1;
+				font-family: 'Space Mono', monospace;
+				font-size: 0.75rem;
+				color: #fff;
 				pointer-events: none;
-				font-family: 'Outfit', sans-serif;
-				font-size: 0.9rem;
-				font-weight: 300;
-				color: #fff;	
 			}
-
 
 		</style>
 		<script type="importmap">
@@ -158,14 +276,41 @@
 	</head>
 	
 	<body>
-		<div id="threeContainer">
-			<div id="info" style="position:absolute; left:50%; z-index: 999;">
-				<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - lottie<br/></br>
-				<input id="scrubber" type="range" value="0" style="width: 300px">
-			</div>
-		</div> 
-		<div id="loadingUI" class="rotate_anim"></div>
-		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+		<div id="threeContainer"></div> 
+		
+		<div id="loadingUI">
+			<div class="loading-spinner"></div>
+		</div>
+
+		<div id="ui-overlay">
+			<header class="header">
+				<div class="title-group">
+					<h1>CHEVROLET 350</h1>
+					<div class="subtitle">TWIN TURBO V8 PERFORMANCE</div>
+				</div>
+				<div class="system-status">
+					<span class="status-blink"></span>
+					SYSTEM ACTIVE / DIAGNOSTICS OK
+				</div>
+			</header>
+
+			<footer class="bottom-bar">
+				<div class="control-deck">
+					<div class="slider-header">
+						<span>Exploded View Analysis</span>
+						<span id="scrubber-value">0%</span>
+					</div>
+					<input id="scrubber" type="range" value="0">
+				</div>
+				<div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+					<div class="fimawork_logo" onclick="window.open('https://fimawork.tw/')"></div>
+					<div style="font-size: 0.6rem; color: var(--text-dim); font-family: 'Space Mono', monospace;">
+						DESIGNED FOR PERFORMANCE SHOWCASE © 2026
+					</div>
+				</div>
+			</footer>
+		</div>
+
 		<div class="web3d_icon"></div>
 		
 		<script type="module">
@@ -210,6 +355,7 @@ let parts_num=0;
 
 init();
 //FX.Camera_Inspector(camera,controls);
+FX.InputEventListener(threeContainer);
 
 function init()
 {
@@ -248,6 +394,15 @@ function init()
 	controls.autoRotate=false;
 	controls.autoRotateSpeed=0.3;
   	controls.update();
+
+	FX.posData[0]={ camera_pos:CameraDefaultPos, controlsTarget_pos:ControlsTargetDefaultPos};
+
+	//side view
+	FX.posData[1]={ camera_pos:new THREE.Vector3(-101.494,2.804,-8.978), controlsTarget_pos:new THREE.Vector3(-1.371,-0.164,-6.010)};
+  	//front view
+  	FX.posData[2]={ camera_pos:new THREE.Vector3(-0.157,32.281,-114.339), controlsTarget_pos:new THREE.Vector3(-1.371,0,-6.010)};
+  	//top view
+  	FX.posData[3]={ camera_pos:new THREE.Vector3(-1.371,94.893,-6.010), controlsTarget_pos:new THREE.Vector3(-1.371,-0.001,-6.010)};
 
   	///hdri 環境光源
 	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
@@ -343,7 +498,12 @@ function init()
 		animate();
 		scene.add(model);
 
-		setTimeout(() => {_loadingUI.remove();}, 600);
+		setTimeout(() => {
+			_loadingUI.style.opacity = '0';
+			setTimeout(() => {
+				_loadingUI.remove();
+			}, 800);
+		}, 600);
 
 		//FX.Material_Inspector(scene);
     },
@@ -362,14 +522,14 @@ function init()
 	function setupControls() 
 	{
 		const scrubber = document.getElementById( 'scrubber' );
+		const scrubberValue = document.getElementById( 'scrubber-value' );
 		scrubber.max = 100;
 		scrubber.min = 0;
 
 		scrubber.addEventListener( 'input', function (event) {
 
-			//ExplodeEffect(object.children[i],new THREE.Vector3(0,0,0),0);
+			scrubberValue.textContent = `${event.target.value}%`;
 			
-	
 			if(event.target.value>50&&!isLabelOn)
 			{
 				ShowLabel(true);
@@ -410,15 +570,12 @@ function init()
 
 	window.addEventListener('pointermove', (event) => {
     
-	//onPointerMove(event);
-
-	//////Raycast工具/////
-	if(EngineModule.children.length>0)
-	{
-		RaycastFunction(event);
-	}
+		//////Raycast工具/////
+		if(EngineModule.children.length>0)
+		{
+			RaycastFunction(event);
+		}
 	
-
     });
 
 }
@@ -444,7 +601,7 @@ function animate()
 
 	if ( mixer ) mixer.update( delta );
 
-	
+	FX.UpdateCameraPosition(camera,controls);
 
 }
 
@@ -458,139 +615,130 @@ function ExplodeEffect(target,center,ratio)
 	target.position.set(new_position.x,new_position.y,new_position.z);
 }
 
-	//////Raycaster工具//////
-	function onPointerMove( event ) {
 
-	// calculate pointer position in normalized device coordinates
-	// (-1 to +1) for both components
+function RaycastFunction(event)
+{
+	
 
 	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-	}
+			// update the picking ray with the camera and pointer position
+	raycaster.setFromCamera( pointer, camera );
 
-	function RaycastFunction(event)
+	const intersects = raycaster.intersectObjects( EngineModule.children);
+
+	if ( intersects.length > 0 ) 
 	{
-		pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-		pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-				// update the picking ray with the camera and pointer position
-		raycaster.setFromCamera( pointer, camera );
-	
-		const intersects = raycaster.intersectObjects( EngineModule.children);
-
-		if ( intersects.length > 0 ) 
+		if ( INTERSECTED != intersects[ 0 ].object ) 
 		{
-			if ( INTERSECTED != intersects[ 0 ].object ) 
-			{
-				INTERSECTED = intersects[ 0 ].object;
-				console.log(INTERSECTED);
-				FocusMode(INTERSECTED);
-
-				if(!isLabelOn)
-				{
-					INTERSECTED.children[0].visible=true;
-				}
-			}
-		} 
-
-		else 
-		{
-			INTERSECTED = null;
-
-			for(let i=0;i<EngineModule.children.length;i++)
-  			{    
-  			    FX.SafeTraverse(EngineModule.children[i], (object) => {
-				
-  			      if(object.isMesh)
-  			      {
-  			        if(object.isMesh)
-        			{
-        			  object.material.opacity=1;
-        			  object.material.transparent=false;
-        			  object.material.needsUpdate = true;
-        			}
-  			      }
-			  
-  			    }); 
-  			}
+			INTERSECTED = intersects[ 0 ].object;
+			console.log(INTERSECTED);
+			FocusMode(INTERSECTED);
 
 			if(!isLabelOn)
 			{
 				ShowLabel(false);
+				INTERSECTED.children[0].visible=true;
 			}
 		}
-	}
+	} 
 
-
-	function FocusMode(target)
+	else 
 	{
-		if(INTERSECTED!=null)
+		INTERSECTED = null;
+
+		for(let i=0;i<EngineModule.children.length;i++)
+		{    
+		    FX.SafeTraverse(EngineModule.children[i], (object) => {
+			
+		      if(object.isMesh)
+		      {
+		        if(object.isMesh)
+    			{
+    			  object.material.opacity=1;
+    			  object.material.transparent=false;
+    			  object.material.needsUpdate = true;
+    			}
+		      }
+		  
+		    }); 
+		}
+
+		if(!isLabelOn)
 		{
-			for(let i=0;i<EngineModule.children.length;i++)
-  			{    
-  			    FX.SafeTraverse(EngineModule.children[i], (object) => {
+			ShowLabel(false);
+		}
+	}
+}
+
+
+function FocusMode(target)
+{
+	if(INTERSECTED!=null)
+	{
+		for(let i=0;i<EngineModule.children.length;i++)
+		{    
+		    FX.SafeTraverse(EngineModule.children[i], (object) => {
 				
-  			      if(object.isMesh)
-  			      {
-  			        object.material.opacity=0.3;
-  			        object.material.transparent=true;
-  			        object.material.needsUpdate = true;
-  			      }
-  			    }); 
-  			}
-
-			target.material.opacity=1;
-        	target.material.transparent=false;
-        	target.material.needsUpdate = true;
+		      if(object.isMesh)
+		      {
+		        object.material.opacity=0.3;
+		        object.material.transparent=true;
+		        object.material.needsUpdate = true;
+		      }
+		    }); 
 		}
-  		
-	}
+
+		target.material.opacity=1;
+    	target.material.transparent=false;
+    	target.material.needsUpdate = true;
+	}		
+}
 
 
-	function InstSceneBtn(thisMainCSS,thisSubCSS,thisLabelTarget,thisContent)
-	{
-		const MainDiv = document.createElement( 'div' );
-  		MainDiv.className = thisMainCSS;
+function InstSceneBtn(thisMainCSS,thisSubCSS,thisLabelTarget,thisContent)
+{
+	const MainDiv = document.createElement( 'div' );
+	MainDiv.className = thisMainCSS;
 
-		const SubDiv = document.createElement( 'div' );
-  		SubDiv.className = thisSubCSS;
-		SubDiv.textContent=thisContent;
-		MainDiv.append(SubDiv);
+	const SubDiv = document.createElement( 'div' );
+	SubDiv.className = thisSubCSS;
+	SubDiv.textContent=thisContent;
+	MainDiv.append(SubDiv);
 
-		let label_position=FX.ReturnModelCenter(thisLabelTarget);
+	let label_position=FX.ReturnModelCenter(thisLabelTarget);
   
-  		const Label = new CSS2DObject( MainDiv );
-  		Label.position.set( label_position.x,label_position.y,label_position.z);
-  		Label.center.set( 0.5, 0.5 );
-  		thisLabelTarget.attach( Label );
-  		Label.layers.set( 0 );
-  		Label.name="sceneButton";
-		Label.visible=false;
+	const Label = new CSS2DObject( MainDiv );
+	Label.position.set( label_position.x,label_position.y,label_position.z);
+	Label.center.set( 0.5, 0.5 );
+	thisLabelTarget.attach( Label );
+	Label.layers.set( 0 );
+	Label.name="sceneButton";
+	Label.visible=false;
 
-		labels.push(Label);
+	labels.push(Label);
 
- 		MainDiv.addEventListener("pointermove", (event) => {
+	MainDiv.addEventListener("pointermove", (event) => {
 
-			INTERSECTED=thisLabelTarget;
-			FocusMode(thisLabelTarget);
+		INTERSECTED=thisLabelTarget;
+		FocusMode(thisLabelTarget);
  		   	///不執行頁面縮放 
- 		  	event.preventDefault();
- 		  	event.stopPropagation();
+	  	event.preventDefault();
+	  	event.stopPropagation();
 
- 		});
+	});
+}
 
-	}
-
-	function ShowLabel(on)
+function ShowLabel(on)
+{
+	for(let i=0;i<labels.length;i++)
 	{
-		for(let i=0;i<labels.length;i++)
-		{
-			labels[i].visible=on;
-		}
-
-		isLabelOn=on;
+		labels[i].visible=on;
 	}
+
+	isLabelOn=on;
+}
 
 		</script>
     </body>
