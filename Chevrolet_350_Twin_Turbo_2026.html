@@ -2,12 +2,16 @@
 <html>
 	<head>
 		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
 		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-		<title>Chevrolet 350 Twin Turbo</title>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 		<style type="text/css">
 
 			:root {
@@ -17,6 +21,8 @@
 				--border-color: rgba(255, 255, 255, 0.1);
 				--text-main: #ffffff;
 				--text-dim: rgba(255, 255, 255, 0.6);
+				--panel-width: 320px;
+				--panel-accent: #ff3b30;
 			}
 			
 			body
@@ -263,6 +269,120 @@
 				pointer-events: none;
 			}
 
+			/* Info Panel */
+			#info-panel {
+				position: absolute;
+				right: 30px;
+				top: 120px;
+				width: var(--panel-width);
+				background: var(--panel-bg);
+				backdrop-filter: blur(20px);
+				border: 1px solid var(--border-color);
+				padding: 25px;
+				border-radius: 4px;
+				pointer-events: all;
+				opacity: 0;
+				transform: translateX(40px);
+				transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+				z-index: 20;
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+			}
+
+			#info-panel.active {
+				opacity: 1;
+				transform: translateX(0);
+			}
+
+			.panel-header {
+				border-left: 3px solid var(--panel-accent);
+				padding-left: 15px;
+			}
+
+			.panel-header .part-id {
+				font-family: 'Space Mono', monospace;
+				font-size: 0.65rem;
+				color: var(--panel-accent);
+				letter-spacing: 2px;
+				text-transform: uppercase;
+				display: block;
+				margin-bottom: 5px;
+			}
+
+			.panel-header h2 {
+				margin: 0;
+				font-family: 'Outfit', sans-serif;
+				font-size: 1.4rem;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+			}
+
+			.spec-grid {
+				display: grid;
+				grid-template-columns: 1fr;
+				gap: 12px;
+				border-top: 1px solid var(--border-color);
+				border-bottom: 1px solid var(--border-color);
+				padding: 15px 0;
+			}
+
+			.spec-item {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.spec-label {
+				font-family: 'Space Mono', monospace;
+				font-size: 0.6rem;
+				color: var(--text-dim);
+				text-transform: uppercase;
+			}
+
+			.spec-value {
+				font-family: 'Inter', sans-serif;
+				font-size: 0.75rem;
+				font-weight: 700;
+				color: var(--text-main);
+			}
+
+			.part-description {
+				font-size: 0.8rem;
+				line-height: 1.6;
+				color: var(--text-dim);
+				font-family: 'Inter', sans-serif;
+			}
+
+			.performance-meter {
+				margin-top: 5px;
+			}
+
+			.meter-label {
+				display: flex;
+				justify-content: space-between;
+				font-family: 'Space Mono', monospace;
+				font-size: 0.6rem;
+				margin-bottom: 8px;
+				color: var(--text-dim);
+			}
+
+			.meter-bar-bg {
+				height: 4px;
+				background: rgba(255, 255, 255, 0.1);
+				border-radius: 2px;
+				overflow: hidden;
+			}
+
+			.meter-bar-fill {
+				height: 100%;
+				background: var(--panel-accent);
+				width: 0%;
+				transition: width 1s ease-out;
+				box-shadow: 0 0 10px var(--panel-accent);
+			}
+
 		</style>
 		<script type="importmap">
 			{
@@ -293,6 +413,55 @@
 					SYSTEM ACTIVE / DIAGNOSTICS OK
 				</div>
 			</header>
+
+			<section id="info-panel">
+				<div class="panel-header">
+					<span class="part-id" id="panel-part-id">PART // 000</span>
+					<h2 id="panel-title">COMPONENT NAME</h2>
+				</div>
+				
+				<div class="spec-grid">
+					<div class="spec-item">
+						<span class="spec-label">Material</span>
+						<span class="spec-value" id="spec-material">--</span>
+					</div>
+					<div class="spec-item">
+						<span class="spec-label">Operating Temp</span>
+						<span class="spec-value" id="spec-temp">--</span>
+					</div>
+					<div class="spec-item">
+						<span class="spec-label">Stress Rating</span>
+						<span class="spec-value" id="spec-stress">--</span>
+					</div>
+				</div>
+
+				<div class="part-description" id="panel-desc">
+					Select a component to view detailed technical specifications and diagnostic data.
+				</div>
+
+				<div class="performance-meter">
+					<div class="meter-label">
+						<span>Component Efficiency</span>
+						<span id="meter-percent">0%</span>
+					</div>
+					<div class="meter-bar-bg">
+						<div class="meter-bar-fill" id="meter-fill"></div>
+					</div>
+				</div>
+			</section>
+
+			<div class="model_info" style="top: 75%;">
+				<div class="titlePanel">
+					<p class="detail_title">Model</p>
+					<p class="detail_title">Author</p>
+					<p class="detail_title">Link</p>
+				</div>
+				<div class="detailPanel">
+					<p class="detail_value">350 CHEVROLET V8 TWIN TURBO</p>
+					<p class="detail_value">Daniel</p>
+					<p class="detail_value">https://grabcad.com/library/350-chevrolet-v8-twin-turbo</p>
+				</div>
+			</div>
 
 			<footer class="bottom-bar">
 				<div class="control-deck">
@@ -352,6 +521,109 @@ let labels=[];
 let isLabelOn=false;
 
 let parts_num=0;
+
+const partData = {
+	"red_housing": {
+		id: "TRB-HOU-01",
+		title: "Turbo Compressor Housing",
+		material: "Cast Aluminum A356",
+		temp: "250°C Max",
+		stress: "High Pressure",
+		desc: "Precision engineered housing designed to optimize airflow into the compressor wheel, increasing intake pressure for maximum power output.",
+		efficiency: 92
+	},
+	"SandTextureMatel": {
+		id: "ENG-BLK-04",
+		title: "Engine Block Core",
+		material: "Compact Graphite Iron",
+		temp: "950°C peak",
+		stress: "Structural Base",
+		desc: "The high-strength foundation of the V8, featuring cross-bolted main caps and optimized coolant passages for thermal stability.",
+		efficiency: 88
+	},
+	"fanWheel": {
+		id: "TRB-FAN-02",
+		title: "Turbine Impeller",
+		material: "Inconel 713C",
+		temp: "1050°C cont.",
+		stress: "150,000 RPM",
+		desc: "Ultra-lightweight turbine wheel designed to withstand extreme centrifugal forces and exhaust temperatures while minimizing turbo lag.",
+		efficiency: 95
+	},
+	"blueTube": {
+		id: "INT-PIP-03",
+		title: "Charge Pipe System",
+		material: "6061-T6 Aluminum",
+		temp: "180°C Max",
+		stress: "35 PSI Rating",
+		desc: "High-flow intake plumbing featuring mandrel-bent tubing and multi-layer silicone couplers for leak-free boost delivery.",
+		efficiency: 91
+	},
+	"heatSink": {
+		id: "CLR-HSK-05",
+		title: "Thermal Management Unit",
+		material: "Extruded Aluminum",
+		temp: "Ambient Sync",
+		stress: "Passive Cooling",
+		desc: "High-surface-area heat exchanger designed to dissipate thermal energy from critical electronic components and sensors.",
+		efficiency: 85
+	},
+	"axle": {
+		id: "DRV-AXL-06",
+		title: "Primary Drive Shaft",
+		material: "4340 Chromoly",
+		temp: "150°C Max",
+		stress: "Variable Torque",
+		desc: "Heavy-duty rotating assembly transferring power from the crankshaft to the auxiliary systems with minimal parasitic loss.",
+		efficiency: 97
+	},
+	"belt": {
+		id: "DRV-BLT-07",
+		title: "Serpentine Drive Belt",
+		material: "EPDM Rubber",
+		temp: "120°C Max",
+		stress: "Continuous Flex",
+		desc: "Reinforced synthetic rubber belt providing reliable power transmission to the alternator, water pump, and cooling fans.",
+		efficiency: 82
+	},
+	"rack": {
+		id: "STR-RCK-08",
+		title: "Mounting Subframe",
+		material: "Powder Coated Steel",
+		temp: "300°C Max",
+		stress: "Static Load",
+		desc: "Rigid mounting infrastructure designed to secure the twin-turbo assembly while dampening high-frequency vibrations.",
+		efficiency: 99
+	}
+};
+
+function updateInfoPanel(meshName) {
+	const panel = document.getElementById('info-panel');
+	
+	// Find matching data key
+	let dataKey = null;
+	for (let key in partData) {
+		if (meshName.includes(key)) {
+			dataKey = key;
+			break;
+		}
+	}
+
+	if (dataKey) {
+		const data = partData[dataKey];
+		document.getElementById('panel-part-id').textContent = `PART // ${data.id}`;
+		document.getElementById('panel-title').textContent = data.title;
+		document.getElementById('spec-material').textContent = data.material;
+		document.getElementById('spec-temp').textContent = data.temp;
+		document.getElementById('spec-stress').textContent = data.stress;
+		document.getElementById('panel-desc').textContent = data.desc;
+		document.getElementById('meter-percent').textContent = `${data.efficiency}%`;
+		document.getElementById('meter-fill').style.width = `${data.efficiency}%`;
+		panel.classList.add('active');
+	} else {
+		panel.classList.remove('active');
+	}
+}
 
 init();
 //FX.Camera_Inspector(camera,controls);
@@ -633,8 +905,9 @@ function RaycastFunction(event)
 		if ( INTERSECTED != intersects[ 0 ].object ) 
 		{
 			INTERSECTED = intersects[ 0 ].object;
-			console.log(INTERSECTED);
+			//console.log(INTERSECTED);
 			FocusMode(INTERSECTED);
+			updateInfoPanel(INTERSECTED.name);
 
 			if(!isLabelOn)
 			{
@@ -647,6 +920,7 @@ function RaycastFunction(event)
 	else 
 	{
 		INTERSECTED = null;
+		updateInfoPanel("");
 
 		for(let i=0;i<EngineModule.children.length;i++)
 		{    
@@ -723,6 +997,7 @@ function InstSceneBtn(thisMainCSS,thisSubCSS,thisLabelTarget,thisContent)
 
 		INTERSECTED=thisLabelTarget;
 		FocusMode(thisLabelTarget);
+		updateInfoPanel(thisLabelTarget.name);
  		   	///不執行頁面縮放 
 	  	event.preventDefault();
 	  	event.stopPropagation();
