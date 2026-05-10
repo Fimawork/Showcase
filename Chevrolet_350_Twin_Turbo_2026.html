@@ -1,0 +1,598 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>Chevrolet 350 Twin Turbo</title>
+		<style type="text/css">
+
+			
+			body
+			{
+				margin: 0;
+				padding:0; 
+			}
+			
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
+			
+			#threeContainer
+			{
+				position: absolute;
+				top: 0%;
+				left: 0%;
+				width: 100%;
+				height: 100%;
+			}
+
+			.fimawork_logo
+			{
+				position:absolute;
+				bottom:3%;
+				left: 1.5%;
+				height: 3.9%;
+				aspect-ratio: 192/33;
+				background-image: url(./images/fimawork_logo_C_white.png);
+				background-size: 100% 100%;
+				opacity: 1;
+				z-index: 99;
+				user-select: none;
+			}
+
+			.fimawork_logo:hover
+			{
+				opacity: 0.5;
+			}
+
+
+			#loadingUI
+			{
+				position: absolute;
+				left: 50%;
+				top:50%;
+				width: 10%;
+				aspect-ratio: 1/1;
+				background-image: url(./images/portfolio_2023_loading.png);
+				background-size: 100% 100%; 
+				background-position: center;
+			}
+
+			@keyframes UI_rotate
+			{
+				0% {transform: rotate(0);}
+				8.33% {transform: rotate(30deg);}
+				16.66% {transform: rotate(60deg);}
+				24.99% {transform: rotate(90deg);}
+				33.32%	{transform: rotate(120deg);}
+				41.65%	{transform: rotate(150deg);}
+				49.98%	{transform: rotate(180deg);}
+				58.31%	{transform: rotate(210deg);}
+				66.64%	{transform: rotate(240deg);}
+				74.97%	{transform: rotate(270deg);}
+				83.3%	{transform: rotate(300deg);}
+				91.63%	{transform: rotate(330deg);}
+				100% {transform: rotate(360deg);}
+			}
+
+			.rotate_anim
+			{
+				animation: UI_rotate;
+				animation-duration: 1.5s;
+				animation-timing-function: step-end;
+				animation-iteration-count: infinite;
+			}
+
+			.web3d_icon
+			{
+				position:absolute;
+				top:6%;
+				right: 6%;
+				height: 12%;
+				aspect-ratio: 1/1;
+				background-image: url(./images/web3d_icon_white.png);
+				background-size: 100% 100%;
+				opacity: 1;
+				z-index: 99;
+				user-select: none;
+			}
+
+
+			/* Hotspots */
+			.hotspot {
+				position: absolute;
+				width: 0.6rem;
+				height: 0.6rem;
+				background: rgba(255, 255, 255, 0.3);
+				border: 2px solid #fff;
+				border-radius: 50%;
+				cursor: pointer;
+				z-index: 150;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				transition: transform 0.3s ease, background 0.3s ease;
+			}
+
+			.hotspot::after {
+				content: '';
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				border-radius: 50%;
+				border: 1px solid #fff;
+				animation: pulse 2s infinite;
+			}
+
+			.hotspot:hover {
+				transform: scale(1.3);
+				background: #fff;
+			}
+
+			.hotspot-label {
+				position: absolute;
+				left: 30px;
+				white-space: nowrap;
+				opacity: 1;
+				pointer-events: none;
+				font-family: 'Outfit', sans-serif;
+				font-size: 0.9rem;
+				font-weight: 300;
+				color: #fff;	
+			}
+
+
+		</style>
+		<script type="importmap">
+			{
+			  "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<div id="threeContainer">
+			<div id="info" style="position:absolute; left:50%; z-index: 999;">
+				<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - lottie<br/></br>
+				<input id="scrubber" type="range" value="0" style="width: 300px">
+			</div>
+		</div> 
+		<div id="loadingUI" class="rotate_anim"></div>
+		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+		<div class="web3d_icon"></div>
+		
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { Chevrolet_350_Twin_Turbo_2026 } from './models/Chevrolet_350_Twin_Turbo_2026_slices.js';
+
+
+let scene, camera, renderer, stats, mixer;
+let composer;
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+let _loadingUI = document.getElementById("loadingUI");
+
+let labelRenderer;
+
+const clock = new THREE.Clock();
+
+const CameraDefaultPos=new THREE.Vector3(-78.788,39.045,-56.125);
+const ControlsTargetDefaultPos=new THREE.Vector3(-1.371,-0.164,-6.010);
+let EngineModule;
+
+//////Raycaster工具//////
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let INTERSECTED;
+
+let labels=[];
+let isLabelOn=false;
+
+let parts_num=0;
+
+init();
+//FX.Camera_Inspector(camera,controls);
+
+function init()
+{
+	FX.SetupEnvironment("cloud");
+
+  	scene = new THREE.Scene();
+
+  	camera = new THREE.PerspectiveCamera( 25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGLRenderer({ antialias: true});
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+  	renderer.setClearColor(0x000000, 0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 0.9;
+  	//document.body.appendChild( renderer.domElement );
+  	threeContainer.appendChild( renderer.domElement );
+
+	labelRenderer = new CSS2DRenderer();
+	labelRenderer.setSize( window.innerWidth , window.innerHeight );
+	labelRenderer.domElement.style.position = 'absolute';
+	labelRenderer.domElement.style.top = '0px';
+	threeContainer.appendChild( labelRenderer.domElement );
+
+  	camera.position.copy(CameraDefaultPos);
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+  	controls = new OrbitControls( camera, labelRenderer.domElement );
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.maxDistance =400;
+	//controls.minDistance = 60;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+  	controls.update();
+
+  	///hdri 環境光源
+	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
+
+	
+	scene.background = new THREE.Color(0x333333);
+
+	const loader_FW_0004_Signboard = new GLTFLoader();
+    loader_FW_0004_Signboard.setDRACOLoader(FX.dracoLoader);
+	loader_FW_0004_Signboard.parse(
+    FX.Base64ToArrayBuffer(Chevrolet_350_Twin_Turbo_2026()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+		const newScale=0.25;
+		model.scale.set(newScale,newScale,newScale);
+
+		const redHousing_material=FXM.InstEtchingMaterial(0xFF3838,0.3,0.9,0.49999999999999983,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(10,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(50,50),1);
+
+		const SandTextureMatel_material=FXM.InstEtchingMaterial(0xC2C2C2,0.3,0.9,1,false,1,"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(100,100),new THREE.Vector2(0,0),"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(100,100),100);
+		
+		const blueTube_material=FXM.InstMaterial(0x0942C8,0.5,0.5,0,2.3333333333333335,1,false,1,true);
+		const fanWheel_material=FXM.InstMaterial(0x954EB7,1,0.3,0,1,0,false,1,true);
+		const heatSink_material=FXM.InstEtchingMaterial(0xCCCCCC,0.1,1,1,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(10,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(50,50),1);
+
+		const axle_material=FXM.InstMaterial(0x9B9292,0.36,1,0,2.3333333333333335,1,false,1,true);
+		const belt_material=FXM.InstMaterial(0x3D3D3D,0.3,0.5,1,1,0,false,1,true);
+		const rack_material=FXM.InstMaterial(0x1F1F1F,0.5,0.75,1,2.3333333333333335,1,false,1,true);
+
+		model.traverse( function ( object ) {	
+                  
+            if(object.name.includes("red_housing"))
+            {
+				parts_num++;
+				object.material=redHousing_material.clone();	 
+				InstSceneBtn("hotspot","hotspot-label",object,`Engine Parts ${parts_num}`);
+            }	
+
+			if(object.name.includes("SandTextureMatel"))
+            {
+				parts_num++;
+				object.material=SandTextureMatel_material.clone();
+				InstSceneBtn("hotspot","hotspot-label",object,`Engine Parts ${parts_num}`);
+            }
+
+			if(object.name.includes("fanWheel"))
+            {
+				parts_num++;
+				object.material=fanWheel_material.clone();
+				InstSceneBtn("hotspot","hotspot-label",object,`Engine Parts ${parts_num}`);
+            }
+
+			if(object.name.includes("blueTube"))
+            {
+				parts_num++;
+				object.material=blueTube_material.clone();
+				InstSceneBtn("hotspot","hotspot-label",object,`Engine Parts ${parts_num}`);
+            }
+
+			if(object.name.includes("heatSink"))
+            {
+				parts_num++;
+				object.material=heatSink_material.clone();
+				InstSceneBtn("hotspot","hotspot-label",object,`Engine Parts ${parts_num}`);
+            }
+
+			if(object.name.includes("axle"))
+            {
+				parts_num++;
+				object.material=axle_material.clone();
+				InstSceneBtn("hotspot","hotspot-label",object,`Engine Parts ${parts_num}`);
+            }
+
+			if(object.name.includes("belt"))
+            {
+				parts_num++;
+				object.material=belt_material.clone();
+				InstSceneBtn("hotspot","hotspot-label",object,`Engine Parts ${parts_num}`);
+            }
+
+			if(object.name.includes("rack"))
+            {
+				parts_num++;
+				object.material=rack_material.clone();
+				InstSceneBtn("hotspot","hotspot-label",object,`Engine Parts ${parts_num}`);
+            }
+			
+        })
+
+		EngineModule=model;
+
+		animate();
+		scene.add(model);
+
+		setTimeout(() => {_loadingUI.remove();}, 600);
+
+		//FX.Material_Inspector(scene);
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	scene.environmentRotation.y = FX.ToThreeEulerAngle(0); 
+
+
+	
+
+	setupControls(); 
+
+	function setupControls() 
+	{
+		const scrubber = document.getElementById( 'scrubber' );
+		scrubber.max = 100;
+		scrubber.min = 0;
+
+		scrubber.addEventListener( 'input', function (event) {
+
+			//ExplodeEffect(object.children[i],new THREE.Vector3(0,0,0),0);
+			
+	
+			if(event.target.value>50&&!isLabelOn)
+			{
+				ShowLabel(true);
+			}
+
+			if(event.target.value<=50&&isLabelOn)
+			{
+				ShowLabel(false);
+			}
+			
+
+			EngineModule.traverse( function ( object ) {	
+                  
+            	if(object.name.includes("part"))
+            	{
+					for(let i=0;i<object.children.length;i++)
+					{
+						ExplodeEffect(object.children[i],new THREE.Vector3(0,0,0),0.015*event.target.value);
+					}
+            	}	
+
+				if(object.name.includes("screw"))
+            	{
+					for(let i=0;i<object.children.length;i++)
+					{
+						ExplodeEffect(object.children[i],new THREE.Vector3(0,0,0),0.015*event.target.value);
+					}
+            	}
+        	})
+
+			
+
+		} );
+	}
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+	window.addEventListener('pointermove', (event) => {
+    
+	//onPointerMove(event);
+
+	//////Raycast工具/////
+	if(EngineModule.children.length>0)
+	{
+		RaycastFunction(event);
+	}
+	
+
+    });
+
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.updateProjectionMatrix();
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+	labelRenderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight );
+}
+
+function animate() 
+{
+  	requestAnimationFrame( animate );
+
+  	controls.update();
+  	renderer.render( scene, camera );
+	labelRenderer.render( scene, camera );
+
+	const delta = clock.getDelta();
+
+	if ( mixer ) mixer.update( delta );
+
+	
+
+}
+
+function ExplodeEffect(target,center,ratio)
+{
+	let default_position=FX.ReturnModelCenter(target);
+	let new_position;
+
+	new_position=new THREE.Vector3(center.x+(default_position.x-center.x)*ratio,center.y+(default_position.y-center.y)*ratio,center.z+(default_position.z-center.z)*ratio);
+
+	target.position.set(new_position.x,new_position.y,new_position.z);
+}
+
+	//////Raycaster工具//////
+	function onPointerMove( event ) {
+
+	// calculate pointer position in normalized device coordinates
+	// (-1 to +1) for both components
+
+	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+	}
+
+	function RaycastFunction(event)
+	{
+		pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+				// update the picking ray with the camera and pointer position
+		raycaster.setFromCamera( pointer, camera );
+	
+		const intersects = raycaster.intersectObjects( EngineModule.children);
+
+		if ( intersects.length > 0 ) 
+		{
+			if ( INTERSECTED != intersects[ 0 ].object ) 
+			{
+				INTERSECTED = intersects[ 0 ].object;
+				console.log(INTERSECTED);
+				FocusMode(INTERSECTED);
+
+				if(!isLabelOn)
+				{
+					INTERSECTED.children[0].visible=true;
+				}
+			}
+		} 
+
+		else 
+		{
+			INTERSECTED = null;
+
+			for(let i=0;i<EngineModule.children.length;i++)
+  			{    
+  			    FX.SafeTraverse(EngineModule.children[i], (object) => {
+				
+  			      if(object.isMesh)
+  			      {
+  			        if(object.isMesh)
+        			{
+        			  object.material.opacity=1;
+        			  object.material.transparent=false;
+        			  object.material.needsUpdate = true;
+        			}
+  			      }
+			  
+  			    }); 
+  			}
+
+			if(!isLabelOn)
+			{
+				ShowLabel(false);
+			}
+		}
+	}
+
+
+	function FocusMode(target)
+	{
+		if(INTERSECTED!=null)
+		{
+			for(let i=0;i<EngineModule.children.length;i++)
+  			{    
+  			    FX.SafeTraverse(EngineModule.children[i], (object) => {
+				
+  			      if(object.isMesh)
+  			      {
+  			        object.material.opacity=0.3;
+  			        object.material.transparent=true;
+  			        object.material.needsUpdate = true;
+  			      }
+  			    }); 
+  			}
+
+			target.material.opacity=1;
+        	target.material.transparent=false;
+        	target.material.needsUpdate = true;
+		}
+  		
+	}
+
+
+	function InstSceneBtn(thisMainCSS,thisSubCSS,thisLabelTarget,thisContent)
+	{
+		const MainDiv = document.createElement( 'div' );
+  		MainDiv.className = thisMainCSS;
+
+		const SubDiv = document.createElement( 'div' );
+  		SubDiv.className = thisSubCSS;
+		SubDiv.textContent=thisContent;
+		MainDiv.append(SubDiv);
+
+		let label_position=FX.ReturnModelCenter(thisLabelTarget);
+  
+  		const Label = new CSS2DObject( MainDiv );
+  		Label.position.set( label_position.x,label_position.y,label_position.z);
+  		Label.center.set( 0.5, 0.5 );
+  		thisLabelTarget.attach( Label );
+  		Label.layers.set( 0 );
+  		Label.name="sceneButton";
+		Label.visible=false;
+
+		labels.push(Label);
+
+ 		MainDiv.addEventListener("pointermove", (event) => {
+
+			INTERSECTED=thisLabelTarget;
+			FocusMode(thisLabelTarget);
+ 		   	///不執行頁面縮放 
+ 		  	event.preventDefault();
+ 		  	event.stopPropagation();
+
+ 		});
+
+	}
+
+	function ShowLabel(on)
+	{
+		for(let i=0;i<labels.length;i++)
+		{
+			labels[i].visible=on;
+		}
+
+		isLabelOn=on;
+	}
+
+		</script>
+    </body>
+
+</html>
