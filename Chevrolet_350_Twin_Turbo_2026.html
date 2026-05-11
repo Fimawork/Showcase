@@ -1122,6 +1122,17 @@ function InstSceneBtn(thisMainCSS,thisSubCSS,thisLabelTarget,thisContent)
 	  	event.stopPropagation();
 
 	});
+
+	MainDiv.addEventListener("pointerdown", (event) => {
+
+		INTERSECTED=thisLabelTarget;
+		FocusMode(thisLabelTarget);
+		updateInfoPanel(thisLabelTarget.name);
+ 		   	///不執行頁面縮放 
+	  	event.preventDefault();
+	  	event.stopPropagation();
+
+	});
 }
 
 function ShowLabel(on)
