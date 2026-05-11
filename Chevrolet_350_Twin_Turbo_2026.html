@@ -384,10 +384,39 @@
 				box-shadow: 0 0 10px var(--panel-accent);
 			}
 
+			#hud_btn
+			{
+				position: fixed;
+				bottom: 1.5%;
+				left: 50%;
+				width: 60%;
+				height: 9%;
+				background: var(--panel-bg);
+				backdrop-filter: blur(15px);
+				border: 1px solid var(--border-color);
+				border-radius: 4px;
+				z-index: 999;
+				transform: translate(-50%,0%);
+				display: none;
+				text-align: center;
+				justify-content: center;
+				flex-direction: column;
+				font-family: 'Space Mono', monospace;
+				font-size: 1rem;
+				color: var(--text-dim);
+				text-transform: uppercase;
+				cursor: pointer;
+			}
+
 			@media screen and (max-width:768px)/*手機*/
 			{
 				#ui-overlay {
 					display: none;
+				}
+
+				#hud_btn
+				{
+					display: flex;
 				}
 			}
 
@@ -458,7 +487,7 @@
 				</div>
 			</section>
 
-			<div class="model_info" style="top: 75%;">
+			<div class="model_info" style="top: 12%; height: 18%;">
 				<div class="titlePanel">
 					<p class="detail_title">Model</p>
 					<p class="detail_title">Author</p>
@@ -488,6 +517,8 @@
 			</footer>
 		</div>
 
+		<div id="hud_btn">Exploded View</div>
+
 		<div class="web3d_icon"></div>
 		
 		<script type="module">
@@ -511,13 +542,14 @@ let composer;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
 let _loadingUI = document.getElementById("loadingUI");
+let _hud_btn=document.getElementById('hud_btn');
 
 let labelRenderer;
 
 const clock = new THREE.Clock();
 
-const CameraDefaultPos=new THREE.Vector3(-78.788,39.045,-56.125);
-const ControlsTargetDefaultPos=new THREE.Vector3(-1.371,-0.164,-6.010);
+let CameraDefaultPos=new THREE.Vector3(-78.788,39.045,-56.125);
+let ControlsTargetDefaultPos=new THREE.Vector3(-1.371,-0.164,-6.010);
 let EngineModule;
 
 //////Raycaster工具//////
@@ -529,6 +561,9 @@ let labels=[];
 let isLabelOn=false;
 
 let parts_num=0;
+let isMobile=false;
+let isExplodeMode=false;
+let distance=0;
 
 const partData = {
 	"red_housing": {
@@ -640,6 +675,13 @@ FX.InputEventListener(threeContainer);
 function init()
 {
 	FX.SetupEnvironment("cloud");
+
+	if(FX.isMobile()||window.matchMedia("(max-width: 768px)").matches)
+	{
+		isMobile=true;
+		CameraDefaultPos=new THREE.Vector3(-27.459,107.396,-95.874);
+		ControlsTargetDefaultPos=new THREE.Vector3(-1.371,-0.164,-6.010);
+	}
 
   	scene = new THREE.Scene();
 
@@ -858,6 +900,12 @@ function init()
 	
     });
 
+	_hud_btn.addEventListener("click",function () {
+
+     	isExplodeMode=!isExplodeMode;
+
+  	});
+
 }
 
 
@@ -882,6 +930,69 @@ function animate()
 	if ( mixer ) mixer.update( delta );
 
 	FX.UpdateCameraPosition(camera,controls);
+
+	if(isMobile)
+	{
+		if(isExplodeMode&&distance<100)
+		{
+			distance++;
+
+			EngineModule.traverse( function ( object ) {	
+                  
+            	if(object.name.includes("part"))
+            	{
+					for(let i=0;i<object.children.length;i++)
+					{
+						ExplodeEffect(object.children[i],new THREE.Vector3(0,0,0),distance*0.02);
+					}
+            	}	
+
+				if(object.name.includes("screw"))
+            	{
+					for(let i=0;i<object.children.length;i++)
+					{
+						ExplodeEffect(object.children[i],new THREE.Vector3(0,0,0),distance*0.02);
+					}
+            	}
+        	})
+
+			if(distance===100)
+			{
+				ShowLabel(true);
+			}
+		}
+
+		if(!isExplodeMode&&distance>0)
+		{
+			distance--;
+
+			EngineModule.traverse( function ( object ) {	
+                  
+            	if(object.name.includes("part"))
+            	{
+					for(let i=0;i<object.children.length;i++)
+					{
+						ExplodeEffect(object.children[i],new THREE.Vector3(0,0,0),distance*0.02);
+					}
+            	}	
+
+				if(object.name.includes("screw"))
+            	{
+					for(let i=0;i<object.children.length;i++)
+					{
+						ExplodeEffect(object.children[i],new THREE.Vector3(0,0,0),distance*0.02);
+					}
+            	}
+        	})
+
+			if(distance===0)
+			{
+				ShowLabel(false);
+			}
+		}
+
+		
+	}
 
 }
 
@@ -1022,6 +1133,7 @@ function ShowLabel(on)
 
 	isLabelOn=on;
 }
+
 
 		</script>
     </body>
