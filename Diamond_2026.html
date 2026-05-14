@@ -383,8 +383,8 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_functions.js';
-import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
@@ -473,6 +473,7 @@ function init()
 		//InstMaterial(thisColor,thisRoughness,thisMetalness,thisTransmission,thisIor,thisReflectivity,isTransparent,thisOpacity,isDepthWrite)
 
 		const metal_material=FXM.InstMaterial(0xe6e6e6,0.3,1,0,1.33,1,false,1,true);
+		const inner_material=FXM.InstMaterial(0xFFFFFF,0,0.6,0,2.3333333333333335,1,false,0.9,true);
 
 		const opacity_value=0.3;
 		const reflectivity_value=1;
@@ -570,7 +571,7 @@ function init()
 
 			if(object.name.includes("reflection"))
         	{
-			  FX.ReturnBufferGeometry(object,null,null,scene);
+			  FX.ReturnBufferGeometry(object,inner_material,null,scene);
         	}
 
 			if(object.name==="mainDiamond")
