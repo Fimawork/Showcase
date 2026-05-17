@@ -25,6 +25,7 @@
 				align-items: center;
 				color: #fff;
 				font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+
 			}
 			
 			canvas
@@ -101,6 +102,7 @@
 				max-width: 380px;
 				z-index: 100;
 				animation: fadeInUp 1s ease-out 0.5s both;
+				pointer-events: none;
 			}
 
 			.intro-title {
@@ -132,6 +134,7 @@
 				gap: 40px;
 				z-index: 100;
 				animation: fadeInSlideLeft 1s ease-out;
+				pointer-events: none;
 			}
 
 			.spec-item {
@@ -189,6 +192,18 @@
 			@media (max-width: 1024px) {
 				.sidebar-specs, .product-intro, .bg-watermark { display: none; }
 				.top-nav { gap: 20px; }
+			}
+
+			@media screen and (max-width:768px)/*手機*/
+			{
+				.web3d_icon {
+					display: none;
+				}
+
+				.fimawork_logo{
+					left: 10%;
+					top: 50%;
+				}
 			}
 
 		</style>
