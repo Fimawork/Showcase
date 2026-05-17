@@ -10,18 +10,255 @@
 		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
 		<link rel="stylesheet" type="text/css" href="Main.css">
 		<style type="text/css">
+			@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,600;0,800;1,700&family=Teko:wght@500;700&display=swap');
 
 			body
 			{
 				margin: 0;
 				padding:0; 
-				background-color: #000000;
+				background-color: #050505;
+				height: 100vh;
+				width: 100vw;
+				overflow: hidden;
+				color: #fff;
+				font-family: 'Montserrat', sans-serif;
+				user-select: none;
 			}
 			
 			canvas
 			{
 				width: 100%;
    				height: 100%;
+			}
+
+			/* Background Accents */
+			.bg-glow {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				width: 90vh;
+				height: 90vh;
+				background: radial-gradient(circle, rgba(255, 184, 0, 0.08) 0%, rgba(255, 184, 0, 0) 70%);
+				border-radius: 50%;
+				filter: blur(60px);
+				z-index: 0;
+				pointer-events: none;
+			}
+
+			.bg-lines {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(135deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.02) 75%, transparent 75%, transparent);
+				background-size: 100px 100px;
+				opacity: 0.3;
+				z-index: 0;
+				pointer-events: none;
+			}
+
+			.bg-watermark {
+				position: absolute;
+				right: 5%;
+				bottom: 10%;
+				font-family: 'Teko', sans-serif;
+				font-size: 18vh;
+				font-weight: 700;
+				color: rgba(255, 255, 255, 0.02);
+				line-height: 0.8;
+				text-align: right;
+				z-index: 1;
+				letter-spacing: 5px;
+				pointer-events: none;
+			}
+
+			/* Top Navigation */
+			.top-header {
+				position: absolute;
+				top: 4%;
+				left: 5%;
+				right: 5%;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				z-index: 100;
+				animation: fadeInDown 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+			}
+
+			.brand-title {
+				font-family: 'Teko', sans-serif;
+				font-size: 2.2rem;
+				font-weight: 700;
+				letter-spacing: 4px;
+				color: #fff;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.brand-title::before {
+				content: '';
+				display: inline-block;
+				width: 12px;
+				height: 24px;
+				background-color: #ffb800;
+				transform: skewX(-20deg);
+			}
+
+			.nav-menu {
+				display: flex;
+				gap: 30px;
+			}
+
+			.nav-item {
+				text-decoration: none;
+				color: rgba(255, 255, 255, 0.6);
+				font-size: 0.85rem;
+				font-weight: 600;
+				letter-spacing: 2px;
+				text-transform: uppercase;
+				transition: color 0.3s ease;
+				position: relative;
+				padding-bottom: 4px;
+			}
+
+			.nav-item:hover, .nav-item.active {
+				color: #ffb800;
+			}
+
+			.nav-item.active::after {
+				content: '';
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+				height: 2px;
+				background-color: #ffb800;
+			}
+
+			/* Hero Intro */
+			.hero-intro {
+				position: absolute;
+				left: 6%;
+				bottom: 12%;
+				max-width: 420px;
+				z-index: 100;
+				animation: fadeInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+			}
+
+			.hero-badge {
+				display: inline-block;
+				background: rgba(255, 184, 0, 0.15);
+				border: 1px solid #ffb800;
+				color: #ffb800;
+				font-size: 0.7rem;
+				font-weight: 600;
+				letter-spacing: 3px;
+				padding: 4px 12px;
+				margin-bottom: 15px;
+				transform: skewX(-15deg);
+			}
+
+			.hero-title {
+				font-family: 'Teko', sans-serif;
+				font-size: 5.5rem;
+				font-weight: 700;
+				line-height: 0.9;
+				margin: 0 0 15px 0;
+				letter-spacing: 2px;
+				text-transform: uppercase;
+				text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+			}
+
+			.hero-desc {
+				font-size: 1rem;
+				font-weight: 300;
+				line-height: 1.6;
+				color: rgba(255, 255, 255, 0.7);
+				margin: 0;
+			}
+
+			/* Telemetry Panel */
+			.telemetry-panel {
+				position: absolute;
+				right: 5%;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 280px;
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+				z-index: 100;
+				animation: fadeInRight 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+			}
+
+			.telemetry-card {
+				background: linear-gradient(90deg, rgba(20,20,20,0.8) 0%, rgba(10,10,10,0.4) 100%);
+				border-left: 3px solid #ffb800;
+				padding: 15px 20px;
+				backdrop-filter: blur(10px);
+				box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+				transform: skewX(-10deg);
+				transition: transform 0.3s ease, border-color 0.3s ease;
+			}
+
+			.telemetry-card:hover {
+				transform: skewX(-10deg) translateX(-5px);
+				border-left-color: #fff;
+			}
+
+			.telemetry-card > * {
+				transform: skewX(10deg); /* unskew content */
+			}
+
+			.tele-label {
+				font-size: 0.7rem;
+				font-weight: 600;
+				color: rgba(255, 255, 255, 0.5);
+				letter-spacing: 2px;
+				margin-bottom: 5px;
+				text-transform: uppercase;
+			}
+
+			.tele-value {
+				font-family: 'Teko', sans-serif;
+				font-size: 2.2rem;
+				font-weight: 700;
+				color: #ffb800;
+				line-height: 1;
+				margin: 0;
+				letter-spacing: 1px;
+			}
+
+			.tele-sub {
+				font-size: 0.75rem;
+				color: #fff;
+				font-weight: 600;
+				margin-left: 5px;
+			}
+
+			/* Animations */
+			@keyframes fadeInDown {
+				from { opacity: 0; transform: translateY(-40px); }
+				to { opacity: 1; transform: translateY(0); }
+			}
+
+			@keyframes fadeInLeft {
+				from { opacity: 0; transform: translateX(-50px); }
+				to { opacity: 1; transform: translateX(0); }
+			}
+
+			@keyframes fadeInRight {
+				from { opacity: 0; transform: translateY(-50%) translateX(50px); }
+				to { opacity: 1; transform: translateY(-50%) translateX(0); }
+			}
+
+			@media (max-width: 1024px) {
+				.telemetry-panel, .hero-desc, .bg-watermark, .nav-menu { display: none; }
+				.hero-intro { bottom: 8%; }
+				.hero-title { font-size: 4rem; }
 			}
 
 		</style>
@@ -41,14 +278,71 @@
 		<div id="threeContainer"></div> 
 		<div id="loadingUI" class="rotate_anim"></div>
 		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
-		<div class="web3d_icon"></div>
+		<div class="web3d_icon" style="top: 12%;"></div>
+
+		<!-- Background Elements -->
+		<div class="bg-glow"></div>
+		<div class="bg-lines"></div>
+		<div class="bg-watermark">LP 770-4</div>
+
+		<!-- Top Header -->
+		<header class="top-header">
+			<div class="brand-title">FIMAWORK</div>
+			<nav class="nav-menu">
+				<a href="#" class="nav-item active">Showcase</a>
+				<a href="#" class="nav-item">Performance</a>
+				<a href="#" class="nav-item">Design</a>
+				<a href="#" class="nav-item">Configurator</a>
+			</nav>
+		</header>
+
+		<!-- Hero Intro -->
+		<section class="hero-intro">
+			<div class="hero-badge">1 OF 20 LIMITED EDITION</div>
+			<h1 class="hero-title">Centenario<br>Roadster</h1>
+			<p class="hero-desc">Created to celebrate the 100th anniversary of Ferruccio Lamborghini's birth. An unbridled display of raw V12 power and futuristic full-carbon aerodynamics.</p>
+		</section>
+
+		<!-- Telemetry Panel -->
+		<aside class="telemetry-panel">
+			<div class="telemetry-card">
+				<div class="tele-label">Naturally Aspirated</div>
+				<div class="tele-value">V12 <span class="tele-sub">6.5L</span></div>
+			</div>
+			<div class="telemetry-card">
+				<div class="tele-label">Max Power</div>
+				<div class="tele-value">770 <span class="tele-sub">CV</span></div>
+			</div>
+			<div class="telemetry-card">
+				<div class="tele-label">Acceleration 0-100 km/h</div>
+				<div class="tele-value">2.9 <span class="tele-sub">s</span></div>
+			</div>
+			<div class="telemetry-card">
+				<div class="tele-label">Top Speed</div>
+				<div class="tele-value">>350 <span class="tele-sub">km/h</span></div>
+			</div>
+		</aside>
+
+		<div class="model_info" style=" left: 72%;">
+			<div class="titlePanel">
+				<p class="detail_title">Model</p>
+				<p class="detail_title">Author</p>
+				<p class="detail_title">Link</p>
+			</div>
+			<div class="detailPanel">
+				<p class="detail_value">Lamborghini Centenario roadster 2017</p>
+				<p class="detail_value">Rex Fu</p>
+				<p class="detail_value">https://grabcad.com/library/lamborghini-centenario-roadster-2017-1</p>
+			</div>
+		</div>
+
 		<script type="module">
 
 import * as THREE from 'three';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_functions.js';
-import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
@@ -66,7 +360,7 @@ const modelPosition=new THREE.Vector3(0,0,0);
 const modelRotation=new THREE.Vector3(0,Math.PI*0.5, 0);
 const modeScale=0.02;
 
-const CameraDefaultPos=new THREE.Vector3(-18.309,7.793,-10.893);
+const CameraDefaultPos=new THREE.Vector3(-14.305,6.248,-9.904);
 const ControlsTargetDefaultPos=new THREE.Vector3(0.320,-0.537,-0.588);
 
 let main_model= new THREE.Object3D();
@@ -124,11 +418,11 @@ function init()
 		//InstEtchingMaterial(thisColor,thisRoughness,thisMetalness,thisReflectivity,isTransparent,thisOpacity,map_src,map_repeat,map_offset,bumpMap_src,bumpMap_repeat,bumpMap_scale)
 		const inner_material=FXM.InstMaterial(0x000000,1,0.5,0,2.333,0.5,false,1,true);
 
-		const silver_paint_material=FXM.InstMaterial(0xd2dde5,0.45,0.9,0,2.333,1,false,1,true);
+		const silver_paint_material=FXM.InstMaterial(0xA9B7C1,0.39,1,0,2.3333333333333335,1,false,1,true);
 
 		const wheel_frame_sliver_material=FXM.InstMaterial(0xeff3f6,0.3,0.6,0,2.333,1,false,1,true);
 
-		const window_material=FXM.InstMaterial(0xFFFFFF,0,0,0.96,1.5,1,true,1,false);
+		const window_material=FXM.InstMaterial(0xD1D1D1,0,0.3,1,2.3333333333333335,1,true,1,false);
 
 		const red_light_material=FXM.InstMaterial(0xff0000,0,1,1,2.4,1,true,0.95,false);
 
@@ -165,7 +459,8 @@ function init()
 		scene.add(main_model);
 		animate();
 		setTimeout(() => {_loadingUI.remove();}, 600);
-		
+		//FX.Material_Inspector(scene);
+
     },
     (error) => {
         console.error('Failed to load model:', error);
