@@ -10,17 +10,185 @@
 		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
 		<link rel="stylesheet" type="text/css" href="Main.css">
 		<style type="text/css">
+			@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
 
 			body
 			{
 				margin: 0;
 				padding:0; 
+				background: radial-gradient(circle at 50% 50%, #2b2b2b 0%, #000000 100%);
+				height: 100vh;
+				width: 100vw;
+				overflow: hidden;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				color: #fff;
+				font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
 			}
 			
 			canvas
 			{
+				position: absolute;
+				top: 0;
+				left: 0;
 				width: 100%;
    				height: 100%;
+			}
+
+			/* Background Elements */
+			.bg-glow {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				width: 80vh;
+				height: 80vh;
+				background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+				border-radius: 50%;
+				filter: blur(80px);
+				z-index: 0;
+				pointer-events: none;
+			}
+
+			.bg-watermark {
+				position: absolute;
+				left: 5%;
+				top: 50%;
+				transform: translateY(-50%) rotate(-90deg);
+				font-size: 15vh;
+				font-weight: 900;
+				color: rgba(255, 255, 255, 0.02);
+				white-space: nowrap;
+				user-select: none;
+				z-index: 1;
+				letter-spacing: -2px;
+				pointer-events: none;
+				text-transform: uppercase;
+			}
+
+			/* Top Header */
+			.top-nav {
+				position: absolute;
+				top: 5%;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				gap: 40px;
+				z-index: 100;
+				animation: fadeInDown 1s ease-out;
+			}
+
+			.nav-link {
+				text-decoration: none;
+				color: rgba(255, 255, 255, 0.5);
+				font-size: 0.8rem;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				transition: color 0.3s ease;
+			}
+
+			.nav-link:hover {
+				color: #fff;
+			}
+
+			/* Product Intro */
+			.product-intro {
+				position: absolute;
+				left: 8%;
+				bottom: 15%;
+				max-width: 380px;
+				z-index: 100;
+				animation: fadeInUp 1s ease-out 0.5s both;
+			}
+
+			.intro-title {
+				font-size: 4rem;
+				font-weight: 800;
+				margin-bottom: 10px;
+				line-height: 1;
+				background: linear-gradient(180deg, #fff 0%, #888 100%);
+				-webkit-background-clip: text;
+				background-clip: text;
+				-webkit-text-fill-color: transparent;
+			}
+
+			.intro-desc {
+				font-size: 1.1rem;
+				font-weight: 300;
+				line-height: 1.6;
+				color: rgba(255, 255, 255, 0.6);
+			}
+
+			/* Sidebar Specs */
+			.sidebar-specs {
+				position: absolute;
+				right: 6%;
+				top: 50%;
+				transform: translateY(-50%);
+				display: flex;
+				flex-direction: column;
+				gap: 40px;
+				z-index: 100;
+				animation: fadeInSlideLeft 1s ease-out;
+			}
+
+			.spec-item {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+				gap: 8px;
+				animation: staggerFadeIn 0.8s ease-out both;
+			}
+
+			.spec-item:nth-child(1) { animation-delay: 0.2s; }
+			.spec-item:nth-child(2) { animation-delay: 0.4s; }
+			.spec-item:nth-child(3) { animation-delay: 0.6s; }
+
+			.spec-icon {
+				font-size: 1.8rem;
+				opacity: 0.9;
+				margin-bottom: 5px;
+			}
+
+			.spec-label {
+				font-size: 0.75rem;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				color: rgba(255, 255, 255, 0.5);
+			}
+
+			.spec-value {
+				font-size: 1.2rem;
+				font-weight: 400;
+			}
+
+			/* Animations */
+			@keyframes staggerFadeIn {
+				from { opacity: 0; transform: translateX(30px); }
+				to { opacity: 1; transform: translateX(0); }
+			}
+
+			@keyframes fadeInSlideLeft {
+				from { opacity: 0; transform: translateY(-50%) translateX(50px); }
+				to { opacity: 1; transform: translateY(-50%) translateX(0); }
+			}
+
+			@keyframes fadeInUp {
+				from { opacity: 0; transform: translateY(50px); }
+				to { opacity: 1; transform: translateY(0); }
+			}
+
+			@keyframes fadeInDown {
+				from { opacity: 0; transform: translate(-50%, -50px); }
+				to { opacity: 1; transform: translate(-50%, 0); }
+			}
+
+			@media (max-width: 1024px) {
+				.sidebar-specs, .product-intro, .bg-watermark { display: none; }
+				.top-nav { gap: 20px; }
 			}
 
 		</style>
@@ -40,28 +208,78 @@
 		<div id="loadingUI" class="rotate_anim"></div>
 		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
 		<div class="web3d_icon"></div>
+
+		<!-- Background Elements -->
+		<div class="bg-glow"></div>
+		<div class="bg-watermark">MacBook Air</div>
+
+		<!-- UI Elements -->
+		<header class="top-nav">
+			<a href="#" class="nav-link">Overview</a>
+			<a href="#" class="nav-link">Tech Specs</a>
+			<a href="#" class="nav-link">Design</a>
+		</header>
+
+		<section class="sidebar-specs">
+			<div class="spec-item">
+				<span class="spec-icon">M3</span>
+				<span class="spec-label">Chip</span>
+				<span class="spec-value">Supercharged by M3</span>
+			</div>
+			<div class="spec-item">
+				<span class="spec-icon">🔋</span>
+				<span class="spec-label">Battery</span>
+				<span class="spec-value">Up to 18 hours</span>
+			</div>
+			<div class="spec-item">
+				<span class="spec-icon">💻</span>
+				<span class="spec-label">Display</span>
+				<span class="spec-value">Liquid Retina</span>
+			</div>
+		</section>
+
+		<article class="product-intro">
+			<h2 class="intro-title">MacBook Air</h2>
+			<p class="intro-desc">Lean. Mean. M3 machine. Incredibly thin and light, so you can work, play, or create anywhere.</p>
+		</article>
+
+		<div class="model_info" style=" left: 84%;">
+			<div class="titlePanel">
+				<p class="detail_title">Model</p>
+				<p class="detail_title">Author</p>
+				<p class="detail_title">Link</p>
+			</div>
+			<div class="detailPanel">
+				<p class="detail_value">MacBook Air</p>
+				<p class="detail_value">MadeInCAD</p>
+				<p class="detail_value">https://grabcad.com/library/macbook-air-2</p>
+			</div>
+		</div>
+
 		<script type="module">
+
+let _loadingUI = document.getElementById("loadingUI");
 
 import * as THREE from 'three';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.8/fx_functions.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { Apple_MacBook_Air } from './models/Apple_MacBook_Air_slices.js';
+import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 
 let scene, camera, renderer, stats, mixer,container;
+let renderer_css3d;
 let controls;
-let threeContainer = document.getElementById("threeContainer");
-let _loadingUI = document.getElementById("loadingUI");
 
 const clock = new THREE.Clock();
 
-const CameraDefaultPos=new THREE.Vector3(12.667,13.019,23.186);
-const ControlsTargetDefaultPos=new THREE.Vector3(-0.181,3.360,3.024);
+const CameraDefaultPos=new THREE.Vector3(15.221,8.565,-21.392);
+const ControlsTargetDefaultPos=new THREE.Vector3(-1.574,3.106,2.005);
 
 let keyboardModule = new THREE.Object3D();
 let screenModule = new THREE.Object3D();
@@ -70,7 +288,10 @@ let RotatePivot = new THREE.Object3D();
 let idleTime=0;
 const hold_time=6;
 
+let css3dObject;
+
 init();
+//FX.Camera_Inspector(camera,controls);
 
 function init()
 {
@@ -90,19 +311,28 @@ function init()
   	renderer.toneMappingExposure = 0.9;
   	document.body.appendChild( renderer.domElement );
 
+	renderer_css3d = new CSS3DRenderer();
+	renderer_css3d.domElement.style.position = 'absolute';
+	renderer_css3d.domElement.style.top = '0px';
+	renderer_css3d.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer_css3d.domElement );
+
 
   	camera.position.copy(CameraDefaultPos);
   
   	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
-  	controls = new OrbitControls( camera, renderer.domElement );
+  	controls = new OrbitControls( camera, renderer_css3d.domElement );
   	controls.enablePan = true;//右鍵平移效果
   	controls.panSpeed = 0.4;
   	controls.enableDamping = true;
   	controls.dampingFactor =0.015;
+  	controls.maxDistance = 100;
+	controls.minDistance = 10;
   	controls.target.copy( ControlsTargetDefaultPos );
   	controls.zoomSpeed=0.5;
 	controls.autoRotate=false;
 	controls.autoRotateSpeed=0.3;
+	controls.maxPolarAngle=FX.ToThreeEulerAngle(96);
   	controls.update();
 
   	///hdri 環境光源
@@ -126,6 +356,7 @@ function init()
 		const silver_paint_material=FXM.InstMaterial(0xe2e9ee,0.5,0.5,0,2.333,1,false,1,true);
 		const keyboard_material=FXM.InstMaterial(0x000000,0.5,0,0,2.333,1,false,1,true);
 		const touchPanel_material=FXM.InstMaterial(0xc0c6c9,0.5,0,0,2.333,1,false,1,true);
+
 
 		FX.ReturnBufferGeometry(model.getObjectByName("keyboard"),keyboard_material,keyboardModule,scene);
 		FX.ReturnBufferGeometry(model.getObjectByName("screen"),null,screenModule,scene);
@@ -178,15 +409,14 @@ function init()
 		scene.add(keyboardModule);
 		//scene.environment.rotation = FX.ToThreeEulerAngle(45);
 
-		scene.environmentRotation.y = FX.ToThreeEulerAngle(-60); 
+		scene.environmentRotation.y = FX.ToThreeEulerAngle(60); 
 		//scene.backgroundRotation.y = FX.ToThreeEulerAngle(-45);
 
 
 		animate();
-		setTimeout(() => {_loadingUI.remove();}, 600);
 
         //FX.Material_Inspector(scene);
-		
+		setTimeout(() => { if(_loadingUI) _loadingUI.remove(); }, 600);
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -216,12 +446,44 @@ function init()
 		mesh_HUD.rotation.set(Math.PI/2,FX.ToThreeEulerAngle(113.6), -Math.PI/2);
 		
 		HUD.add(mesh_HUD);
-		//scene.add( HUD );
 
-		screenModule.add(HUD);
+		if(FX.isMobile())//手持裝置顯示圖片
+		{
+			screenModule.add(HUD);
+		}
 	} );
 
-	///桌布
+	///css3d
+
+	const videoClip = document.createElement( 'video' );
+	videoClip.style.width = '1920px';
+	videoClip.style.height = '1080px';
+	videoClip.style.backgroundColor = '#000';
+	videoClip.src = './videos/ending_20260422_720p_5Mb.mp4';
+	videoClip.autoplay=true;
+	videoClip.loop=true;
+	videoClip.muted=true;
+	videoClip.style.opacity=0.95;
+
+	videoClip.play();
+
+	css3dObject = new CSS3DObject( videoClip );
+
+	const s = 0.0076;
+	css3dObject.position.set( -6.6, 5.1, 0);
+	css3dObject.rotation.set(Math.PI/2,FX.ToThreeEulerAngle(113.6), -Math.PI/2);
+	css3dObject.scale.set(s,s,s);
+
+	const isMobileSize = window.matchMedia("(max-width: 768px)").matches;//目前的螢幕寬度小於或等於 768px
+
+	if(!FX.isMobile()||!isMobileSize)//電腦顯示影片
+	{
+		screenModule.add(css3dObject);
+	}
+
+	
+	
+	///鍵盤
 	
 	let keyboard_layout = new THREE.Object3D();
 		
@@ -256,23 +518,16 @@ function init()
 
   		window.addEventListener("pointerdown", (event) => {
 
-		idleTime=0;
-		controls.autoRotate=false;
-
+		
 	});
 
 	window.addEventListener( 'pointermove', function(e) {
 
-		idleTime=0;
-		controls.autoRotate=false;
-
+		
 	});
 
   	window.addEventListener("wheel", (event) => {
 		
-		idleTime=0;
-		controls.autoRotate=false;
-
 	});
 }
 
@@ -282,6 +537,7 @@ function onWindowResize()
     camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight);
+	renderer_css3d.setSize( window.innerWidth, window.innerHeight );
 }
 
 function animate() 
@@ -290,6 +546,7 @@ function animate()
 
   	controls.update();
   	renderer.render( scene, camera );
+	renderer_css3d.render( scene, camera );
   	//UpdateCameraPosition(camera,controls);
 	//FX.WebGLInspector(container, renderer);
 
@@ -297,19 +554,20 @@ function animate()
 
 	if ( mixer ) mixer.update( delta );
 
-	idleTime+=delta;
+	//模型無法遮擋CSS3D物件，若攝影機位置在螢幕後方則影藏CSS3D
 	
-	if(idleTime>hold_time)
+	if(css3dObject!=null)
 	{
-		controls.autoRotate=true;
-	}
+		if(camera.position.x<-7.5)
+		{
+			css3dObject.visible=false;
+		}
 
-	//if(RotatePivot.rotation.z>FX.ToThreeEulerAngle(-115))
-	//{
-	//	RotatePivot.rotation.z-=0.01;
-	//}
-	
-	//console.log(RotatePivot.rotation.z)
+		else
+		{
+			css3dObject.visible=true;
+		}
+	}
 
 }
 		</script>
