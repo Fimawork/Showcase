@@ -267,8 +267,10 @@
 		<script type="importmap">
 			{
 			  "imports": {
-				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
 			  }
 			}
 		</script>
@@ -342,7 +344,7 @@
 import * as THREE from 'three';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_functions.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.2/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
 import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_hud.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
@@ -356,7 +358,9 @@ let controls;
 let threeContainer = document.getElementById("threeContainer");
 let _loadingUI = document.getElementById("loadingUI");
 
-const clock = new THREE.Clock();
+//const clock = new THREE.Clock();
+// 2. 建立新版的 Timer（取代舊的 Clock）
+const timer = new THREE.Timer();
 
 const modelPosition=new THREE.Vector3(0,0,0);
 const modelRotation=new THREE.Vector3(0,Math.PI*0.5, 0);
@@ -374,14 +378,15 @@ init();
 //FX.Camera_Inspector(camera,controls);
 FXUI.InstLoadingEffect_Type_A();
 
-function init()
+async function init()
 {
 	FX.SetupEnvironment("cloud");
 
   	scene = new THREE.Scene();
 
   	camera = new THREE.PerspectiveCamera( 25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
-  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	//renderer = new THREE.WebGLRenderer({ antialias: true });
+	renderer = new THREE.WebGPURenderer( { antialias: true } );
   	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
 
   	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
@@ -389,6 +394,11 @@ function init()
   	renderer.toneMappingExposure = 0.9;
   	//document.body.appendChild( renderer.domElement );
   	threeContainer.appendChild( renderer.domElement );
+
+	// 1. 先等待 Renderer 初始化完成
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+	// 2. 初始化完成後，再啟動動畫循環（這行會自己一直跑，不用手動 call 第一次）
+	renderer.setAnimationLoop( animate );
 
   	camera.position.copy(CameraDefaultPos);
   
@@ -406,7 +416,8 @@ function init()
   	controls.update();
 
   	///hdri 環境光源
-	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
+	//FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
 	
 	///Lamborghini_Centenario_roadster
 	const loader_Lamborghini_Centenario_roadster = new GLTFLoader();
@@ -460,7 +471,7 @@ function init()
 		main_model.scale.set(0.0024,0.0024,0.0024);
 
 		scene.add(main_model);
-		animate();
+		//animate();
 		setTimeout(() => {document.getElementById("fx_loading_effect").remove();}, 1000);
 		//FX.Material_Inspector(scene);
 
@@ -503,16 +514,19 @@ function onWindowResize()
     renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
 }
 
-function animate() 
+function animate(timestamp) 
 {
-  	requestAnimationFrame( animate );
+  	//requestAnimationFrame( animate );
 
   	controls.update();
   	renderer.render( scene, camera );
   	//UpdateCameraPosition(camera,controls);
 
 
-	const delta = clock.getDelta();
+	//const delta = clock.getDelta();
+	// 自動更新時間（用來計算移動速度、旋轉等）
+    timer.update( timestamp );
+	const delta = timer.getDelta();// 兩幀之間的時間差
 
 	if ( mixer ) mixer.update( delta );
 
