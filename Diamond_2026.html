@@ -300,8 +300,10 @@
 		<script type="importmap">
 			{
 			  "imports": {
-				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
 			  }
 			}
 		</script>
@@ -378,12 +380,15 @@
 
 import * as THREE from 'three';
 
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+//import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+//import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+//import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+import { pass } from 'three/tsl';
+import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_functions.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.2/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -392,12 +397,15 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { Diamond_2026 } from './models/Diamond_2026_slices.js';
 
 let scene, camera, renderer, stats, mixer;
-let composer;
+//let composer;
+let renderPipeline;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
 let _loadingUI = document.getElementById("loadingUI");
 
-const clock = new THREE.Clock();
+//const clock = new THREE.Clock();
+// 2. 建立新版的 Timer（取代舊的 Clock）
+const timer = new THREE.Timer();
 
 const CameraDefaultPos=new THREE.Vector3(-29.105,91.313,36.017);
 const ControlsTargetDefaultPos=new THREE.Vector3(0.615,3.216,-0.802);
@@ -407,37 +415,60 @@ let main_model= new THREE.Object3D();
 let idleTime=0;
 const hold_time=6;
 
-// 設定 Bloom 參數
-const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(threeContainer.clientWidth, threeContainer.clientHeight),
-    0.1,  // 強度 (strength)
-    0.15,  // 半徑 (radius)
-   	1.8 // 閾值 (threshold) - 只有亮度超過此值的區域會發光
-);
+//// 設定 Bloom 參數
+//const bloomPass = new UnrealBloomPass(
+//    new THREE.Vector2(threeContainer.clientWidth, threeContainer.clientHeight),
+//    0.1,  // 強度 (strength)
+//    0.15,  // 半徑 (radius)
+//   	1.8 // 閾值 (threshold) - 只有亮度超過此值的區域會發光
+//);
+
+const params = {
+	threshold: 1.8,
+	strength: 0.1,
+	radius: 0.15,
+	exposure: 0.9
+};
 
 init();
 //FX.Camera_Inspector(camera,controls);
 
-function init()
+async function init()
 {
 	FX.SetupEnvironment("cloud");
 
   	scene = new THREE.Scene();
 
   	camera = new THREE.PerspectiveCamera( 25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
-  	renderer = new THREE.WebGLRenderer({ antialias: true});
+  	renderer = new THREE.WebGPURenderer( { antialias: true } );
   	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
 
   	renderer.setClearColor(0x000000, 0);//需加入這一條，否則看不到CSS的底圖
   	renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  	renderer.toneMappingExposure = 0.9;
+  	renderer.toneMappingExposure = params.exposure;
   	//document.body.appendChild( renderer.domElement );
   	threeContainer.appendChild( renderer.domElement );
 
+	// 1. 先等待 Renderer 初始化完成
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+	// 2. 初始化完成後，再啟動動畫循環（這行會自己一直跑，不用手動 call 第一次）
+	renderer.setAnimationLoop( animate );
+
 	// 初始化 Composer
-	composer = new EffectComposer(renderer);
-	composer.addPass(new RenderPass(scene, camera));
-	composer.addPass(bloomPass);
+	//composer = new EffectComposer(renderer);
+	//composer.addPass(new RenderPass(scene, camera));
+	//composer.addPass(bloomPass);
+
+	// 初始化 RenderPipeline
+	renderPipeline = new THREE.RenderPipeline( renderer );
+	const scenePass = pass( scene, camera );
+	const scenePassColor = scenePass.getTextureNode( 'output' ).toInspector( 'Color' );
+	const bloomPass = bloom( scenePassColor ).toInspector( 'Bloom' );
+	renderPipeline.outputNode = scenePassColor.add( bloomPass );
+
+	bloomPass.threshold.value = params.threshold;
+	bloomPass.strength.value = params.strength;
+	bloomPass.radius.value = params.radius;
 
   	camera.position.copy(CameraDefaultPos);
   
@@ -456,9 +487,9 @@ function init()
   	controls.update();
 
   	///hdri 環境光源
-	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
+	//FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer);
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
 
-	
 	scene.background = new THREE.Color(0xf2efe8);
 
 	const loader_diamond_2026 = new GLTFLoader();
@@ -482,7 +513,7 @@ function init()
 			color: 0xffffff, 
 			transparent:true,//沒設定，畫面會出錯
 			transmission: 1,
-			metalness: 0, 
+			metalness: 1, 
 			thickness: 0.5,
 			roughness: 0, 
 			reflectivity:1,
@@ -491,7 +522,7 @@ function init()
   			envMapIntensity: 1,//鑽石本身不發光，它的美來自對環境光的反射。
 			ior:2.4,//<1畫面會不穩定
 			depthWrite:false,
-			opacity:0.3,
+			opacity:1,
 			blending: THREE.AdditiveBlending,
 		} );
 
@@ -657,17 +688,19 @@ function onWindowResize()
     renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
 }
 
-function animate() 
+function animate(timestamp) 
 {
-  	requestAnimationFrame( animate );
+  	//requestAnimationFrame( animate );
 
   	controls.update();
-  	renderer.render( scene, camera );
-	composer.render();
+  	//renderer.render( scene, camera );
+	//composer.render();
   	//UpdateCameraPosition(camera,controls);
+	renderPipeline.render();
 
-
-	const delta = clock.getDelta();
+	// 自動更新時間（用來計算移動速度、旋轉等）
+    timer.update( timestamp );
+	const delta = timer.getDelta();
 
 	if ( mixer ) mixer.update( delta );
 
