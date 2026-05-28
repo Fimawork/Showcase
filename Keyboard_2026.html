@@ -13,6 +13,7 @@
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 		<style type="text/css">
+			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
 
 			body
 			{
@@ -248,8 +249,10 @@
 		<script type="importmap">
 			{
 			  "imports": {
-				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
 			  }
 			}
 		</script>
@@ -257,7 +260,6 @@
 	</head>
 	
 	<body>
-		<div id="loadingUI" class="rotate_anim"></div>
 		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
 		
 		<!-- UI Overlay -->
@@ -340,13 +342,14 @@
 
 import * as THREE from 'three';
 
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+//RenderPipeline工具
+import { pass } from 'three/tsl';
+import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.8/fx_functions.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.2/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
+import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.41/fx_hud.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
@@ -354,36 +357,31 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { keyboard_2026 } from './models/keyboard_2026_slices.js';
 
 let scene, camera, renderer, stats, mixer,container;
-let composer;
+let renderPipeline;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
-let _loadingUI = document.getElementById("loadingUI");
 
-const clock = new THREE.Clock();
+const timer = new THREE.Timer();
+
 
 const CameraDefaultPos=new THREE.Vector3(-13.217,5.203,11.497);
 const ControlsTargetDefaultPos=new THREE.Vector3(-4.236,0.614,1.933);
 
-//let keyboardModule = new THREE.Object3D();
-//let screenModule = new THREE.Object3D();
-//let RotatePivot = new THREE.Object3D();
-
 let idleTime=0;
 const hold_time=6;
 
-// 設定 Bloom 參數
-const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight),
-    2.4,  // 強度 (strength)
-    1,  // 半徑 (radius)
-    1  // 閾值 (threshold) - 只有亮度超過此值的區域會發光
-);
-
+const params = {
+	threshold: 1,
+	strength: 2.4,
+	radius: 1,
+	exposure: 0.6
+};
 
 
 init();
+FXUI.InstLoadingEffect_Type_A(true);
 
-function init()
+async function init()
 {
 	FX.SetupEnvironment("cloud");
 
@@ -393,18 +391,29 @@ function init()
   	scene = new THREE.Scene();
 
   	camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );//非全螢幕比例設定
-  	renderer = new THREE.WebGLRenderer({ antialias: true});
+  	renderer = new THREE.WebGPURenderer( { antialias: true } );
   	renderer.setSize( window.innerWidth, window.innerHeight);
 
   	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
   	renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  	renderer.toneMappingExposure = 0.6;
+  	renderer.toneMappingExposure = params.exposure;
   	document.body.appendChild( renderer.domElement );
 
-	// 初始化 Composer
-	composer = new EffectComposer(renderer);
-	composer.addPass(new RenderPass(scene, camera));
-	composer.addPass(bloomPass);
+	// 1. 先等待 Renderer 初始化完成
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+	// 2. 初始化完成後，再啟動動畫循環（這行會自己一直跑，不用手動 call 第一次）
+	renderer.setAnimationLoop( animate );
+
+	// 初始化 RenderPipeline
+	renderPipeline = new THREE.RenderPipeline( renderer );
+	const scenePass = pass( scene, camera );
+	const scenePassColor = scenePass.getTextureNode( 'output' ).toInspector( 'Color' );
+	const bloomPass = bloom( scenePassColor ).toInspector( 'Bloom' );
+	renderPipeline.outputNode = scenePassColor.add( bloomPass );
+
+	bloomPass.threshold.value = params.threshold;
+	bloomPass.strength.value = params.strength;
+	bloomPass.radius.value = params.radius;
 
   	camera.position.copy(CameraDefaultPos);
   
@@ -425,7 +434,7 @@ function init()
   	controls.update();
 
   	///hdri 環境光源
-	FX.LoadHDRWithPMREM('./textures/hdri/studio_small_09_1k.hdr',scene,renderer);
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
 
 	const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 1.5 );
 	hemiLight.position.set( 0, 20, 0 );
@@ -477,7 +486,7 @@ function init()
 
 				const color_code = object.children[i].name.split(/_\d+/)[0];
 				InstLight(object.children[i],color_code);
-				//console.log(color_code);
+				//object.children[i].scale.set(1.02,1,1.02);
 			  }
         	}
 
@@ -493,25 +502,11 @@ function init()
         	}
 		});
 
-	
-	//	model.traverse((child) => {
-//
-	//	
-//
-	//	});
-
 		scene.add(model);
 
-
-		//scene.environment.rotation = FX.ToThreeEulerAngle(45);
-
 		scene.environmentRotation.y = FX.ToThreeEulerAngle(-30); 
-		//scene.backgroundRotation.y = FX.ToThreeEulerAngle(-45);
 
-
-		animate();
-		setTimeout(() => {_loadingUI.remove();}, 600);
-
+		FXUI.InstLoadingEffect_Type_A(false)
         //FX.Material_Inspector(scene);
 		
     },
@@ -588,18 +583,15 @@ function onWindowResize()
     renderer.setSize( window.innerWidth, window.innerHeight);
 }
 
-function animate() 
+function animate(timestamp) 
 {
-  	requestAnimationFrame( animate );
 
   	controls.update();
-	
-  	//renderer.render( scene, camera );
-	composer.render();
-  	//UpdateCameraPosition(camera,controls);
-	//FX.WebGLInspector(container, renderer);
+	renderPipeline.render();
 
-	const delta = clock.getDelta();
+	// 自動更新時間（用來計算移動速度、旋轉等）
+    timer.update( timestamp );
+	const delta = timer.getDelta();
 
 	if ( mixer ) mixer.update( delta );
 
@@ -609,14 +601,6 @@ function animate()
 	{
 		controls.autoRotate=true;
 	}
-
-	//if(RotatePivot.rotation.z>FX.ToThreeEulerAngle(-115))
-	//{
-	//	RotatePivot.rotation.z-=0.01;
-	//}
-	
-	//console.log(RotatePivot.rotation.z)
-
 }
 
 function InstLight(target,thisColor)
@@ -624,7 +608,7 @@ function InstLight(target,thisColor)
 	const keyMaterial = new THREE.MeshStandardMaterial({
 	    color: thisColor,       // 鍵帽本體顏色（深色）
 	    emissive: thisColor,    // 發光顏色（起始為綠色）
-	    emissiveIntensity: 3,  // 發光強度，配合 Bloom 效果更佳
+	    emissiveIntensity: 3  // 發光強度，配合 Bloom 效果更佳
 	});
 
 	target.traverse((child) => {
