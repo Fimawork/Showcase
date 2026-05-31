@@ -8,23 +8,420 @@
 		
 		<style type="text/css">
 		@import url('https://fonts.googleapis.com/css?family=Roboto:100,300,700');  
+		@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
 		@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" );
 		@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
 			
+			:root {
+				--hud-cyan: #00d2ff;
+				--hud-cyan-dim: rgba(0, 210, 255, 0.1);
+				--hud-cyan-glow: rgba(0, 210, 255, 0.5);
+
+				--hud-green: #3AAE07;
+				--hud-green-dim: rgba(58, 174, 7, 0.1);
+				--hud-green-glow: rgba(58, 174, 7, 0.5);
+
+				--hud-amber: #ffaa00;
+				--hud-amber-dim: rgba(255, 170, 0, 0.1);
+				--hud-amber-glow: rgba(255, 170, 0, 0.5);
+
+				--hud-theme: var(--hud-cyan);
+				--hud-theme-dim: var(--hud-cyan-dim);
+				--hud-theme-glow: var(--hud-theme-glow);
+				--font-hud: 'Share Tech Mono', monospace;
+				--font-title: 'Orbitron', sans-serif;
+			}
+
 			body
 			{
 				margin: 0;
 				padding:0; 
 				overflow: hidden;
+				background-color: #000;
+				user-select: none;
 			}
 			
-
 			canvas
 			{
 				width: 100%;
-   				height: 100%;
+				height: 100%;
+				display: block;
 			}
 
+			/* HUD Container */
+			#hud-overlay {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 10;
+				pointer-events: none;
+				font-family: var(--font-hud);
+				color: var(--hud-theme);
+				text-shadow: 0 0 5px var(--hud-theme-glow);
+				box-sizing: border-box;
+				transition: opacity 0.5s ease;
+				opacity: 1;
+				overflow: hidden;
+			}
+
+			#hud-overlay.hidden {
+				opacity: 0;
+			}
+
+			/* Background Grid and Vignette */
+			.hud-vignette {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.7) 100%);
+				pointer-events: none;
+			}
+
+			/* Curved Visor Screen Overlay */
+			.hud-visor-curved {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				border: 1px solid var(--hud-theme-dim);
+				box-shadow: inset 0 0 80px var(--hud-theme-dim);
+				pointer-events: none;
+				border-radius: 40px;
+				margin: 10px;
+				width: calc(100% - 20px);
+				height: calc(100% - 20px);
+			}
+
+			/* Left & Right HUD Columns bending in 3D */
+			.hud-side-panel {
+				position: absolute;
+				top: 25%;
+				height: 50%;
+				width: 250px;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				pointer-events: none;
+			}
+
+			.hud-side-left {
+				left: 4%;
+				transform: perspective(800px) rotateY(18deg);
+				transform-origin: left center;
+			}
+
+			.hud-side-right {
+				right: 4%;
+				transform: perspective(800px) rotateY(-18deg);
+				transform-origin: right center;
+				align-items: flex-end;
+			}
+
+			/* Centered Reticle */
+			#hud-center {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				width: 600px;
+				height: 600px;
+				transform: translate(-50%, -50%);
+				pointer-events: none;
+			}
+
+			/* Top and Bottom Panels */
+			#hud-top {
+				position: absolute;
+				top: 3%;
+				left: 50%;
+				transform: translateX(-50%);
+				width: 800px;
+				height: 70px;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				pointer-events: none;
+			}
+
+			.hud-top-data {
+				display: flex;
+				justify-content: space-between;
+				width: 100%;
+				font-size: 13px;
+				letter-spacing: 2px;
+				opacity: 0.8;
+			}
+
+			#hud-bottom-telemetry {
+				position: absolute;
+				bottom: 12%;
+				left: 0;
+				width: 100%;
+				padding: 0 5%;
+				display: flex;
+				justify-content: space-between;
+				box-sizing: border-box;
+				pointer-events: none;
+			}
+
+			/* Telemetry Blocks */
+			.hud-telemetry-block {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+				width: 180px;
+			}
+
+			.hud-telemetry-row {
+				display: flex;
+				justify-content: space-between;
+				font-size: 12px;
+				letter-spacing: 1px;
+			}
+
+			.hud-telemetry-label {
+				opacity: 0.6;
+			}
+
+			.hud-telemetry-value {
+				font-weight: bold;
+			}
+
+			.hud-border-line {
+				margin-top: 5px;
+				overflow: visible;
+			}
+
+			.hud-border-line path {
+				stroke: var(--hud-theme);
+				fill: none;
+				stroke-width: 1.2;
+				filter: drop-shadow(0 0 2px var(--hud-theme-glow));
+			}
+
+			/* Top-Left Tabs */
+			.hud-tabs {
+				position: absolute;
+				top: 3%;
+				left: 3%;
+				display: flex;
+				gap: 15px;
+				pointer-events: auto;
+			}
+
+			.hud-tab {
+				font-size: 11px;
+				letter-spacing: 1.5px;
+				padding: 4px 10px;
+				border: 1px solid var(--hud-theme-dim);
+				background: rgba(0, 0, 0, 0.4);
+				clip-path: polygon(0 0, 85% 0, 100% 100%, 0% 100%);
+				cursor: pointer;
+				transition: all 0.3s ease;
+			}
+
+			.hud-tab:hover, .hud-tab.active {
+				background: var(--hud-theme-dim);
+				border-color: var(--hud-theme);
+				box-shadow: 0 0 8px var(--hud-theme-dim);
+			}
+
+			/* Double UU brackets styles */
+			.hud-bracket-group {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				margin: 15px 0;
+			}
+
+			.hud-val-side {
+				font-size: 14px;
+				font-weight: bold;
+				letter-spacing: 1px;
+			}
+
+			/* Console Log Feed */
+			.hud-log-feed {
+				position: absolute;
+				bottom: 12%;
+				left: 50%;
+				transform: translateX(-50%);
+				width: 400px;
+				height: 80px;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-end;
+				font-size: 11px;
+				opacity: 0.7;
+				pointer-events: none;
+				text-align: center;
+			}
+
+			.hud-log-line {
+				margin: 2px 0;
+				white-space: nowrap;
+				animation: logFadeIn 0.3s ease forwards;
+			}
+
+			@keyframes logFadeIn {
+				from { opacity: 0; transform: translateY(5px); }
+				to { opacity: 1; transform: translateY(0); }
+			}
+
+			/* Control Panel Console */
+			#hud-console {
+				position: absolute;
+				bottom: 3%;
+				left: 50%;
+				transform: translateX(-50%);
+				z-index: 100;
+				pointer-events: auto;
+				display: flex;
+				gap: 15px;
+				padding: 10px 25px;
+				border-radius: 30px;
+				background: rgba(0, 0, 0, 0.6);
+				border: 1px solid var(--hud-theme-dim);
+				backdrop-filter: blur(10px);
+				-webkit-backdrop-filter: blur(10px);
+				box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 15px var(--hud-theme-dim);
+			}
+
+			.hud-btn {
+				background: transparent;
+				border: 1px solid var(--hud-theme-dim);
+				color: var(--hud-theme);
+				font-family: var(--font-hud);
+				font-size: 12px;
+				letter-spacing: 1px;
+				padding: 8px 18px;
+				border-radius: 20px;
+				cursor: pointer;
+				transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+				position: relative;
+				overflow: hidden;
+				text-shadow: 0 0 3px var(--hud-theme-glow);
+			}
+
+			.hud-btn::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: -100%;
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(90deg, transparent, var(--hud-theme-dim), transparent);
+				transition: all 0.5s;
+			}
+
+			.hud-btn:hover::before {
+				left: 100%;
+			}
+
+			.hud-btn:hover {
+				background: var(--hud-theme-dim);
+				border-color: var(--hud-theme);
+				box-shadow: 0 0 10px var(--hud-theme-dim);
+				transform: translateY(-2px);
+			}
+
+			.hud-btn:active {
+				transform: translateY(1px);
+			}
+
+			.hud-btn.active {
+				background: var(--hud-theme);
+				color: #000;
+				font-weight: bold;
+				text-shadow: none;
+				box-shadow: 0 0 15px var(--hud-theme);
+			}
+
+			/* Loading screen modifications to match the theme */
+			#fx_loading_screen {
+				font-family: var(--font-hud) !important;
+				background-color: #000 !important;
+			}
+
+			/* SVG Vector elements styling */
+			.hud-svg-line {
+				stroke: var(--hud-theme);
+				stroke-width: 1;
+				fill: none;
+				filter: drop-shadow(0 0 2px var(--hud-theme-glow));
+			}
+
+			.hud-svg-dim {
+				stroke: var(--hud-theme);
+				stroke-width: 0.5;
+				fill: none;
+				opacity: 0.4;
+			}
+
+			.hud-svg-text {
+				fill: var(--hud-theme);
+				font-family: var(--font-hud);
+				font-size: 11px;
+				letter-spacing: 1px;
+				text-shadow: 0 0 3px var(--hud-theme-glow);
+			}
+
+			/* Scanline effect */
+			.hud-scanline {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(
+					rgba(18, 16, 16, 0) 50%, 
+					rgba(0, 0, 0, 0.25) 50%
+				);
+				background-size: 100% 4px;
+				z-index: 100;
+				pointer-events: none;
+				opacity: 0.15;
+			}
+
+			/* Alarm warning overlay */
+			#hud-alarm-overlay {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(255, 0, 0, 0.15);
+				z-index: 9;
+				pointer-events: none;
+				opacity: 0;
+				transition: opacity 0.3s ease;
+			}
+			#hud-alarm-overlay.alarm-active {
+				animation: blink 0.6s infinite alternate;
+			}
+
+			/* Jitter shake classes */
+			@keyframes shake {
+				0% { transform: translate(0, 0) rotate(0deg); }
+				10% { transform: translate(-2px, -2px) rotate(-0.5deg); }
+				20% { transform: translate(2px, 1px) rotate(0.5deg); }
+				30% { transform: translate(-1px, 2px) rotate(0deg); }
+				40% { transform: translate(1px, -1px) rotate(0.5deg); }
+				50% { transform: translate(-2px, 1px) rotate(-0.5deg); }
+				60% { transform: translate(2px, -2px) rotate(0deg); }
+				70% { transform: translate(-1px, -1px) rotate(0.5deg); }
+				80% { transform: translate(1px, 2px) rotate(-0.5deg); }
+				90% { transform: translate(-2px, -1px) rotate(0deg); }
+				100% { transform: translate(0, 0) rotate(0deg); }
+			}
+			.shaking {
+				animation: shake 0.15s infinite;
+			}
 		</style>
 
         
@@ -32,6 +429,209 @@
 	
 	<body> 
 
+	<!-- HUD Overlay -->
+	<div id="hud-alarm-overlay"></div>
+	<div id="hud-overlay">
+		<!-- Vignette -->
+		<div class="hud-vignette"></div>
+		
+		<!-- Scanline -->
+		<div class="hud-scanline"></div>
+
+		<!-- Curved Visor Framing -->
+		<div class="hud-visor-curved"></div>
+
+		<!-- Inline SVG for Background Crosses Grid -->
+		<svg id="hud-bg-grid" style="position:absolute; width:100%; height:100%; top:0; left:0; z-index:-1; pointer-events:none;">
+			<defs>
+				<pattern id="cross-grid" width="80" height="80" patternUnits="userSpaceOnUse">
+					<path d="M 40 35 L 40 45 M 35 40 L 45 40" stroke="var(--hud-theme)" stroke-width="0.7" opacity="0.15" />
+				</pattern>
+			</defs>
+			<rect width="100%" height="100%" fill="url(#cross-grid)" />
+		</svg>
+
+		<!-- Top Navigation/Compass -->
+		<div id="hud-top">
+			<div class="hud-top-data">
+				<div>SYS-STAT: ACTIVE</div>
+				<div id="hud-met-clock">MET: 00:00:00:00</div>
+				<div>NODE: NEBULA-OV104</div>
+			</div>
+			<svg width="600" height="40" viewBox="0 0 600 40" style="margin-top: 5px;">
+				<path d="M 50 35 Q 300 15 550 35" class="hud-svg-dim" />
+				<path d="M 150 28 Q 300 8 450 28" class="hud-svg-line" />
+				<!-- Center indicator triangle -->
+				<polygon points="300,28 296,20 304,20" fill="var(--hud-theme)" style="filter: drop-shadow(0 0 2px var(--hud-theme-glow));" />
+				<!-- Compass slider text display -->
+				<text x="300" y="15" text-anchor="middle" id="hud-heading-txt" fill="var(--hud-theme)" font-family="var(--font-hud)" font-size="14" font-weight="bold" style="text-shadow: 0 0 3px var(--hud-theme-glow);">HEADING: 000°</text>
+			</svg>
+		</div>
+
+		<!-- Top-Left Navigation Tabs -->
+		<div class="hud-tabs">
+			<div class="hud-tab active" onclick="window.HUDAudio.playClick();">DIAG</div>
+			<div class="hud-tab" onclick="window.HUDAudio.playClick();">COMM</div>
+			<div class="hud-tab" onclick="window.HUDAudio.playClick();">SCAN</div>
+		</div>
+
+		<!-- Left Side 3D Curved Panel -->
+		<div class="hud-side-panel hud-side-left">
+			<div class="hud-bracket-group">
+				<svg width="60" height="40" viewBox="0 0 60 40" style="overflow: visible;">
+					<rect x="10" y="10" width="15" height="20" rx="3" class="hud-svg-line" />
+					<rect x="35" y="10" width="15" height="20" rx="3" class="hud-svg-line" />
+					<path d="M 5 5 L 5 35 M 55 5 L 55 35" class="hud-svg-dim" />
+				</svg>
+				<span class="hud-val-side" id="hud-side-l1">02.14</span>
+			</div>
+			<div class="hud-bracket-group" style="margin-top: auto;">
+				<svg width="60" height="40" viewBox="0 0 60 40" style="overflow: visible;">
+					<rect x="10" y="10" width="15" height="20" rx="3" class="hud-svg-line" />
+					<rect x="35" y="10" width="15" height="20" rx="3" class="hud-svg-line" />
+					<path d="M 5 5 L 5 35 M 55 5 L 55 35" class="hud-svg-dim" />
+				</svg>
+				<span class="hud-val-side" id="hud-side-l2">45.09</span>
+			</div>
+		</div>
+
+		<!-- Right Side 3D Curved Panel -->
+		<div class="hud-side-panel hud-side-right">
+			<div class="hud-bracket-group">
+				<span class="hud-val-side" id="hud-side-r1">99.81</span>
+				<svg width="60" height="40" viewBox="0 0 60 40" style="overflow: visible;">
+					<rect x="10" y="10" width="15" height="20" rx="3" class="hud-svg-line" />
+					<rect x="35" y="10" width="15" height="20" rx="3" class="hud-svg-line" />
+					<path d="M 5 5 L 5 35 M 55 5 L 55 35" class="hud-svg-dim" />
+				</svg>
+			</div>
+			<div class="hud-bracket-group" style="margin-top: auto;">
+				<span class="hud-val-side" id="hud-side-r2">12.04</span>
+				<svg width="60" height="40" viewBox="0 0 60 40" style="overflow: visible;">
+					<rect x="10" y="10" width="15" height="20" rx="3" class="hud-svg-line" />
+					<rect x="35" y="10" width="15" height="20" rx="3" class="hud-svg-line" />
+					<path d="M 5 5 L 5 35 M 55 5 L 55 35" class="hud-svg-dim" />
+				</svg>
+			</div>
+		</div>
+
+		<!-- Centered HUD Reticle (Exactly Matching Pinterest Reference) -->
+		<div id="hud-center">
+			<svg width="600" height="600" viewBox="0 0 600 600" style="overflow: visible;">
+				<!-- Background alignment helpers -->
+				<!-- Left vertical ruler bar -->
+				<line x1="150" y1="120" x2="150" y2="480" class="hud-svg-line" />
+				<!-- Ticks along left vertical ruler -->
+				<path d="M 140 150 L 150 150 M 145 180 L 150 180 M 145 210 L 150 210 M 145 240 L 150 240 M 140 270 L 150 270 M 140 330 L 150 330 M 145 360 L 150 360 M 145 390 L 150 390 M 145 420 L 150 420 M 140 450 L 150 450" class="hud-svg-line" />
+				<text x="130" y="305" transform="rotate(-90, 130, 305)" class="hud-svg-text" font-size="10" opacity="0.8">DORMANT MODE - 04</text>
+				
+				<!-- Right vertical ruler bar -->
+				<line x1="450" y1="120" x2="450" y2="480" class="hud-svg-line" />
+				<!-- Ticks along right vertical ruler -->
+				<path d="M 450 150 L 460 150 M 450 180 L 455 180 M 450 210 L 455 210 M 450 240 L 455 240 M 450 270 L 460 270 M 450 330 L 460 330 M 450 360 L 455 360 M 450 390 L 455 390 M 450 420 L 455 420 M 450 450 L 460 450" class="hud-svg-line" />
+				<text x="470" y="295" transform="rotate(90, 470, 295)" class="hud-svg-text" font-size="10" opacity="0.8">DORMANT MODE - 04</text>
+
+				<!-- Center dynamic rotation group (rolls with camera) -->
+				<g id="hud-reticle-gyro" style="transform-origin: 300px 300px; transition: transform 0.1s ease-out;">
+					<!-- Horizontal alignment lines -->
+					<line x1="180" y1="300" x2="260" y2="300" class="hud-svg-line" />
+					<line x1="340" y1="300" x2="420" y2="300" class="hud-svg-line" />
+					
+					<!-- Left double concentric arcs -->
+					<path d="M 180 275 A 25 25 0 0 0 180 325" fill="none" stroke="var(--hud-theme)" stroke-width="1" opacity="0.5" />
+					<path d="M 175 270 A 30 30 0 0 0 175 330" fill="none" stroke="var(--hud-theme)" stroke-width="1.5" />
+					<line x1="165" y1="300" x2="175" y2="300" class="hud-svg-line" />
+
+					<!-- Right double concentric arcs -->
+					<path d="M 420 275 A 25 25 0 0 1 420 325" fill="none" stroke="var(--hud-theme)" stroke-width="1" opacity="0.5" />
+					<path d="M 425 270 A 30 30 0 0 1 425 330" fill="none" stroke="var(--hud-theme)" stroke-width="1.5" />
+					<line x1="425" y1="300" x2="435" y2="300" class="hud-svg-line" />
+
+					<!-- Dotted outer ring -->
+					<circle cx="300" cy="300" r="75" fill="none" stroke="var(--hud-theme)" stroke-width="1" stroke-dasharray="2 5" opacity="0.4" />
+					
+					<!-- Inner gear-teeth ring -->
+					<circle cx="300" cy="300" r="40" fill="none" stroke="var(--hud-theme)" stroke-width="5" stroke-dasharray="2.2 5.5" opacity="0.75" />
+
+					<!-- Dynamic center splits -->
+					<path d="M 282 300 A 18 18 0 0 0 318 300" fill="none" stroke="var(--hud-theme)" stroke-width="1.5" />
+					<line x1="300" y1="262" x2="300" y2="278" class="hud-svg-line" />
+					<line x1="300" y1="322" x2="300" y2="338" class="hud-svg-line" />
+					<line x1="280" y1="300" x2="320" y2="300" class="hud-svg-dim" />
+
+					<!-- Tiny decorative crosses -->
+					<path d="M 230 225 L 230 235 M 225 230 L 235 230" class="hud-svg-dim" opacity="0.3" />
+					<path d="M 370 225 L 370 235 M 365 230 L 375 230" class="hud-svg-dim" opacity="0.3" />
+					<path d="M 230 365 L 230 375 M 225 370 L 235 370" class="hud-svg-dim" opacity="0.3" />
+					<path d="M 370 365 L 370 375 M 365 370 L 375 370" class="hud-svg-dim" opacity="0.3" />
+				</g>
+
+				<!-- Coordinate indicator text box offsets -->
+				<text x="300" y="225" text-anchor="middle" id="hud-val-pitch" class="hud-svg-text" font-weight="bold">P: 00.0°</text>
+				<text x="300" y="390" text-anchor="middle" id="hud-val-roll" class="hud-svg-text" font-weight="bold">R: 00.0°</text>
+				<text x="300" y="425" text-anchor="middle" class="hud-svg-text" font-size="14" font-weight="bold" letter-spacing="2">00</text>
+
+				<text x="280" y="270" text-anchor="end" class="hud-svg-text" opacity="0.6">00./</text>
+				<text x="320" y="270" text-anchor="start" class="hud-svg-text" opacity="0.6">00./</text>
+				<text x="280" y="340" text-anchor="end" class="hud-svg-text" opacity="0.6">00./</text>
+				<text x="320" y="340" text-anchor="start" class="hud-svg-text" opacity="0.6">00./</text>
+			</svg>
+		</div>
+
+		<!-- Scrolling Command Diagnostic Log Feed -->
+		<div class="hud-log-feed" id="hud-log-container">
+			<div class="hud-log-line">> SHUTTLE SYSTEMS OPERATIONAL</div>
+			<div class="hud-log-line">> MATRIX SYNC COMPLETE</div>
+		</div>
+
+		<!-- Bottom Left & Right Angled Telemetry -->
+		<div id="hud-bottom-telemetry">
+			<div class="hud-telemetry-block">
+				<div class="hud-telemetry-row">
+					<span class="hud-telemetry-label">ALIM</span>
+					<span class="hud-telemetry-value" id="hud-stat-alim">100%</span>
+				</div>
+				<div class="hud-telemetry-row">
+					<span class="hud-telemetry-label">TEMP</span>
+					<span class="hud-telemetry-value" id="hud-stat-temp">301K</span>
+				</div>
+				<div class="hud-telemetry-row">
+					<span class="hud-telemetry-label">CHAR</span>
+					<span class="hud-telemetry-value" id="hud-stat-char">0.05G</span>
+				</div>
+				<svg width="180" height="20" class="hud-border-line">
+					<path d="M 0 5 L 140 5 L 160 18" />
+				</svg>
+			</div>
+
+			<div class="hud-telemetry-block">
+				<div class="hud-telemetry-row">
+					<span class="hud-telemetry-label">ZOOM</span>
+					<span class="hud-telemetry-value" id="hud-stat-zoom">1.0X</span>
+				</div>
+				<div class="hud-telemetry-row">
+					<span class="hud-telemetry-label">TERRAIN</span>
+					<span class="hud-telemetry-value" id="hud-stat-terrain">ORBIT</span>
+				</div>
+				<div class="hud-telemetry-row">
+					<span class="hud-telemetry-label">CLOAK</span>
+					<span class="hud-telemetry-value" id="hud-stat-cloak">OFF</span>
+				</div>
+				<svg width="180" height="20" class="hud-border-line">
+					<path d="M 180 5 L 40 5 L 20 18" />
+				</svg>
+			</div>
+		</div>
+	</div>
+
+	<!-- Interactive Console Controls (Glassmorphic Bottom Overlay) -->
+	<div id="hud-console">
+		<button class="hud-btn" id="btn-hud-toggle">HUD ON</button>
+		<button class="hud-btn" id="btn-theme-switch">THEME: CYAN</button>
+		<button class="hud-btn" id="btn-warp">WARP DRIVE</button>
+		<button class="hud-btn" id="btn-autopilot">AUTOPILOT</button>
+		<button class="hud-btn" id="btn-reset">RESET VIEW</button>
+	</div>
 	<script type="importmap">
 		{
 			"imports": {
@@ -73,12 +673,290 @@ let ScanEffect = new THREE.MeshStandardMaterial( {
 } );
 
 let renderPipeline;
+let bloomPass; // globally declared for warp adjustment
 
 const params = {
 	threshold: 0.3,
 	strength: 3,
 	radius: 1
 };
+
+// Web Audio API Synthesizer
+const HUDAudio = {
+	ctx: null,
+	enabled: true,
+	init() {
+		if (this.ctx) return;
+		try {
+			this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+		} catch (e) {
+			console.warn("Web Audio API not supported", e);
+		}
+	},
+	playClick() {
+		if (!this.enabled) return;
+		this.init();
+		if (!this.ctx) return;
+		const osc = this.ctx.createOscillator();
+		const gain = this.ctx.createGain();
+		osc.type = 'sine';
+		osc.frequency.setValueAtTime(1000, this.ctx.currentTime);
+		osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.08);
+		gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+		osc.connect(gain);
+		gain.connect(this.ctx.destination);
+		osc.start();
+		osc.stop(this.ctx.currentTime + 0.08);
+	},
+	playHover() {
+		if (!this.enabled) return;
+		this.init();
+		if (!this.ctx) return;
+		const osc = this.ctx.createOscillator();
+		const gain = this.ctx.createGain();
+		osc.type = 'triangle';
+		osc.frequency.setValueAtTime(1600, this.ctx.currentTime);
+		gain.gain.setValueAtTime(0.008, this.ctx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.02);
+		osc.connect(gain);
+		gain.connect(this.ctx.destination);
+		osc.start();
+		osc.stop(this.ctx.currentTime + 0.02);
+	},
+	playWarp(engage) {
+		if (!this.enabled) return;
+		this.init();
+		if (!this.ctx) return;
+		const osc = this.ctx.createOscillator();
+		const gain = this.ctx.createGain();
+		const filter = this.ctx.createBiquadFilter();
+		
+		filter.type = 'lowpass';
+		filter.frequency.setValueAtTime(300, this.ctx.currentTime);
+		
+		osc.type = 'sawtooth';
+		if (engage) {
+			osc.frequency.setValueAtTime(80, this.ctx.currentTime);
+			osc.frequency.exponentialRampToValueAtTime(500, this.ctx.currentTime + 1.0);
+			gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+			gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 1.0);
+		} else {
+			osc.frequency.setValueAtTime(500, this.ctx.currentTime);
+			osc.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 0.6);
+			gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+			gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.6);
+		}
+		
+		osc.connect(filter);
+		filter.connect(gain);
+		gain.connect(this.ctx.destination);
+		osc.start();
+		osc.stop(this.ctx.currentTime + 1.0);
+	},
+	playColorChange() {
+		if (!this.enabled) return;
+		this.init();
+		if (!this.ctx) return;
+		const osc = this.ctx.createOscillator();
+		const gain = this.ctx.createGain();
+		osc.type = 'sine';
+		osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+		osc.frequency.linearRampToValueAtTime(800, this.ctx.currentTime + 0.25);
+		gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+		osc.connect(gain);
+		gain.connect(this.ctx.destination);
+		osc.start();
+		osc.stop(this.ctx.currentTime + 0.25);
+	}
+};
+window.HUDAudio = HUDAudio; // expose globally for HTML elements
+
+// Color Theme Management
+const HUDThemes = {
+	CYAN: {
+		hex: 0x00d2ff,
+		themeVar: 'var(--hud-cyan)',
+		dimVar: 'var(--hud-cyan-dim)',
+		glowVar: 'var(--hud-cyan-glow)',
+		label: 'THEME: CYAN'
+	},
+	GREEN: {
+		hex: 0x3AAE07,
+		themeVar: 'var(--hud-green)',
+		dimVar: 'var(--hud-green-dim)',
+		glowVar: 'var(--hud-green-glow)',
+		label: 'THEME: GREEN'
+	},
+	AMBER: {
+		hex: 0xffaa00,
+		themeVar: 'var(--hud-amber)',
+		dimVar: 'var(--hud-amber-dim)',
+		glowVar: 'var(--hud-amber-glow)',
+		label: 'THEME: AMBER'
+	}
+};
+
+let currentTheme = 'CYAN';
+
+function switchTheme(themeKey) {
+	HUDAudio.playColorChange();
+	const t = HUDThemes[themeKey];
+	currentTheme = themeKey;
+	
+	// Update Three.js Materials
+	if (ScanEffect) {
+		ScanEffect.color.setHex(t.hex);
+		ScanEffect.emissive.setHex(t.hex);
+	}
+	if (scene && scene.fog) {
+		scene.fog.color.setHex(t.hex);
+	}
+	
+	// Update CSS Variables
+	document.documentElement.style.setProperty('--hud-theme', t.themeVar);
+	document.documentElement.style.setProperty('--hud-theme-dim', t.dimVar);
+	document.documentElement.style.setProperty('--hud-theme-glow', t.glowVar);
+	
+	// Update Button Label
+	const btn = document.getElementById('btn-theme-switch');
+	if (btn) btn.innerText = t.label;
+	addLogLine(`[SYSTEM] THEME SWITCHED TO ${themeKey}`);
+}
+
+// Log Feed Streamer
+const logLinesList = [
+	"SHUTTLE SYSTEMS OPERATIONAL",
+	"MATRIX SYNC COMPLETE",
+	"ESTABLISHING SECURE ORBITAL LINK",
+	"TELEMETRY: SCANNING EXOPLANET GRID",
+	"CORE RENDER PIPELINE: ACTIVE",
+	"FOG DENSITY LEVEL: NOMINAL",
+	"GRAVITATIONAL DEVIATION: 0.02G",
+	"ATMOSPHERE READINGS: ZERO",
+	"SOLAR SHIELD: ARMED",
+	"QUANTUM MATRIX STREAM: ONLINE"
+];
+
+function addLogLine(text) {
+	const container = document.getElementById('hud-log-container');
+	if (!container) return;
+	const line = document.createElement('div');
+	line.className = 'hud-log-line';
+	line.innerText = `> ${text}`;
+	container.appendChild(line);
+	if (container.children.length > 4) {
+		container.removeChild(container.firstChild);
+	}
+}
+
+// Controls
+let warpActive = false;
+let hudVisible = true;
+
+function toggleWarp() {
+	warpActive = !warpActive;
+	HUDAudio.playWarp(warpActive);
+	
+	const btn = document.getElementById('btn-warp');
+	const overlay = document.getElementById('hud-alarm-overlay');
+	const hudEl = document.getElementById('hud-overlay');
+	
+	if (warpActive) {
+		if (btn) {
+			btn.classList.add('active');
+			btn.innerText = "DISENGAGE WARP";
+		}
+		if (overlay) overlay.classList.add('alarm-active');
+		addLogLine("[WARP] WARP DRIVE ENGAGED. HYPER VELOCITY.");
+		
+		// Jitter shake
+		if (hudEl) hudEl.classList.add('shaking');
+		setTimeout(() => {
+			if (hudEl) hudEl.classList.remove('shaking');
+		}, 1000);
+	} else {
+		if (btn) {
+			btn.classList.remove('active');
+			btn.innerText = "WARP DRIVE";
+		}
+		if (overlay) overlay.classList.remove('alarm-active');
+		addLogLine("[WARP] WARP DRIVE DISENGAGED. SAFE VELOCITY.");
+	}
+}
+
+// Telemetry Updates
+function updateHUDTelemetry(timestamp) {
+	if (!camera || !controls) return;
+	
+	// Yaw (Heading)
+	const dir = new THREE.Vector3();
+	camera.getWorldDirection(dir);
+	let yaw = Math.atan2(dir.x, dir.z);
+	let heading = (yaw * 180 / Math.PI + 360) % 360;
+	const headingTxt = document.getElementById('hud-heading-txt');
+	if (headingTxt) {
+		headingTxt.innerText = `HEADING: ${Math.floor(heading).toString().padStart(3, '0')}°`;
+	}
+	
+	// Pitch
+	let pitch = Math.asin(dir.y) * 180 / Math.PI;
+	const valPitch = document.getElementById('hud-val-pitch');
+	if (valPitch) valPitch.innerText = `P: ${pitch.toFixed(1)}°`;
+	
+	// Roll (Azimuthal tilt for responsiveness)
+	let roll = controls.getAzimuthalAngle() * 180 / Math.PI;
+	const valRoll = document.getElementById('hud-val-roll');
+	if (valRoll) valRoll.innerText = `R: ${roll.toFixed(1)}°`;
+	
+	const gyro = document.getElementById('hud-reticle-gyro');
+	if (gyro) {
+		gyro.style.transform = `rotate(${-roll}deg) translateY(${pitch * 0.8}px)`;
+	}
+	
+	// Distance (Altitude)
+	let dist = camera.position.distanceTo(controls.target);
+	
+	const statAlim = document.getElementById('hud-stat-alim');
+	if (statAlim) statAlim.innerText = warpActive ? "142%" : "100%";
+	
+	const statTemp = document.getElementById('hud-stat-temp');
+	if (statTemp) {
+		statTemp.innerText = (301 + (warpActive ? Math.sin(timestamp * 0.01) * 2 + 15 : Math.sin(timestamp * 0.002) * 0.5)).toFixed(1) + "K";
+	}
+	
+	const statChar = document.getElementById('hud-stat-char');
+	if (statChar) {
+		statChar.innerText = (warpActive ? (3.5 + Math.sin(timestamp * 0.02) * 0.2).toFixed(2) + "G" : "0.02G");
+	}
+	
+	const statZoom = document.getElementById('hud-stat-zoom');
+	if (statZoom) {
+		statZoom.innerText = (15 / dist).toFixed(1) + "X";
+	}
+	
+	// Brackets
+	const sideL1 = document.getElementById('hud-side-l1');
+	const sideL2 = document.getElementById('hud-side-l2');
+	const sideR1 = document.getElementById('hud-side-r1');
+	const sideR2 = document.getElementById('hud-side-r2');
+	if (sideL1) sideL1.innerText = (2.14 + Math.sin(timestamp * 0.001) * 0.02).toFixed(4);
+	if (sideL2) sideL2.innerText = (45.09 + Math.cos(timestamp * 0.0005) * 0.05).toFixed(4);
+	if (sideR1) sideR1.innerText = (99.81 + Math.sin(timestamp * 0.002) * 0.01).toFixed(4);
+	if (sideR2) sideR2.innerText = (12.04 + Math.cos(timestamp * 0.001) * 0.03).toFixed(4);
+	
+	// MET Clock
+	const elapsed = timestamp;
+	const ms = Math.floor((elapsed % 1000) / 10).toString().padStart(2, '0');
+	const secs = Math.floor((elapsed / 1000) % 60).toString().padStart(2, '0');
+	const mins = Math.floor((elapsed / (1000 * 60)) % 60).toString().padStart(2, '0');
+	const hrs = Math.floor((elapsed / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+	const metClock = document.getElementById('hud-met-clock');
+	if (metClock) {
+		metClock.innerText = `MET: ${hrs}:${mins}:${secs}:${ms}`;
+	}
+}
 
 
 
@@ -143,7 +1021,7 @@ async function init() {
 	renderPipeline = new THREE.RenderPipeline( renderer );
 	const scenePass = pass( scene, camera );
 	const scenePassColor = scenePass.getTextureNode( 'output' ).toInspector( 'Color' );
-	const bloomPass = bloom( scenePassColor ).toInspector( 'Bloom' );
+	bloomPass = bloom( scenePassColor ).toInspector( 'Bloom' );
 	renderPipeline.outputNode = scenePassColor.add( bloomPass );
 
 	bloomPass.threshold.value = params.threshold;
@@ -177,13 +1055,86 @@ async function init() {
 	
     });
 
-	window.addEventListener( "mousewheel", event => {
-		
-		if(Math.abs(event.deltaY)>5)
-		{
-			SpeedUp();
-		}
-   
+	// Switch to default theme
+	switchTheme('CYAN');
+
+	// Button Event Listeners
+	const btnHudToggle = document.getElementById('btn-hud-toggle');
+	if (btnHudToggle) {
+		btnHudToggle.addEventListener('click', () => {
+			hudVisible = !hudVisible;
+			HUDAudio.playClick();
+			const hud = document.getElementById('hud-overlay');
+			if (hudVisible) {
+				hud.classList.remove('hidden');
+				btnHudToggle.innerText = "HUD ON";
+				btnHudToggle.classList.remove('active');
+			} else {
+				hud.classList.add('hidden');
+				btnHudToggle.innerText = "HUD OFF";
+				btnHudToggle.classList.add('active');
+			}
+		});
+		btnHudToggle.addEventListener('mouseenter', () => HUDAudio.playHover());
+	}
+
+	const btnThemeSwitch = document.getElementById('btn-theme-switch');
+	if (btnThemeSwitch) {
+		const themesKeys = ['CYAN', 'GREEN', 'AMBER'];
+		let themeIdx = 0;
+		btnThemeSwitch.addEventListener('click', () => {
+			themeIdx = (themeIdx + 1) % themesKeys.length;
+			switchTheme(themesKeys[themeIdx]);
+		});
+		btnThemeSwitch.addEventListener('mouseenter', () => HUDAudio.playHover());
+	}
+
+	const btnWarp = document.getElementById('btn-warp');
+	if (btnWarp) {
+		btnWarp.addEventListener('click', () => {
+			toggleWarp();
+		});
+		btnWarp.addEventListener('mouseenter', () => HUDAudio.playHover());
+	}
+
+	const btnAutopilot = document.getElementById('btn-autopilot');
+	if (btnAutopilot) {
+		btnAutopilot.addEventListener('click', () => {
+			HUDAudio.playClick();
+			controls.autoRotate = !controls.autoRotate;
+			if (controls.autoRotate) {
+				btnAutopilot.classList.add('active');
+				addLogLine("[SYSTEM] AUTOPILOT ORBIT: ACTIVE");
+			} else {
+				btnAutopilot.classList.remove('active');
+				addLogLine("[SYSTEM] AUTOPILOT ORBIT: INACTIVE");
+			}
+		});
+		btnAutopilot.addEventListener('mouseenter', () => HUDAudio.playHover());
+	}
+
+	const btnReset = document.getElementById('btn-reset');
+	if (btnReset) {
+		btnReset.addEventListener('click', () => {
+			HUDAudio.playClick();
+			controls.reset();
+			camera.position.copy(CameraDefaultPos);
+			controls.target.copy(ControlsTargetDefaultPos);
+			controls.update();
+			addLogLine("[SYSTEM] CAMERA COORDINATES RESET");
+		});
+		btnReset.addEventListener('mouseenter', () => HUDAudio.playHover());
+	}
+	
+	// Add click listeners to tabs as well
+	const tabs = document.querySelectorAll('.hud-tab');
+	tabs.forEach((tab, index) => {
+		tab.addEventListener('click', () => {
+			tabs.forEach(t => t.classList.remove('active'));
+			tab.classList.add('active');
+			HUDAudio.playClick();
+			addLogLine(`[INTERFACE] MODESWITCH: PAGE ${tab.innerText}`);
+		});
 	});
 }
 
@@ -196,15 +1147,24 @@ function onWindowResize() {
 
 function animate(timestamp) 
 {
-
 	renderPipeline.render();
 	controls.update();
 
 	// 自動更新時間（用來計算移動速度、旋轉等）
-    timer.update( timestamp );
+	timer.update( timestamp );
 	const delta = timer.getDelta();
 
-	//renderer.render( scene, camera );
+	// Update HUD Telemetry
+	updateHUDTelemetry(timestamp);
+
+	// Adjust bloom strength dynamically on warp
+	if (bloomPass) {
+		if (warpActive) {
+			bloomPass.strength.value = params.strength * (1.5 + Math.sin(timestamp * 0.05) * 0.3);
+		} else {
+			bloomPass.strength.value = params.strength;
+		}
+	}
 
 	if(speed_up>0)
 	{
@@ -216,18 +1176,20 @@ function animate(timestamp)
 		speed=0.03;
 	}
 
+	let speedMultiplier = warpActive ? 6.0 : 1.0;
+
 	for(let i=0;i<model_holder.children.length;i++)
  	{
 		if(model_holder.children[i]!=null)
 		{
-			model_holder.children[i].position.y-=0.1*(speed+speed_up);
+			model_holder.children[i].position.y-=0.1*(speed+speed_up)*speedMultiplier;
 
 			if(model_holder.children[i].position.y<-15)
 			{
 				let posX;
 				let min = Math.ceil(-15);
-    			let max = Math.floor(15);
-    			posX=Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and 			the minimum is inclusive
+				let max = Math.floor(15);
+				posX=Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and 			the minimum is inclusive
 				model_holder.children[i].position.set(posX, 50 ,Math.floor(Math.random() * (5 - (-5) + 1) + (-5)));
 
 				num++;
@@ -239,14 +1201,14 @@ function animate(timestamp)
  	{
 		if(model_holder_02.children[j]!=null)
 		{
-			model_holder_02.children[j].position.y-=0.15*(speed+speed_up);
+			model_holder_02.children[j].position.y-=0.15*(speed+speed_up)*speedMultiplier;
 
 			if(model_holder_02.children[j].position.y<-15)
 			{
 				let posX;
 				let min = Math.ceil(-15);
-    			let max = Math.floor(15);
-    			posX=Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and 			the minimum is inclusive
+				let max = Math.floor(15);
+				posX=Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and 			the minimum is inclusive
 				model_holder_02.children[j].position.set(posX, 50 ,Math.floor(Math.random() * (5 - (-5) + 1) + (-5)));
 
 				num++;
