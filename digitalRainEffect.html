@@ -422,6 +422,22 @@
 			.shaking {
 				animation: shake 0.15s infinite;
 			}
+
+			@media screen and (max-width:768px)/*手機*/
+			{
+				#hud-console {
+				bottom: 0%;
+				}
+
+				.hud-log-feed {
+				display: none;
+				}
+
+				.hud-telemetry-block
+				{
+					display: none;
+				}
+			}
 		</style>
 
         
@@ -630,7 +646,7 @@
 		<button class="hud-btn" id="btn-theme-switch">THEME: CYAN</button>
 		<button class="hud-btn" id="btn-warp">WARP DRIVE</button>
 		<button class="hud-btn" id="btn-autopilot">AUTOPILOT</button>
-		<button class="hud-btn" id="btn-reset">RESET VIEW</button>
+		<!--<button class="hud-btn" id="btn-reset">RESET VIEW</button>-->
 	</div>
 	<script type="importmap">
 		{
@@ -867,6 +883,7 @@ function toggleWarp() {
 		if (btn) {
 			btn.classList.add('active');
 			btn.innerText = "DISENGAGE WARP";
+			speed_up+=25;
 		}
 		if (overlay) overlay.classList.add('alarm-active');
 		addLogLine("[WARP] WARP DRIVE ENGAGED. HYPER VELOCITY.");
@@ -880,6 +897,7 @@ function toggleWarp() {
 		if (btn) {
 			btn.classList.remove('active');
 			btn.innerText = "WARP DRIVE";
+			speed_up=0;
 		}
 		if (overlay) overlay.classList.remove('alarm-active');
 		addLogLine("[WARP] WARP DRIVE DISENGAGED. SAFE VELOCITY.");
@@ -1113,18 +1131,18 @@ async function init() {
 		btnAutopilot.addEventListener('mouseenter', () => HUDAudio.playHover());
 	}
 
-	const btnReset = document.getElementById('btn-reset');
-	if (btnReset) {
-		btnReset.addEventListener('click', () => {
-			HUDAudio.playClick();
-			controls.reset();
-			camera.position.copy(CameraDefaultPos);
-			controls.target.copy(ControlsTargetDefaultPos);
-			controls.update();
-			addLogLine("[SYSTEM] CAMERA COORDINATES RESET");
-		});
-		btnReset.addEventListener('mouseenter', () => HUDAudio.playHover());
-	}
+//	const btnReset = document.getElementById('btn-reset');
+//	if (btnReset) {
+//		btnReset.addEventListener('click', () => {
+//			HUDAudio.playClick();
+//			controls.reset();
+//			camera.position.copy(CameraDefaultPos);
+//			controls.target.copy(ControlsTargetDefaultPos);
+//			controls.update();
+//			addLogLine("[SYSTEM] CAMERA COORDINATES RESET");
+//		});
+//		btnReset.addEventListener('mouseenter', () => HUDAudio.playHover());
+//	}
 	
 	// Add click listeners to tabs as well
 	const tabs = document.querySelectorAll('.hud-tab');
@@ -1161,6 +1179,7 @@ function animate(timestamp)
 	if (bloomPass) {
 		if (warpActive) {
 			bloomPass.strength.value = params.strength * (1.5 + Math.sin(timestamp * 0.05) * 0.3);
+			
 		} else {
 			bloomPass.strength.value = params.strength;
 		}
@@ -1176,13 +1195,14 @@ function animate(timestamp)
 		speed=0.03;
 	}
 
-	let speedMultiplier = warpActive ? 6.0 : 1.0;
+	//let speedMultiplier = warpActive ? 6.0 : 1.0;
+	
 
 	for(let i=0;i<model_holder.children.length;i++)
  	{
 		if(model_holder.children[i]!=null)
 		{
-			model_holder.children[i].position.y-=0.1*(speed+speed_up)*speedMultiplier;
+			model_holder.children[i].position.y-=0.1*(speed+speed_up);
 
 			if(model_holder.children[i].position.y<-15)
 			{
@@ -1201,7 +1221,7 @@ function animate(timestamp)
  	{
 		if(model_holder_02.children[j]!=null)
 		{
-			model_holder_02.children[j].position.y-=0.15*(speed+speed_up)*speedMultiplier;
+			model_holder_02.children[j].position.y-=0.15*(speed+speed_up);
 
 			if(model_holder_02.children[j].position.y<-15)
 			{
