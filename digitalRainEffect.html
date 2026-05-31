@@ -653,7 +653,7 @@
 		import Stats from 'three/addons/libs/stats.module.js';
 		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 		import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-		import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.41/fx_hud.js';
+		import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
 		//RenderPipeline工具
 		import { pass } from 'three/tsl';
 		import { bloom } from 'three/addons/tsl/display/BloomNode.js';
@@ -981,7 +981,7 @@ let speed_up=0;
 
 init();
 
-FXUI.InstLoadingEffect_Type_A(true);
+FXUI.InstLoadingEffect_Type_B(true);
 
 TiggerRainTextAnim();
 
@@ -1257,11 +1257,11 @@ function instText(content)
 
 function TiggerRainTextAnim()
 {
-	setTimeout(() => {RainTextAnim(title_01);}, 1000);
+	setTimeout(() => {RainTextAnim(title_01);FXUI.InstLoadingEffect_Type_B(false);}, 1000);
 	setTimeout(() => {RainTextAnim(title_02);}, 2000);
 	setTimeout(() => {RainTextAnim(title_03);}, 3000);
 	setTimeout(() => {RainTextAnim(title_04);}, 4000);
-	setTimeout(() => {RainTextAnim(title_05);FXUI.InstLoadingEffect_Type_A(false);}, 5000);	
+	setTimeout(() => {RainTextAnim(title_05);}, 5000);	
 }
 
 function RainTextAnim(_content)
