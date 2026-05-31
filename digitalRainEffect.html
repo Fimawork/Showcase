@@ -1,0 +1,330 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width", initial-scale="1.0"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>Digital Rain Effect</title>
+		
+		<style type="text/css">
+		@import url('https://fonts.googleapis.com/css?family=Roboto:100,300,700');  
+		@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" );
+		@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
+			
+			body
+			{
+				margin: 0;
+				padding:0; 
+				overflow: hidden;
+			}
+			
+
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
+
+		</style>
+
+        
+	</head>
+	
+	<body> 
+
+	<script type="importmap">
+		{
+			"imports": {
+			  "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			  "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			  "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+			}
+		}
+	</script>
+
+
+	
+	
+	
+	<script type="module">
+
+		import * as THREE from 'three';
+		import Stats from 'three/addons/libs/stats.module.js';
+		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+		import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+		import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.41/fx_hud.js';
+		//RenderPipeline工具
+		import { pass } from 'three/tsl';
+		import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+
+let camera, scene, renderer, stats;
+let controls;
+let CameraDefaultPos=new THREE.Vector3( 0, -15, 0);
+let ControlsTargetDefaultPos=new THREE.Vector3(0,0,0);
+
+let moving=1;
+
+let ScanEffect = new THREE.MeshStandardMaterial( { 
+	color: 0x3AAE07, 
+	emissive:0x3AAE07,
+	emissiveIntensity: 1,
+	side:THREE.DoubleSide
+} );
+
+let renderPipeline;
+
+const params = {
+	threshold: 0.3,
+	strength: 3,
+	radius: 1
+};
+
+
+
+const timer = new THREE.Timer();
+
+const pointer = new THREE.Vector2();
+
+let mixer;
+
+let title_01='H\nE\nL\nL\nO\nW\nO\nR\nL\nD\nI\nA\nM\nF\nI\nM\nA\nW\nO\nR\nK';
+let title_02='3\nD\nW\nE\nB\nS\nI\nD\nE\nD\nE\nS\nI\nG\nN\nS\nT\nU\nD\nI\nO';
+let title_03='I\nN\nT\nE\nA\nC\nT\nI\nV\nE\n3\nD\nW\nE\nB\nS\nI\nT\nE\nD\nE\nS\nI\nG\nN';
+let title_04='3\nD\nP\nR\nO\nD\nU\nC\nT\nS\nH\nO\nW\nC\nA\nS\nE';
+let title_05='3\nD\nP\nR\nO\nD\nU\nC\nT\nC\nO\nN\nF\nI\nG\nU\nR\nA\nT\nO\nR';
+
+let model_holder=new THREE.Object3D();
+let model_holder_02=new THREE.Object3D();
+let text;
+let speed=1;
+let num=0;
+let speed_up=0;	
+
+init();
+
+FXUI.InstLoadingEffect_Type_A(true);
+
+TiggerRainTextAnim();
+
+async function init() {
+
+	const container = document.createElement( 'div' );
+	document.body.appendChild( container );
+
+	let camera_angel=window.innerWidth<=450?-0.5*Math.PI:0;
+
+	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 500 );
+	camera.position.copy(CameraDefaultPos);
+	camera.lookAt(0,0,0);
+	camera.rotation.z=camera_angel;
+
+	
+	scene = new THREE.Scene();
+
+	renderer = new THREE.WebGPURenderer();
+	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.shadowMap.enabled = true;
+
+	scene.fog = new THREE.Fog( 0x3AAE07, 50, 100 );
+	
+	document.body.appendChild(renderer.domElement);
+
+		// 1. 先等待 Renderer 初始化完成
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+	// 2. 初始化完成後，再啟動動畫循環（這行會自己一直跑，不用手動 call 第一次）
+	renderer.setAnimationLoop( animate );
+
+	scene.add(model_holder).add(model_holder_02);
+
+
+	// 初始化 RenderPipeline
+	renderPipeline = new THREE.RenderPipeline( renderer );
+	const scenePass = pass( scene, camera );
+	const scenePassColor = scenePass.getTextureNode( 'output' ).toInspector( 'Color' );
+	const bloomPass = bloom( scenePassColor ).toInspector( 'Bloom' );
+	renderPipeline.outputNode = scenePassColor.add( bloomPass );
+
+	bloomPass.threshold.value = params.threshold;
+	bloomPass.strength.value = params.strength;
+	bloomPass.radius.value = params.radius;
+
+
+	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+  	controls = new OrbitControls( camera, renderer.domElement );
+  	controls.enablePan = false;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.maxDistance =400;
+	//controls.minDistance = 60;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+  	controls.update();
+
+	
+
+	window.addEventListener( 'resize', onWindowResize );
+
+	window.addEventListener('pointermove', (event) => {
+    
+		if((Math.abs(event.movementX)+Math.abs(event.movementY))>5)
+		{
+			SpeedUp();
+		}
+	
+    });
+
+	window.addEventListener( "mousewheel", event => {
+		
+		if(Math.abs(event.deltaY)>5)
+		{
+			SpeedUp();
+		}
+   
+	});
+}
+
+function onWindowResize() {
+
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
+function animate(timestamp) 
+{
+
+	renderPipeline.render();
+	controls.update();
+
+	// 自動更新時間（用來計算移動速度、旋轉等）
+    timer.update( timestamp );
+	const delta = timer.getDelta();
+
+	//renderer.render( scene, camera );
+
+	if(speed_up>0)
+	{
+		speed_up-=delta;
+	}
+
+	if(num>10)
+	{
+		speed=0.03;
+	}
+
+	for(let i=0;i<model_holder.children.length;i++)
+ 	{
+		if(model_holder.children[i]!=null)
+		{
+			model_holder.children[i].position.y-=0.1*(speed+speed_up);
+
+			if(model_holder.children[i].position.y<-15)
+			{
+				let posX;
+				let min = Math.ceil(-15);
+    			let max = Math.floor(15);
+    			posX=Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and 			the minimum is inclusive
+				model_holder.children[i].position.set(posX, 50 ,Math.floor(Math.random() * (5 - (-5) + 1) + (-5)));
+
+				num++;
+			}
+		}
+ 	}
+
+	for(let j=0;j<model_holder_02.children.length;j++)
+ 	{
+		if(model_holder_02.children[j]!=null)
+		{
+			model_holder_02.children[j].position.y-=0.15*(speed+speed_up);
+
+			if(model_holder_02.children[j].position.y<-15)
+			{
+				let posX;
+				let min = Math.ceil(-15);
+    			let max = Math.floor(15);
+    			posX=Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and 			the minimum is inclusive
+				model_holder_02.children[j].position.set(posX, 50 ,Math.floor(Math.random() * (5 - (-5) + 1) + (-5)));
+
+				num++;
+			}
+		}
+ 	}
+}
+
+function instText(content)
+{
+	const loader = new FontLoader();
+	loader.load( './fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+	const message = content;
+	const shapes = font.generateShapes( message, 0.25 );//字體大小
+	const geometry = new THREE.ShapeGeometry( shapes );
+	geometry.computeBoundingBox();
+	const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+	geometry.translate( xMid, 0, 0 );
+	// make shape ( N.B. edge view not visible )
+	text = new THREE.Mesh( geometry, ScanEffect);
+	text.position.set(0,1000,0);
+	//scene.add( text );
+
+	let posX;
+	let min = Math.ceil(-15);
+    let max = Math.floor(15);
+    posX=Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
+
+	let random_index=Math.floor(Math.random() * (2 - 1 + 1) + 1);
+
+	text.position.set(posX, 50 ,Math.floor(Math.random() * (3 - (-3) + 1) + (-3)));
+
+	if(random_index===1)
+	{
+		model_holder.add(text);
+	}
+				
+	else
+	{
+		model_holder_02.add(text);
+	}
+
+	} );
+}
+
+function TiggerRainTextAnim()
+{
+	setTimeout(() => {RainTextAnim(title_01);}, 1000);
+	setTimeout(() => {RainTextAnim(title_02);}, 2000);
+	setTimeout(() => {RainTextAnim(title_03);}, 3000);
+	setTimeout(() => {RainTextAnim(title_04);}, 4000);
+	setTimeout(() => {RainTextAnim(title_05);FXUI.InstLoadingEffect_Type_A(false);}, 5000);	
+}
+
+function RainTextAnim(_content)
+{
+	for(let i=0;i<15;i++)
+	{
+		instText(_content);
+	}
+}
+
+
+
+function SpeedUp()
+{
+	speed_up+=0.1;
+}
+
+
+</script>
+<script>
+
+
+
+</script>
+
+	</body>
+	
+</html>
