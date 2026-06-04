@@ -11,7 +11,7 @@
 		<link rel="stylesheet" type="text/css" href="Main.css">
 		<style type="text/css">
 			@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
-
+			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
 
 			body
 			{
@@ -345,8 +345,10 @@
 		<script type="importmap">
 			{
 			  "imports": {
-				"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-				"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
 			  }
 			}
 		</script>
@@ -354,7 +356,6 @@
 	</head>
 	
 	<body>
-		<div id="loadingUI" class="rotate_anim"></div>
 		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
 		<div class="web3d_icon"></div>
 
@@ -397,39 +398,27 @@
 			<p class="intro-desc">Aerospace-grade durability meets the most advanced mobile silicon. Designed to be legendary.</p>
 		</article>
 
-		<div class="model_info" style=" left: 84%;">
-			<div class="titlePanel">
-				<p class="detail_title">Model</p>
-				<p class="detail_title">Author</p>
-				<p class="detail_title">Link</p>
-			</div>
-			<div class="detailPanel">
-				<p class="detail_value">iPhone 17 Pro</p>
-				<p class="detail_value">Ranguel</p>
-				<p class="detail_value">https://skfb.ly/pCnq8</p>
-			</div>
-		</div>
-
 		<script type="module">
 
 import * as THREE from 'three';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import {CameraManager,UpdateCameraPosition, InputEvent,Camera_Inspector,SetDefaultCameraStatus,InstFBXLoader,InstGLTFLoader,FindMataterialByName,posData,dracoLoader,LoadHDRWithPMREM} from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.2/fx_functions.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.2/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
+import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-import { iphone_17_pro_withCase } from './models/iphone_17_pro_withCase_slices.js';
+import { smartPhone_2026 } from './models/smartPhone_2026_slices.js';
 
-let _loadingUI = document.getElementById("loadingUI");
 
 let scene, camera, renderer, stats, mixer;
 let labelRenderer;
 let controls;
 let idleTime=0;
 
-const clock = new THREE.Clock();
+const timer = new THREE.Timer();
 
 const modelPosition=new THREE.Vector3(0,0,0);
 const modelRotation=new THREE.Vector3(0,-Math.PI*0.5, 0);
@@ -446,13 +435,15 @@ const hold_time=6;
 
 
 init();
+FXUI.InstLoadingEffect_Type_A(true);
 
-function init()
+async function init()
 {
+	FX.SetupEnvironment("cloud");
   	scene = new THREE.Scene();
 
   	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );//非全螢幕比例設定
-  	renderer = new THREE.WebGLRenderer({ antialias: true });
+  	renderer = new THREE.WebGPURenderer( { antialias: true } );
   	renderer.setSize(window.innerWidth , window.innerHeight);
 
   	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
@@ -466,9 +457,12 @@ function init()
 	labelRenderer.domElement.style.top = '0px';
 	document.body.appendChild( labelRenderer.domElement );
 
+	// 1. 先等待 Renderer 初始化完成
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+
 	
   	camera.position.copy(CameraDefaultPos);
-  	posData[0]={ camera_pos:CameraDefaultPos, controlsTarget_pos:ControlsTargetDefaultPos};
+  	FX.posData[0]={ camera_pos:CameraDefaultPos, controlsTarget_pos:ControlsTargetDefaultPos};
 
 
 	//加密模組
@@ -489,16 +483,10 @@ function init()
     	return bytes.buffer;
 	}
 
-	const arrayBuffer = base64ToArrayBuffer(iphone_17_pro_withCase());
-
-	//draco模組
-	dracoLoader.setDecoderPath( 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/libs/draco/' );
-	dracoLoader.preload();
-
 	const loader = new GLTFLoader();
-	loader.setDRACOLoader(dracoLoader);
+	loader.setDRACOLoader(FX.dracoLoader);
 	loader.parse(
-		arrayBuffer,
+		FX.Base64ToArrayBuffer(smartPhone_2026()),
 		'',
 		(gltf) => {
 			
@@ -507,7 +495,7 @@ function init()
 			model.position.copy(modelPosition);
 			model.rotation.set(modelRotation.x, modelRotation.y, modelRotation.z);
 			model.scale.set(modeScale,modeScale,modeScale);
-			model.name="iphone with case";
+			model.name="smartPhone with case";
 			
 			const glassMaterial = new THREE.MeshPhysicalMaterial( {
 			color: 0xffffff, 
@@ -529,9 +517,12 @@ function init()
 			})
 			
 			scene.add(model);
-			animate();
 
-			setTimeout(() => {_loadingUI.remove();}, 600);
+			setTimeout(() => {
+				// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
+				renderer.setAnimationLoop( animate );
+				FXUI.InstLoadingEffect_Type_A(false);
+			}, 600);
 		},
 		(error) => {
 			console.error('Failed to load model:', error);
@@ -552,9 +543,8 @@ function init()
 	controls.autoRotateSpeed=0.2;
   	controls.update();
 
-  	///hdri 環境光源
-
-	LoadHDRWithPMREM('./textures/hdri/studio_small_09_2k.hdr',scene,renderer) 
+	///hdri 環境光源
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
 
 	///光源
 	
@@ -657,17 +647,17 @@ function onWindowResize()
 	labelRenderer.setSize( window.innerWidth, window.innerHeight );
 }
 
-function animate() 
+function animate(timestamp) 
 {
-  	requestAnimationFrame( animate );
-
   	controls.update();
   	renderer.render( scene, camera );
 	labelRenderer.render( scene, camera );
-  	UpdateCameraPosition(camera,controls);
+  	FX.UpdateCameraPosition(camera,controls);
 
 
-	const delta = clock.getDelta();
+	// 自動更新時間（用來計算移動速度、旋轉等）
+    timer.update( timestamp );
+	const delta = timer.getDelta();
 
 	if ( mixer ) mixer.update( delta );
 
