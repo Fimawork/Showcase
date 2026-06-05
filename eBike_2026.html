@@ -1,0 +1,530 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
+
+			body
+			{
+				margin: 0;
+				padding:0; 
+				background-color: #d6d6d6;
+				font-family: 'Inter', sans-serif;
+				overflow: hidden;
+			}
+			
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
+
+			.bg-text {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				font-size: 15vw;
+				font-weight: 900;
+				color: #ffffff;
+				letter-spacing: 1.5rem;
+				z-index: -1;
+				text-transform: uppercase;
+				user-select: none;
+				white-space: nowrap;
+			}
+
+			#threeContainer {
+				position: absolute;
+				top: 0; left: 0;
+				width: 100%; height: 100%;
+				z-index: 6;
+			}
+
+			.top-nav {
+				position: absolute;
+				top: 40px;
+				right: 40px;
+				display: flex;
+				align-items: center;
+				gap: 30px;
+				z-index: 20;
+			}
+
+			.top-nav a {
+				text-decoration: none;
+				color: #000;
+				font-size: 14px;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+			}
+
+			.hamburger {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+				cursor: pointer;
+			}
+
+			.hamburger span {
+				display: block;
+				width: 24px;
+				height: 2px;
+				background-color: #000;
+				transition: 0.3s;
+			}
+
+			.side-year {
+				position: absolute;
+				top: 50%;
+				left: 40px;
+				transform: translateY(-50%) rotate(-90deg);
+				font-size: 14px;
+				font-weight: 700;
+				color: #000;
+				letter-spacing: 4px;
+				z-index: 20;
+			}
+
+			.buy-button {
+				position: absolute;
+				bottom: 40px;
+				right: 40px;
+				background-color: #000000;
+				color: #ffffff;
+				padding: 16px 40px;
+				border-radius: 50px;
+				font-size: 14px;
+				font-weight: 800;
+				letter-spacing: 2px;
+				text-transform: uppercase;
+				border: none;
+				cursor: pointer;
+				z-index: 20;
+				transition: transform 0.2s, background-color 0.2s;
+			}
+			.buy-button:hover {
+				transform: scale(1.05);
+				background-color: #222;
+			}
+
+			.specs-grid {
+				position: absolute;
+				bottom: 40px;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				gap: 60px;
+				text-align: center;
+				z-index: 20;
+			}
+
+			.spec-cell label {
+				display: block;
+				font-size: 12px;
+				color: #777777;
+				margin-bottom: 8px;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+				font-weight: 700;
+			}
+
+			.spec-cell span {
+				font-size: 18px;
+				font-weight: 900;
+				color: #000000;
+			}
+
+
+			@media screen and (max-width:768px)/*手機*/
+			{
+				#contact_btn
+				{
+					display: none;
+				}
+
+				#about_btn
+				{
+					display: none;
+				}
+			}
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<div class="bg-text">V-ROD</div>
+		
+		<div class="top-nav">
+			<a href="#" id="contact_btn">Contact</a>
+			<a href="#" id="about_btn">About</a>
+			<div class="hamburger">
+				<span></span><span></span><span></span>
+			</div>
+		</div>
+
+		<div class="side-year">2018</div>
+
+		<div id="threeContainer"></div> 
+		<!--<div id="loadingUI" class="rotate_anim"></div>-->
+		<div class="fimawork_logo" style="top: 3%;"onclick="parent.open('https://fimawork.tw/')"></div>
+		<!--<div class="web3d_icon"></div>-->
+
+		<div class="specs-grid">
+			<div class="spec-cell">
+				<label>Torque</label>
+				<span>115 Nm</span>
+			</div>
+			<div class="spec-cell">
+				<label>Weight</label>
+				<span>289 kg</span>
+			</div>
+			<div class="spec-cell">
+				<label>Engine</label>
+				<span>1250 cc</span>
+			</div>
+		</div>
+
+		
+		<div class="model_info">
+			<div class="titlePanel">
+				<p class="detail_title">Model</p>
+				<p class="detail_title">Author</p>
+				<p class="detail_title">Link</p>
+			</div>
+			<div class="detailPanel">
+				<p class="detail_value">Electric Motorcycle</p>
+				<p class="detail_value">MA-3D</p>
+				<p class="detail_value">https://reurl.cc/N2KN1Q</p>
+			</div>
+		</div>
+	
+
+		<button class="buy-button">BUY</button>
+
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.45/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
+import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { eBike_2026 } from './models/eBike_2026_slices.js';
+
+import { Inspector } from 'three/addons/inspector/Inspector.js';
+
+
+let scene, camera, renderer, stats, mixer;
+
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+
+
+const timer = new THREE.Timer();
+
+const modelPosition=new THREE.Vector3(0,0,0);
+const modelRotation=new THREE.Vector3(0,FX.ToThreeEulerAngle(90), 0);
+const modeScale=0.006;
+
+const CameraDefaultPos=new THREE.Vector3(-21.426,1.508,17.120);
+const ControlsTargetDefaultPos=new THREE.Vector3(-1.295,3.827,-0.120);
+
+let main_model= new THREE.Object3D();
+
+
+
+let idleTime=0;
+const hold_time=6;
+
+
+init();
+//FX.Camera_Inspector(camera,controls);
+FXUI.InstLoadingEffect_Type_A(true);
+
+async function init()
+{
+	FX.SetupEnvironment("cloud");
+
+  	scene = new THREE.Scene();
+	scene.background = null;
+
+  	camera = new THREE.PerspectiveCamera( 24, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 0.9;
+  	//document.body.appendChild( renderer.domElement );
+  	threeContainer.appendChild( renderer.domElement );
+
+	//renderer.inspector = new Inspector();
+
+	// 1. 先等待 Renderer 初始化完成
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+
+  	camera.position.copy(CameraDefaultPos);
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+	controls = new OrbitControls( camera, renderer.domElement);
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.maxDistance = 500;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+
+	controls.maxPolarAngle=FX.ToThreeEulerAngle(95);
+	controls.minPolarAngle=FX.ToThreeEulerAngle(-90);
+  	controls.update();
+
+  	///hdri 環境光源
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
+	scene.environmentRotation.y = FX.ToThreeEulerAngle(-180); 
+	
+	///Lamborghini_Centenario_roadster
+	const loader_Lamborghini_Centenario_roadster = new GLTFLoader();
+    loader_Lamborghini_Centenario_roadster.setDRACOLoader(FX.dracoLoader);
+	loader_Lamborghini_Centenario_roadster.parse(
+    FX.Base64ToArrayBuffer(eBike_2026()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+
+		model.position.set(0,0,0);
+		model.rotation.set(0,FX.ToThreeEulerAngle(-90), 0);
+		model.scale.set(modeScale,modeScale,modeScale);
+
+		const saddle_back_01_material=FXM.InstEtchingMaterial(0x080808,0.4,0.3,0.75,false,1,'./textures/Leather.png',new THREE.Vector2(10,10),new THREE.Vector2(0,0),'./textures/Leather.png',new THREE.Vector2(15, 15),0);
+
+		const tire_material=FXM.InstEtchingMaterial(0x292929,0.7,0.35,1,false,1,"./textures/Leather.png",new THREE.Vector2(10,10),new THREE.Vector2(0,0),"./textures/Leather.png",new THREE.Vector2(50,100),30);
+
+		const black_housing_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.75,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(600, 600),2);
+
+		const metal_housing_material=FXM.InstEtchingMaterial(0x737373,0.3,0.5,1,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(50,50),2);
+
+		const lightLens_material=FXM.InstMaterial(0x183A25,0,0.5,1,2.4,1,true,0.9,true);
+
+		const brake_material=FXM.InstMaterial(0x919191,0.3,0.9,0,1.27,0,false,1,true);
+
+		const fork_material=FXM.InstMaterial(0x4F4F4F,0.3,0.9,0,2.3333333333333335,1,false,1,true);
+
+		const wheel_material=FXM.InstMaterial(0xD5783F,0.53,1,0,2.3333333333333335,1,false,1,true);
+
+		const logo_material=FXM.InstMaterial(0xD5783F,0.53,1,0,2.3333333333333335,1,false,1,true);
+
+		const freeWheel_material=FXM.InstMaterial(0xD5783F,0.53,1,0,2.3333333333333335,1,false,1,true);
+
+		const frame_material=FXM.InstMaterial(0x4F4F4F,0.3,0.9,0,2.3333333333333335,1,false,1,true);
+
+		model.traverse( function ( object ) {	
+                  
+            if(object.name.includes("wheel"))
+            {
+              FX.ReturnBufferGeometry(object,wheel_material,null,scene);
+            }
+
+			if(object.name.includes("tire"))
+            {
+              FX.ReturnBufferGeometry(object,tire_material,null,scene);
+            }
+
+			if(object.name.includes("saddle"))
+            {
+              FX.ReturnBufferGeometry(object,saddle_back_01_material,null,scene);
+            }
+
+			if(object.name.includes("frame"))
+            {
+              FX.ReturnBufferGeometry(object,frame_material,null,scene);
+            }
+
+			if(object.name.includes("plasticHousing"))
+            {
+              FX.ReturnBufferGeometry(object,black_housing_material,null,scene);
+            }
+
+			if(object.name.includes("cable"))
+            {
+              FX.ReturnBufferGeometry(object,null,null,scene);
+            }
+
+			if(object.name.includes("fork"))
+            {
+              FX.ReturnBufferGeometry(object,fork_material,null,scene);
+            }
+
+			if(object.name.includes("metalHousing"))
+            {
+              FX.ReturnBufferGeometry(object,metal_housing_material,null,scene);
+            }
+
+			//if(object.name.includes("light"))
+            //{
+            //  FX.ReturnBufferGeometry(object,null,null,scene);
+            //}
+
+			if(object.name.includes("lightLens"))
+            {
+              FX.ReturnBufferGeometry(object,lightLens_material,null,scene);
+            }
+
+			if(object.name.includes("handle"))
+            {
+              FX.ReturnBufferGeometry(object,tire_material,null,scene);
+            }
+
+			if(object.name.includes("screw"))
+            {
+              FX.ReturnBufferGeometry(object,null,null,scene);
+            }
+
+			if(object.name.includes("spoke"))
+            {
+              FX.ReturnBufferGeometry(object,brake_material,null,scene);
+            }
+
+			if(object.name.includes("freeWheel"))
+            {
+              FX.ReturnBufferGeometry(object,null,null,scene);
+            }
+
+			if(object.name.includes("brake"))
+            {
+              FX.ReturnBufferGeometry(object,brake_material,null,scene);
+            }
+
+			if(object.name.includes("axle"))
+            {
+              FX.ReturnBufferGeometry(object,brake_material,null,scene);
+            }
+
+			if(object.name.includes("logo"))
+            {
+              FX.ReturnBufferGeometry(object,logo_material,null,scene);
+            }
+        })
+
+		scene.add(model);
+		
+		setTimeout(() => {
+			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
+			renderer.setAnimationLoop( animate );
+			FXUI.InstLoadingEffect_Type_A(false);
+			//FX.Material_Inspector(scene);
+		}, 1000);
+
+		console.log()
+		
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	
+
+	//影子工具
+	FX.InitWebGPUShadow(scene);
+
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+  		window.addEventListener("pointerdown", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+	
+	});
+
+	window.addEventListener( 'pointermove', function(e) {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+  	window.addEventListener("wheel", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+	
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.updateProjectionMatrix();
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+}
+
+function animate(timestamp) 
+{
+
+  	controls.update();
+  	renderer.render( scene, camera );
+
+  	// 自動更新時間（用來計算移動速度、旋轉等）
+    timer.update( timestamp );
+	const delta = timer.getDelta();
+
+
+	if ( mixer ) mixer.update( delta );
+
+//	idleTime+=delta;
+//	
+//	if(idleTime>hold_time)
+//	{
+//		controls.autoRotate=true;
+//	}
+
+
+//影子工具
+FX.UpdateWebGPUShadow(renderer, scene , camera);
+
+}
+
+
+
+
+
+		</script>
+    </body>
+
+</html>
