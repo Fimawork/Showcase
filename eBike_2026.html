@@ -230,7 +230,7 @@ import * as THREE from 'three';
 
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.45/fx_functions.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.46/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
 import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
@@ -314,9 +314,9 @@ async function init()
 	scene.environmentRotation.y = FX.ToThreeEulerAngle(-180); 
 	
 	///Lamborghini_Centenario_roadster
-	const loader_Lamborghini_Centenario_roadster = new GLTFLoader();
-    loader_Lamborghini_Centenario_roadster.setDRACOLoader(FX.dracoLoader);
-	loader_Lamborghini_Centenario_roadster.parse(
+	const loader_EBike = new GLTFLoader();
+    loader_EBike.setDRACOLoader(FX.dracoLoader);
+	loader_EBike.parse(
     FX.Base64ToArrayBuffer(eBike_2026()),
     '',
     (gltf) => {
@@ -457,7 +457,10 @@ async function init()
 	
 
 	//影子工具
-	FX.InitWebGPUShadow(scene);
+	FX.InitWebGPUShadow(scene, {
+     shadow: { blur: 0.5, darkness: 0.3 },
+     plane: { color: '#ffffff', opacity: 1 }
+});
 
 
 	///EventListener
@@ -516,7 +519,7 @@ function animate(timestamp)
 
 
 //影子工具
-FX.UpdateWebGPUShadow(renderer, scene , camera);
+FX.UpdateWebGPUShadow(renderer, scene);
 
 }
 
