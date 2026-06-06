@@ -1,0 +1,250 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
+
+			body
+			{
+				margin: 0;
+				padding:0; 
+			}
+			
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
+
+			#info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+            pointer-events: none;
+            z-index: 10;
+        	}
+
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<div id="info">請用支援 WebGPU/WebXR 的 Android 手機開啟<br>尋找地面並點擊螢幕擺放產品</div>
+		<div class="fimawork_logo" style="top: 3%;"onclick="parent.open('https://fimawork.tw/')"></div>
+
+		<script type="module">
+
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.46/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
+import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { exerciseBike_2026 } from './models/exerciseBike_2026_slices.js';
+import { XRButton } from 'three/addons/webxr/XRButton.js';
+import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+import { Inspector } from 'three/addons/inspector/Inspector.js';
+
+
+let scene, camera, renderer, stats, mixer;
+let container;
+let controller, controllerGrip;
+let reticle;
+        let hitTestSource = null;
+        let hitTestSourceRequested = false;
+        let productServiceModel = null; // 用來儲存載入的產品模型
+
+
+
+init();
+//FX.Camera_Inspector(camera,controls);
+FXUI.InstLoadingEffect_Type_A(true);
+
+function init()
+{
+	FX.SetupEnvironment("cloud");
+
+	container = document.createElement('div');
+    document.body.appendChild(container);
+	
+  	scene = new THREE.Scene();
+	scene.background = null;
+
+  	camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+
+	
+
+  	// 💡 關鍵點：使用 Three.js 的 WebGPURenderer
+    // 它會優先使用 WebGPU 渲染，並處理 WebXR 的相容問題
+    renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true, forceWebGL: true, outputBufferType: THREE.UnsignedByteType, multiview: true});
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.xr.enabled = true; // 啟用 XR
+    container.appendChild(renderer.domElement);
+
+	// 啟動 XR 按鈕
+    document.body.appendChild( XRButton.createButton( renderer ) );
+
+	// 1. 先等待 Renderer 初始化完成
+	//await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+
+	function onSelectStart() {
+
+					this.userData.isSelecting = true;
+
+				}
+
+				function onSelectEnd() {
+
+					this.userData.isSelecting = false;
+
+				}
+
+  
+  					controller = renderer.xr.getController( 0 );
+				controller.addEventListener( 'selectstart', onSelectStart );
+				controller.addEventListener( 'selectend', onSelectEnd );
+				controller.addEventListener( 'connected', function ( event ) {
+
+					const targetRayMode = event.data.targetRayMode;
+
+					if ( targetRayMode === 'tracked-pointer' || targetRayMode === 'gaze' ) {
+
+						this.add( buildController( event.data ) );
+
+					}
+
+				} );
+				controller.addEventListener( 'disconnected', function () {
+
+					this.remove( this.children[ 0 ] );
+
+				} );
+				scene.add( controller );
+
+				const controllerModelFactory = new XRControllerModelFactory();
+
+				controllerGrip = renderer.xr.getControllerGrip( 0 );
+				controllerGrip.add( controllerModelFactory.createControllerModel( controllerGrip ) );
+				scene.add( controllerGrip );
+
+  	///hdri 環境光源
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
+	scene.environmentRotation.y = FX.ToThreeEulerAngle(-180); 
+	
+	///Lamborghini_Centenario_roadster
+	const loader_exerciseBike = new GLTFLoader();
+    loader_exerciseBike.setDRACOLoader(FX.dracoLoader);
+	loader_exerciseBike.parse(
+    FX.Base64ToArrayBuffer(exerciseBike_2026()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+
+		model.position.set(0,0,0);
+		model.rotation.set(0,FX.ToThreeEulerAngle(-90), 0);
+		model.scale.set(1,1,1);
+
+
+		scene.add(model);
+		
+		setTimeout(() => {
+			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
+			renderer.setAnimationLoop( animate );
+			FXUI.InstLoadingEffect_Type_A(false);
+			//FX.Material_Inspector(scene);
+		}, 1000);
+
+		console.log()
+		
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	
+
+	//影子工具
+	FX.InitWebGPUShadow(scene, {
+     shadow: { blur: 0.5, darkness: 0.25 },
+     plane: { color: '#ffffff', opacity: 1 }
+});
+
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+  	
+	
+}
+
+// 當使用者點擊螢幕時觸發
+        function onSelect() {
+            if (reticle.visible && productServiceModel) {
+                // 複製一份載入好的產品模型
+                const product = productServiceModel.clone();
+                
+                // 將產品放置在目前瞄準框（地面）的位置與角度
+                product.position.setFromMatrixPosition(reticle.matrix);
+                product.quaternion.setFromRotationMatrix(reticle.matrix);
+                
+                scene.add(product);
+            }
+        }
+
+
+function onWindowResize() 
+{
+    camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate(timestamp, frame) 
+{
+
+            // 執行 WebGPU 渲染
+            renderer.render(scene, camera);
+
+//影子工具
+FX.UpdateWebGPUShadow(renderer, scene);
+
+}
+
+
+
+
+
+		</script>
+    </body>
+
+</html>
