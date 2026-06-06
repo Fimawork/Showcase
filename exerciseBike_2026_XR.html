@@ -54,7 +54,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.46/fx_functions.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.47/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
 import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
@@ -148,6 +148,8 @@ async function init()
 			FXUI.InstLoadingEffect_Type_A(false);
 			setupUniversalButton();
 			//FX.Material_Inspector(scene);
+
+			FX.USDZ_Exporter(scene);
 		}, 1000);
 
 
