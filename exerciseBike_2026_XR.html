@@ -13,28 +13,15 @@
 			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
 
-			body
-			{
-				margin: 0;
-				padding:0; 
-			}
+			body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; }
 			
-			canvas
-			{
-				width: 100%;
-   				height: 100%;
-			}
-
-			#info {
-            position: absolute;
-            top: 10px;
-            width: 100%;
-            text-align: center;
-            color: white;
-            text-shadow: 1px 1px 2px black;
-            pointer-events: none;
-            z-index: 10;
-        	}
+			#canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        
+        /* 網頁上的控制 UI */
+        #ui-overlay { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10; text-align: center; width: 100%; }
+        .ar-btn { padding: 16px 32px; font-size: 18px; font-weight: bold; background: #007AFF; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: 0.2s; }
+        .ar-btn:active { transform: scale(0.95); }
+        #loading-text { color: #fff; text-shadow: 1px 1px 3px #000; margin-bottom: 10px; font-size: 14px; }
 
 
 		</style>
@@ -53,8 +40,15 @@
 	</head>
 	
 	<body>
-		<div id="info">請用支援 WebGPU/WebXR 的 Android 手機開啟<br>尋找地面並點擊螢幕擺放產品</div>
-		<div class="fimawork_logo" style="top: 3%;"onclick="parent.open('https://fimawork.tw/')"></div>
+		<!-- Three.js 渲染畫布的容器 -->
+    <div id="canvas-container"></div>
+
+    <!-- UI 介面 -->
+    <div id="ui-overlay">
+        <div id="loading-text">3D 場景初始化中...</div>
+        <!-- 這是我們唯一的萬能按鈕，它會根據裝置自動變身 -->
+        <button id="ar-trigger-btn" class="ar-btn" style="display:none;">啟動 AR 空間擺放</button>
+    </div>
 
 		<script type="module">
 
@@ -76,84 +70,57 @@ import { Inspector } from 'three/addons/inspector/Inspector.js';
 let scene, camera, renderer, stats, mixer;
 let container;
 let controller, controllerGrip;
-let reticle;
+
+
+		const CameraDefaultPos=new THREE.Vector3(1649.438,1012.584,1665.931);
+const ControlsTargetDefaultPos=new THREE.Vector3(0,500,0);
+
+
+let productModel = null;
+        let reticle = null; // AR 模式下的「找地面準心」
+        
+        // 用於 WebXR 命中測試（Hit Test）的變數
         let hitTestSource = null;
         let hitTestSourceRequested = false;
-        let productServiceModel = null; // 用來儲存載入的產品模型
-
+// 偵測裝置類型
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 
 init();
 //FX.Camera_Inspector(camera,controls);
 FXUI.InstLoadingEffect_Type_A(true);
 
-function init()
+async function init()
 {
 	FX.SetupEnvironment("cloud");
 
-	container = document.createElement('div');
+	container = document.getElementById('canvas-container');
     document.body.appendChild(container);
 	
   	scene = new THREE.Scene();
 	scene.background = null;
 
-  	camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+  	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 50000);
 
-	
+	camera.position.copy(CameraDefaultPos);
+	camera.lookAt(0,600,0);
 
   	// 💡 關鍵點：使用 Three.js 的 WebGPURenderer
     // 它會優先使用 WebGPU 渲染，並處理 WebXR 的相容問題
     renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true, forceWebGL: true, outputBufferType: THREE.UnsignedByteType});
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.xr.enabled = true; // 啟用 XR
+    renderer.xr.enabled = true; // 告知渲染器啟用 WebXR 核心
     container.appendChild(renderer.domElement);
 
-	// 啟動 XR 按鈕
-    document.body.appendChild( XRButton.createButton( renderer ) );
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+
+
 
 	// 1. 先等待 Renderer 初始化完成
 	//await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
 
-	function onSelectStart() {
-
-					this.userData.isSelecting = true;
-
-				}
-
-				function onSelectEnd() {
-
-					this.userData.isSelecting = false;
-
-				}
-
-  
-  					controller = renderer.xr.getController( 0 );
-				controller.addEventListener( 'selectstart', onSelectStart );
-				controller.addEventListener( 'selectend', onSelectEnd );
-				controller.addEventListener( 'connected', function ( event ) {
-
-					const targetRayMode = event.data.targetRayMode;
-
-					if ( targetRayMode === 'tracked-pointer' || targetRayMode === 'gaze' ) {
-
-						this.add( buildController( event.data ) );
-
-					}
-
-				} );
-				controller.addEventListener( 'disconnected', function () {
-
-					this.remove( this.children[ 0 ] );
-
-				} );
-				scene.add( controller );
-
-				const controllerModelFactory = new XRControllerModelFactory();
-
-				controllerGrip = renderer.xr.getControllerGrip( 0 );
-				controllerGrip.add( controllerModelFactory.createControllerModel( controllerGrip ) );
-				scene.add( controllerGrip );
+	
 
   	///hdri 環境光源
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
@@ -167,24 +134,24 @@ function init()
     '',
     (gltf) => {
         
-		const model = gltf.scene;
+		productModel = gltf.scene;
 
-		model.position.set(0,0,0);
-		model.rotation.set(0,FX.ToThreeEulerAngle(-90), 0);
-		model.scale.set(1,1,1);
+		productModel.position.set(0,0,0);
+		productModel.rotation.set(0,FX.ToThreeEulerAngle(-90), 0);
+		productModel.scale.set(1,1,1);
 
-
-		scene.add(model);
+		document.getElementById('loading-text').style.display = 'none';
+		scene.add(productModel);
 		
 		setTimeout(() => {
 			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
 			renderer.setAnimationLoop( animate );
 			FXUI.InstLoadingEffect_Type_A(false);
+			setupUniversalButton();
 			//FX.Material_Inspector(scene);
 		}, 1000);
 
-		console.log()
-		
+
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -192,14 +159,6 @@ function init()
 	);
 
 	
-
-	//影子工具
-	FX.InitWebGPUShadow(scene, {
-     shadow: { blur: 0.5, darkness: 0.25 },
-     plane: { color: '#ffffff', opacity: 1 }
-});
-
-
 	///EventListener
   	window.addEventListener( 'resize', onWindowResize );  
 
@@ -232,13 +191,107 @@ function onWindowResize()
 function animate(timestamp, frame) 
 {
 
-            // 執行 WebGPU 渲染
-            renderer.render(scene, camera);
-
-//影子工具
-FX.UpdateWebGPUShadow(renderer, scene);
+    // 執行 WebGPU 渲染
+    renderer.render(scene, camera);
 
 }
+
+
+// 7. 設定萬能分流按鈕
+        function setupUniversalButton() {
+            const btn = document.getElementById('ar-trigger-btn');
+            btn.style.display = 'inline-block';
+
+            if (isIOS) {
+                /* ==========================================================
+                   🍏 通道一：iOS / iPadOS ── 系統原生分流
+                   ========================================================== */
+                btn.innerText = '在客廳擺放 (iOS 原生)';
+                btn.addEventListener('click', () => {
+                    const iosAnchor = document.createElement('a');
+                    iosAnchor.setAttribute('rel', 'ar');
+                    iosAnchor.setAttribute('href','./models/exerciseBike_2026.usdz');
+                    iosAnchor.click();
+                });
+            } else {
+                /* ==========================================================
+                   🤖 通道二：Android / Vision Pro ── 真正的 Three.js WebXR 模式
+                   ========================================================== */
+                btn.innerText = '進入 AR 空間定位';
+                
+                // 檢查當前瀏覽器環境是否真的支援 WebXR AR 模式
+                if (navigator.xr) {
+                    navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+                        if (supported) {
+                            btn.addEventListener('click', toggleThreeJsArSession);
+                        } else {
+                            btn.innerText = '不支援此網頁 AR (請換 Chrome)';
+                            btn.style.background = '#8e8e93';
+                        }
+                    });
+                } else {
+                    btn.innerText = '您的裝置不支援 WebXR';
+                    btn.style.background = '#8e8e93';
+                }
+            }
+        }
+
+        // 8. 真正驅動 Three.js 進入 WebXR 空間渲染的函式
+        let currentSession = null;
+        function toggleThreeJsArSession() {
+            if (currentSession === null) {
+                // 請求開啟一個「包含命中測試功能」的 AR 鏡頭會話
+                navigator.xr.requestSession('immersive-ar', {
+                    requiredFeatures: ['local-floor', 'hit-test']
+                }).then(onSessionStarted);
+            } else {
+                currentSession.end();
+            }
+        }
+
+        function onSessionStarted(session) {
+            currentSession = session;
+            renderer.xr.setSession(currentSession);
+            
+            // 進入 AR 模式時，先把原本漂浮在網頁中央的模型藏起來，等待使用者找地面定位
+            if(productModel) productModel.visible = false; 
+
+            // 設置 Android 手機螢幕被點擊時的傾聽器
+            session.addEventListener('select', onScreenTap);
+            session.addEventListener('end', onSessionEnded);
+            
+            document.getElementById('ar-trigger-btn').innerText = '結束 AR';
+        }
+
+        function onSessionEnded() {
+            currentSession = null;
+            hitTestSourceRequested = false;
+            hitTestSource = null;
+            reticle.visible = false;
+            
+            // 退出 AR 回到網頁後，把模型恢復顯示在原位
+            if(productModel) {
+                productModel.visible = true;
+                productModel.position.set(0, -0.2, -0.8);
+            }
+            document.getElementById('ar-trigger-btn').innerText = '進入 AR 空間定位';
+        }
+
+        /* ==========================================================
+           🎯 WebXR 核心邏輯：即時尋找地面 & 放置模型
+           ========================================================== */
+        
+        // 9. 當使用者用手指點擊手機螢幕時：把模型移到準心當前所在的真實地面座標
+        function onScreenTap() {
+            if (reticle.visible && productModel) {
+                productModel.visible = true;
+                // 將模型的空間座標完全對齊綠色準心的世界座標
+                productModel.position.setFromMatrixPosition(reticle.matrix);
+                // 讓模型擺正
+                productModel.rotation.set(0, 0, 0); 
+                console.log('產品成功擺放在真實地面！');
+            }
+        }
 
 
 
