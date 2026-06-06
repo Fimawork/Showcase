@@ -72,9 +72,7 @@ let container;
 let controller, controllerGrip;
 
 
-		const CameraDefaultPos=new THREE.Vector3(1649.438,1012.584,1665.931);
-const ControlsTargetDefaultPos=new THREE.Vector3(0,500,0);
-
+	const CameraDefaultPos=new THREE.Vector3(0,1.2,2);
 
 let productModel = null;
         let reticle = null; // AR 模式下的「找地面準心」
@@ -87,7 +85,7 @@ let productModel = null;
 
 
 init();
-//FX.Camera_Inspector(camera,controls);
+FX.Camera_Inspector(camera,controls);
 FXUI.InstLoadingEffect_Type_A(true);
 
 async function init()
@@ -100,10 +98,10 @@ async function init()
   	scene = new THREE.Scene();
 	scene.background = null;
 
-  	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 50000);
+  	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 500);
 
 	camera.position.copy(CameraDefaultPos);
-	camera.lookAt(0,600,0);
+	camera.lookAt(0,0.75,0);
 
   	// 💡 關鍵點：使用 Three.js 的 WebGPURenderer
     // 它會優先使用 WebGPU 渲染，並處理 WebXR 的相容問題
@@ -136,9 +134,10 @@ async function init()
         
 		productModel = gltf.scene;
 
+		const scale=0.001;
 		productModel.position.set(0,0,0);
 		productModel.rotation.set(0,FX.ToThreeEulerAngle(-90), 0);
-		productModel.scale.set(1,1,1);
+		productModel.scale.set(0.001,0.001,0.001);
 
 		document.getElementById('loading-text').style.display = 'none';
 		scene.add(productModel);
