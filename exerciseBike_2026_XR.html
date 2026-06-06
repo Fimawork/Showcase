@@ -103,7 +103,7 @@ function init()
 
   	// 💡 關鍵點：使用 Three.js 的 WebGPURenderer
     // 它會優先使用 WebGPU 渲染，並處理 WebXR 的相容問題
-    renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true, forceWebGL: true, outputBufferType: THREE.UnsignedByteType, multiview: true});
+    renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true, forceWebGL: true, outputBufferType: THREE.UnsignedByteType});
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.xr.enabled = true; // 啟用 XR
