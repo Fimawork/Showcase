@@ -91,6 +91,20 @@ import { XRButton } from 'three/addons/webxr/XRButton.js';
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
+        // 🌟 新增網址後門：如果網址後面加上 ?test=android，就強制走 Android 流程
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('test') === 'android') {
+            isIOS = false; // 強制變裝成 Android 測試環境！
+        }
+
+        startBtn.addEventListener('click', async () => {
+            if (isIOS) {
+                // ... 原本的 iOS 檔案流 ...
+            } else {
+                // ... 執行 Android 的 initAndroidThreeXR() ...
+            }
+        });
+
         startBtn.addEventListener('click', async () => {
             if (isIOS) {
                 // ==========================================
