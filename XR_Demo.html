@@ -10,38 +10,9 @@
 		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
 		<link rel="stylesheet" type="text/css" href="Main.css">
 		<style type="text/css">
-			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
-
-			body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #121212;
-            font-family: sans-serif;
-            }
-            /* 主畫面置中的啟動按鈕 */
-            #ar-ui-container {
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 999;
-                background: rgba(0,0,0,0.7);
-            }
-            .ar-btn {
-                padding: 16px 32px;
-                font-size: 18px;
-                font-weight: bold;
-                color: #fff;
-                background: linear-gradient(135deg, #2563eb, #1d4ed8);
-                border: none;
-                border-radius: 30px;
-                cursor: pointer;
-                box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-            }
+			/* 🎨 讓 3D 畫布充滿整個手機螢幕，體驗最好 */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+        model-viewer { width: 100%; height: 100%; background-color: #f3f4f6; }
 
 
 		</style>
@@ -58,10 +29,20 @@
 		</script>
 
 	</head>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>
 	
 	<body>
 
-    <div id="ar-ui-container">
+        <model-viewer 
+    src="./models/AR_TEST.glb" 
+    ios-src="./models/AR_TEST.usdz"
+    ar 
+    ar-modes="scene-viewer quick-look webxr"
+    ar-placement="floor">
+</model-viewer>
+
+<!--    <div id="ar-ui-container">
         <button id="start-ar-btn" class="ar-btn">✨ 進入空間 AR 展示</button>
     </div>
 
@@ -332,7 +313,7 @@ import { XRButton } from 'three/addons/webxr/XRButton.js';
 
 
 
-		</script>
+		</script>-->
     </body>
 
 </html>
