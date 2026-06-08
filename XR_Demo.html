@@ -13,6 +13,15 @@
 			/* 🎨 讓 3D 畫布充滿整個手機螢幕，體驗最好 */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
         model-viewer { width: 100%; height: 100%; background-color: #f3f4f6; }
+        #your-custom-vr-button
+        {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            width: 100px;
+            height: 50px;
+            transform: translate(-50%,-50%);
+        }
 
 
 		</style>
@@ -34,13 +43,98 @@
 	
 	<body>
 
-        <model-viewer 
-    src="./models/AR_TEST.glb" 
-    ios-src="./models/AR_TEST.usdz"
-    ar 
-    ar-modes="scene-viewer quick-look webxr"
-    ar-placement="floor">
-</model-viewer>
+<button id="your-custom-vr-button">VR TEST</button>
+    <script>
+
+    const startBtn = document.getElementById('your-custom-vr-button');
+        
+    const USDZ_PATH = atob('Li9tb2RlbHMvQVJfVEVTVC51c2R6');//btoa('./models/AR_TEST.usdz')
+    const GLB_PATH = atob('Li9tb2RlbHMvQVJfVEVTVC5nbGI=');//btoa('./models/AR_TEST.glb')
+        
+    startBtn.addEventListener('click', async () => {
+    try {
+        startBtn.disabled = true;
+        startBtn.innerText = '⏳ 正在加密生成安全 3D 場域...';
+
+        // 🌟 1. 這裡必須加 await！讓兩者非同步平行/依序下載，並取得各自的加密 Blob 網址
+        const ghostGLB  = await GhostLinkFunction(GLB_PATH);
+        const ghostUSDZ = await GhostLinkFunction(USDZ_PATH);
+
+        console.log("偽裝 GLB 網址:", ghostGLB);
+        console.log("偽裝 USDZ 網址:", ghostUSDZ);
+
+        // 🌟 2. 兩個記憶體網址都準備好了，開始動態建立標籤
+        const mv = document.createElement('model-viewer');
+        mv.src = ghostGLB;                                     // 餵入加密 GLB
+        mv.setAttribute('ios-src', `${ghostUSDZ}#canonicalWebPageURL=https://yourdomain.com`); // 餵入加密 USDZ + 防偷分享
+        mv.setAttribute('ar', '');
+        mv.setAttribute('ar-modes', 'scene-viewer quick-look webxr');
+        mv.setAttribute('ar-placement', 'floor');
+
+        // 讓標籤在網頁上隱形
+        Object.assign(mv.style, { position: 'fixed', width: '0px', height: '0px', opacity: '0' });
+        document.body.appendChild(mv);
+
+        // 🌟 3. 標籤載入記憶體完成後，立刻一擊入魂開啟相機
+        mv.addEventListener('load', () => {
+            startBtn.disabled = false;
+            startBtn.innerText = '✨ 啟動空間 AR 展示';
+            
+            if (mv.canActivateAR) {
+                mv.activateAR();
+            } else {
+                alert("您的裝置不支援空間 AR 展示");
+                mv.remove();
+            }
+        });
+
+        // 🌟 4. 防禦機制：使用者關閉 AR 相機回到網頁時，自動銷毀標籤，並作廢記憶體網址（極度安全）
+        mv.addEventListener('ar-status', (event) => {
+            if (event.detail.status === 'not-presenting') {
+                console.log("♻️ 使用者離開 AR，清除記憶體殘留");
+                mv.remove();
+                URL.revokeObjectURL(ghostGLB);  // 釋放記憶體，網址當場報廢
+                URL.revokeObjectURL(ghostUSDZ); // 釋放記憶體，網址當場報廢
+            }
+        });
+
+    } catch (error) {
+        alert("AR 核心引擎啟動失敗");
+        startBtn.disabled = false;
+        startBtn.innerText = '✨ 啟動空間 AR 展示';
+    }
+});
+
+
+
+
+
+
+async function GhostLinkFunction(target) {
+    try {
+        const response = await fetch(target);
+        if (!response.ok) throw new Error("檔案載入失敗");
+        const arrayBuffer = await response.arrayBuffer();
+
+        // 🌟 修正：自動根據副檔名判定 Mime Type，防止 Android/iOS 混淆
+        let mimeType = 'model/gltf-binary'; // 預設為 GLB 格式
+        if (target.endsWith('.usdz')) {
+            mimeType = 'model/vnd.usdz+zip'; // 如果是 usdz 則改為 iOS 格式
+        }
+
+        const blob = new Blob([arrayBuffer], { type: mimeType });
+        const ghostURL = URL.createObjectURL(blob);
+
+        return ghostURL; // 正確回傳字串
+
+    } catch (e) {
+        console.error(e);
+        throw e; // 拋出錯誤讓外部 catch 捕捉
+    }
+}
+
+
+    </script>
 
 <!--    <div id="ar-ui-container">
         <button id="start-ar-btn" class="ar-btn">✨ 進入空間 AR 展示</button>
