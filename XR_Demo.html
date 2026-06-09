@@ -72,7 +72,7 @@ async function LoadXRScene(glb,usdz,placement,thisBtn)
         : false;
 
         // 2. 確保它是 iOS 手機/平板（iPhone/iPad），且支援 Apple AR Quick Look
-        const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         const isSafariAr = isIOS && document.createElement('a').relList.supports('ar');
 
         // 3. 偵測是否被困在 LINE / FB 等內建瀏覽器中
