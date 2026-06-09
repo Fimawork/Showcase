@@ -96,26 +96,35 @@
 				z-index: 20;
 			}
 
-			.buy-button {
+			#xr_btn {
 				position: absolute;
 				bottom: 40px;
-				right: 40px;
-				background-color: #000000;
+				right: 60px;
+
 				color: #ffffff;
 				padding: 16px 40px;
-				border-radius: 50px;
-				font-size: 14px;
+	
+				font-size: 21px;
 				font-weight: 800;
 				letter-spacing: 2px;
 				text-transform: uppercase;
-				border: none;
 				cursor: pointer;
 				z-index: 20;
 				transition: transform 0.2s, background-color 0.2s;
+
+				/* From https://css.glass */
+				background: rgba(255, 255, 255, 0.2);
+				border-radius: 16px;
+				box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+				backdrop-filter: blur(5px);
+				-webkit-backdrop-filter: blur(5px);
+				border: 1px solid rgba(255, 255, 255, 0.3);
+
+				animation: siri-pulse 2s infinite alternate;
 			}
-			.buy-button:hover {
+			#xr_btn:hover {
 				transform: scale(1.05);
-				background-color: #222;
+				background-color: #60bee4;
 			}
 
 			.specs-grid {
@@ -159,6 +168,104 @@
 				}
 			}
 
+			:root {
+			    --btn-width: 200px;
+			    --btn-height: 60px;
+			    /* Siri 經典的霓虹四色：桃紅、青藍、亮紫、深藍 */
+			    --siri-neon-1: #ff007f;
+			    --siri-neon-2: #00f0ff;
+			    --siri-neon-3: #7000ff;
+			    --siri-neon-4: #141526;
+			}
+
+			/* 1. 外層容器：確保按鈕與光暈完美疊加 */
+			.siri-btn-wrapper {
+			    position: relative;
+			    width: var(--btn-width);
+			    height: var(--btn-height);
+			    display: inline-block;
+			    cursor: pointer;
+			}
+
+			/* 2. 背景光暈層：利用高斯模糊與旋轉動畫營活動態流體感 */
+			.siri-glow {
+			    position: absolute;
+			    top: -8px; left: -8px; right: -8px; bottom: -8px; /* 故意比按鈕大一圈，讓光暈溢出 */
+			    border-radius: 16px; /* 剛好符合 iPhone 的微圓角方形外觀 */
+			    background: linear-gradient(
+			        45deg, 
+			        var(--siri-neon-1), 
+			        var(--siri-neon-2), 
+			        var(--siri-neon-3), 
+			        var(--siri-neon-1)
+			    );
+			    background-size: 400% 400%;
+			    filter: blur(15px); /* 🌟 關鍵：高斯模糊創造迷幻光暈 */
+			    opacity: 0.6; /* 平常淡淡的呼吸感 */
+			    z-index: 1;
+			    transition: opacity 0.5s ease, filter 0.5s ease;
+			    /* 讓漸層色自己動起來，像有生命一樣 */
+			    animation: siri-fluid-flow 8s ease infinite;
+			}
+
+			/* 3. 按鈕本體：帶有毛玻璃質感的深色微圓角正方形 */
+			.siri-button {
+			    position: relative;
+			    width: 100%;
+			    height: 100%;
+			    border: none;
+			    border-radius: 14px;
+			    /* iPhone 質感的半透明超深藍色（毛玻璃基底） */
+			    background: rgba(20, 21, 38, 0.85); 
+			    color: #ffffff;
+			    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+			    font-size: 14px;
+			    font-weight: 700;
+			    letter-spacing: 1.5px;
+			    display: flex;
+			    align-items: center;
+			    justify-content: center;
+			    gap: 10px;
+			    cursor: pointer;
+			    z-index: 2; /* 壓在光暈上方 */
+			    overflow: hidden;
+			    /* 隱約的細微邊框，像高階硬體工藝 */
+			    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+			                0 4px 20px rgba(0, 0, 0, 0.5);
+			    backdrop-filter: blur(10px); /* 增強毛玻璃質感 */
+			    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+			}
+
+			/* 4. 按鈕內部的文字與圖示樣式 */
+			.btn-icon {
+			    font-size: 16px;
+			    animation: siri-pulse 2s infinite alternate;
+			}
+
+			.btn-text {
+			    /* 讓文字帶有一點點微弱的霓虹發光感 */
+			    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+			}
+
+
+			/* 圖示的輕微呼吸放大，誘導視覺焦點 */
+			@keyframes siri-pulse {
+			    0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255,255,255,0.5)); }
+			    100% { transform: scale(1.2); filter: drop-shadow(0 0 8px var(--siri-neon-2)); }
+			}
+
+			@media screen and (max-width:768px)/*手機*/
+			{
+				#xr_btn {
+					bottom: 90%;
+					right: 6%;
+				}
+
+				.hamburger {
+					display: none;
+				}
+			}
+
 		</style>
 
 		<script type="importmap">
@@ -176,7 +283,7 @@
 	
 	<body>
 		<div class="bg-text">E-BIKE</div>
-		
+
 		<div class="top-nav">
 			<a href="#" id="contact_btn">Contact</a>
 			<a href="#" id="about_btn">About</a>
@@ -220,9 +327,8 @@
 				<p class="detail_value">https://reurl.cc/N2KN1Q</p>
 			</div>
 		</div>
-	
 
-		<button class="buy-button">BUY</button>
+		<button id="xr_btn">AR</button>
 
 		<script type="module">
 
@@ -230,7 +336,7 @@ import * as THREE from 'three';
 
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.46/fx_functions.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.48/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
 import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
@@ -238,7 +344,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { eBike_2026 } from './models/eBike_2026_slices.js';
-
+import 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js';
 import { Inspector } from 'three/addons/inspector/Inspector.js';
 
 
@@ -258,6 +364,15 @@ const CameraDefaultPos=new THREE.Vector3(-21.426,1.508,17.120);
 const ControlsTargetDefaultPos=new THREE.Vector3(-1.295,3.827,-0.120);
 
 let main_model= new THREE.Object3D();
+
+const XRBtn = document.getElementById('xr_btn');
+        
+const USDZ_PATH = atob('Li9tb2RlbHMvQVJfVEVTVC51c2R6');
+const GLB_PATH = atob('Li9tb2RlbHMvQVJfVEVTVC5nbGI=');
+        
+XRBtn.addEventListener('click', async () => {
+      await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'floor',XRBtn);
+});
 
 
 
