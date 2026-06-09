@@ -52,16 +52,20 @@
     const GLB_PATH = atob('Li9tb2RlbHMvQVJfVEVTVC5nbGI=');//btoa('./models/AR_TEST.glb')
         
     startBtn.addEventListener('click', async () => {
+      await LoadXRScene(GLB_PATH,USDZ_PATH,'floor',startBtn);
+});
+
+
+
+async function LoadXRScene(glb,usdz,placement,thisBtn)
+{
     try {
-        startBtn.disabled = true;
-        startBtn.innerText = '⏳ 正在加密生成安全 3D 場域...';
+
+        thisBtn.disabled = true;//防重複連擊
 
         // 🌟 1. 這裡必須加 await！讓兩者非同步平行/依序下載，並取得各自的加密 Blob 網址
-        const ghostGLB  = await GhostLinkFunction(GLB_PATH);
-        const ghostUSDZ = await GhostLinkFunction(USDZ_PATH);
-
-        console.log("偽裝 GLB 網址:", ghostGLB);
-        console.log("偽裝 USDZ 網址:", ghostUSDZ);
+        const ghostGLB  = await GhostLinkFunction(glb);
+        const ghostUSDZ = await GhostLinkFunction(usdz);
 
         // 🌟 2. 兩個記憶體網址都準備好了，開始動態建立標籤
         const mv = document.createElement('model-viewer');
@@ -69,7 +73,7 @@
         mv.setAttribute('ios-src', `${ghostUSDZ}#canonicalWebPageURL=https://yourdomain.com`); // 餵入加密 USDZ + 防偷分享
         mv.setAttribute('ar', '');
         mv.setAttribute('ar-modes', 'scene-viewer quick-look webxr');
-        mv.setAttribute('ar-placement', 'floor');
+        mv.setAttribute('ar-placement', placement);
 
         // 讓標籤在網頁上隱形
         Object.assign(mv.style, { position: 'fixed', width: '0px', height: '0px', opacity: '0' });
@@ -77,9 +81,7 @@
 
         // 🌟 3. 標籤載入記憶體完成後，立刻一擊入魂開啟相機
         mv.addEventListener('load', () => {
-            startBtn.disabled = false;
-            startBtn.innerText = '✨ 啟動空間 AR 展示';
-            
+            thisBtn.disabled = false;
             if (mv.canActivateAR) {
                 mv.activateAR();
             } else {
@@ -91,7 +93,7 @@
         // 🌟 4. 防禦機制：使用者關閉 AR 相機回到網頁時，自動銷毀標籤，並作廢記憶體網址（極度安全）
         mv.addEventListener('ar-status', (event) => {
             if (event.detail.status === 'not-presenting') {
-                console.log("♻️ 使用者離開 AR，清除記憶體殘留");
+
                 mv.remove();
                 URL.revokeObjectURL(ghostGLB);  // 釋放記憶體，網址當場報廢
                 URL.revokeObjectURL(ghostUSDZ); // 釋放記憶體，網址當場報廢
@@ -100,14 +102,8 @@
 
     } catch (error) {
         alert("AR 核心引擎啟動失敗");
-        startBtn.disabled = false;
-        startBtn.innerText = '✨ 啟動空間 AR 展示';
     }
-});
-
-
-
-
+}
 
 
 async function GhostLinkFunction(target) {
@@ -118,7 +114,7 @@ async function GhostLinkFunction(target) {
 
         // 🌟 修正：自動根據副檔名判定 Mime Type，防止 Android/iOS 混淆
         let mimeType = 'model/gltf-binary'; // 預設為 GLB 格式
-        if (target.endsWith('.usdz')) {
+        if (target.includes('.usdz')) {
             mimeType = 'model/vnd.usdz+zip'; // 如果是 usdz 則改為 iOS 格式
         }
 
@@ -136,278 +132,7 @@ async function GhostLinkFunction(target) {
 
     </script>
 
-<!--    <div id="ar-ui-container">
-        <button id="start-ar-btn" class="ar-btn">✨ 進入空間 AR 展示</button>
-    </div>
 
-		<script type="module">
-
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.47/fx_functions.js';
-import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
-import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
-import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-
-import { eBike_2026_XR_Android } from './models/eBike_2026_XR_Android_slices.js';
-import { XRButton } from 'three/addons/webxr/XRButton.js';
-
-
-
-// 設定資產路徑
-        const USDZ_PATH = './models/eBike_2026_XR_ios.usdz';
-        const GLB_PATH = './models/my_model_perfect.glb';
-
-        const startBtn = document.getElementById('start-ar-btn');
-        const uiContainer = document.getElementById('ar-ui-container');
-
-        // 偵測是否為 iOS 裝置
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-        // 🌟 新增網址後門：如果網址後面加上 ?test=android，就強制走 Android 流程
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('test') === 'android') {
-            isIOS = false; // 強制變裝成 Android 測試環境！
-        }
-
-        startBtn.addEventListener('click', async () => {
-            if (isIOS) {
-                // ... 原本的 iOS 檔案流 ...
-            } else {
-                // ... 執行 Android 的 initAndroidThreeXR() ...
-            }
-        });
-
-        startBtn.addEventListener('click', async () => {
-            if (isIOS) {
-                // ==========================================
-                // 🍏 軌跡一：iOS 專屬通路 (Fetch 現成檔案 + Blob 加密自毀)
-                // ==========================================
-                startBtn.innerText = "加密串流傳輸中...";
-                startBtn.disabled = true;
-                try {
-                    const response = await fetch(USDZ_PATH);
-                    if (!response.ok) throw new Error("檔案載入失敗");
-                    const arrayBuffer = await response.arrayBuffer();
-
-                    const blob = new Blob([arrayBuffer], { type: 'model/vnd.usdz+zip' });
-                    const ghostURL = URL.createObjectURL(blob);
-
-                    const arLink = document.createElement('a');
-                    arLink.setAttribute('rel', 'ar');
-                    arLink.href = ghostURL;
-                    const dummyImg = document.createElement('img');
-                    arLink.appendChild(dummyImg);
-                    document.body.appendChild(arLink);
-                    arLink.click();
-
-                    setTimeout(() => {
-                        URL.revokeObjectURL(ghostURL);
-                        document.body.removeChild(arLink);
-                        startBtn.innerText = "✨ 進入空間 AR 展示";
-                        startBtn.disabled = false;
-                    }, 1000);
-                } catch (e) {
-                    alert("iOS AR 啟動失敗");
-                    startBtn.disabled = false;
-                }
-            } else {
-                // ==========================================
-                // 🤖 軌跡二：Android 專屬通路 (執行 Three.js 內嵌 WebXR)
-                // ==========================================
-                uiContainer.style.display = 'none'; // 隱藏主按鈕，交給 Three.js 接管
-                initAndroidThreeXR();
-            }
-        });
-
-        // 🛠️ Android 專用：純場域展示的 Three.js WebXR 初始化
-        async function initAndroidThreeXR() {
-            let scene, camera, renderer, model;
-
-            FX.SetupEnvironment("cloud");
-
-            // 1. 初始化場景與相機
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
-
-            // 2. 初始化渲染器並「強制啟用 XR 支援」
-            renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true, forceWebGL: true, outputBufferType: THREE.UnsignedByteType});
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.xr.enabled = true; // 🌟 關鍵：開啟 Three.js 的 WebXR 引擎
-            document.body.appendChild(renderer.domElement);
-
-            await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
-
-           	///hdri 環境光源
-	        FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
-	        scene.environmentRotation.y = FX.ToThreeEulerAngle(-180); 
-
-            // 4. 載入符合 WebGPU/WebGL 規範且帶有 Rhino 圖層的完美 GLB
-            const loader_EBike = new GLTFLoader();
-    loader_EBike.setDRACOLoader(FX.dracoLoader);
-	loader_EBike.parse(
-    FX.Base64ToArrayBuffer(eBike_2026_XR_Android()),
-    '',
-    (gltf) => {
-        
-		const model = gltf.scene;
-
-		model.position.set(0,0,0);
-		model.rotation.set(0,FX.ToThreeEulerAngle(-90), 0);
-		model.scale.set(1,1,1);
-
-		const saddle_back_01_material=FXM.InstEtchingMaterial(0x080808,0.4,0.3,0.75,false,1,'./textures/Leather.png',new THREE.Vector2(10,10),new THREE.Vector2(0,0),'./textures/Leather.png',new THREE.Vector2(15, 15),0);
-
-		const tire_material=FXM.InstEtchingMaterial(0x292929,0.7,0.35,1,false,1,"./textures/Leather.png",new THREE.Vector2(10,10),new THREE.Vector2(0,0),"./textures/Leather.png",new THREE.Vector2(50,100),30);
-
-		const black_housing_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.75,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(600, 600),2);
-
-		const metal_housing_material=FXM.InstEtchingMaterial(0x737373,0.3,0.5,1,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(50,50),2);
-
-		const lightLens_material=FXM.InstMaterial(0x183A25,0,0.5,1,2.4,1,true,0.9,true);
-
-		const brake_material=FXM.InstMaterial(0x919191,0.3,0.9,0,1.27,0,false,1,true);
-
-		const fork_material=FXM.InstMaterial(0x4F4F4F,0.3,0.9,0,2.3333333333333335,1,false,1,true);
-
-		const wheel_material=FXM.InstMaterial(0xD5783F,0.53,1,0,2.3333333333333335,1,false,1,true);
-
-		const logo_material=FXM.InstMaterial(0xD5783F,0.53,1,0,2.3333333333333335,1,false,1,true);
-
-		const freeWheel_material=FXM.InstMaterial(0xD5783F,0.53,1,0,2.3333333333333335,1,false,1,true);
-
-		const frame_material=FXM.InstMaterial(0x4F4F4F,0.3,0.9,0,2.3333333333333335,1,false,1,true);
-
-		model.traverse( function ( object ) {	
-                  
-            if(object.name.includes("wheel"))
-            {
-              FX.ReturnBufferGeometry(object,wheel_material,null,scene);
-            }
-
-			if(object.name.includes("tire"))
-            {
-              FX.ReturnBufferGeometry(object,tire_material,null,scene);
-            }
-
-			if(object.name.includes("saddle"))
-            {
-              FX.ReturnBufferGeometry(object,saddle_back_01_material,null,scene);
-            }
-
-			if(object.name.includes("frame"))
-            {
-              FX.ReturnBufferGeometry(object,frame_material,null,scene);
-            }
-
-			if(object.name.includes("plasticHousing"))
-            {
-              FX.ReturnBufferGeometry(object,black_housing_material,null,scene);
-            }
-
-			if(object.name.includes("cable"))
-            {
-              FX.ReturnBufferGeometry(object,null,null,scene);
-            }
-
-			if(object.name.includes("fork"))
-            {
-              FX.ReturnBufferGeometry(object,fork_material,null,scene);
-            }
-
-			if(object.name.includes("metalHousing"))
-            {
-              FX.ReturnBufferGeometry(object,metal_housing_material,null,scene);
-            }
-
-			//if(object.name.includes("light"))
-            //{
-            //  FX.ReturnBufferGeometry(object,null,null,scene);
-            //}
-
-			if(object.name.includes("lightLens"))
-            {
-              FX.ReturnBufferGeometry(object,lightLens_material,null,scene);
-            }
-
-			if(object.name.includes("handle"))
-            {
-              FX.ReturnBufferGeometry(object,tire_material,null,scene);
-            }
-
-			if(object.name.includes("screw"))
-            {
-              FX.ReturnBufferGeometry(object,null,null,scene);
-            }
-
-			if(object.name.includes("spoke"))
-            {
-              FX.ReturnBufferGeometry(object,brake_material,null,scene);
-            }
-
-			if(object.name.includes("freeWheel"))
-            {
-              FX.ReturnBufferGeometry(object,null,null,scene);
-            }
-
-			if(object.name.includes("brake"))
-            {
-              FX.ReturnBufferGeometry(object,brake_material,null,scene);
-            }
-
-			if(object.name.includes("axle"))
-            {
-              FX.ReturnBufferGeometry(object,brake_material,null,scene);
-            }
-
-			if(object.name.includes("logo"))
-            {
-              FX.ReturnBufferGeometry(object,logo_material,null,scene);
-            }
-        })
-
-		scene.add(model);
-
-    },
-    (error) => {
-        console.error('Failed to load model:', error);
-    }
-	);
-
-            // 5. 創建 Three.js 內建的 WebXR 啟動按鈕並自動模擬點擊
-            // optionalFeatures 設定 'local-floor' 確保模型可以直接依據實體地面定位，不需手動射線點擊放置
-            const xrButton = XRButton.createButton(renderer, { 
-                requiredFeatures: ['local-floor'] 
-            });
-            document.body.appendChild(xrButton);
-            
-            // 防呆自動觸發：免去使用者多點一次，直接拉起 Android Chrome 的 WebXR 相機
-            setTimeout(() => {
-                xrButton.click();
-            }, 100);
-
-            // 6. WebXR 專用的固定渲染循環 (Animation Loop)
-            renderer.setAnimationLoop(() => {
-                // 如果您希望模型在場域中自己微微自轉增添動感，可以解開下一行：
-                // if (model) model.rotation.y += 0.005;
-                
-                renderer.render(scene, camera);
-            });
-
-            // 視窗縮放處理
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-        }
-
-
-
-		</script>-->
     </body>
 
 </html>
