@@ -372,8 +372,55 @@ const GLB_PATH = atob('Li9tb2RlbHMvQVJfVEVTVC5nbGI=');
         
 XRBtn.addEventListener('click', async () => {
       await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'floor',XRBtn);
+	  await TestXRRecorder();
 });
 
+async function TestXRRecorder()
+{
+	// 2. 同步發送紀錄到 Google 試算表 (不影響複製速度)
+	const GAS_URL = 'https://script.google.com/macros/s/AKfycbxK3AOGluqtjfJHxkOzoKnsgDnzTj7AQiiDjIRZOMWnNVtmD3bw0wTfEBNeXRRfe26A/exec';
+
+	try {
+		// 使用免費的 ipapi.co 取得訪客的地理資訊
+		const ipResponse = await fetch('https://ipapi.co/json/');
+		const ipData = await ipResponse.json();
+
+		// 提取國家名稱與城市名稱（例如：Taiwan, Taipei）
+		const country = ipData.country_name || '未知國家';
+		const city = ipData.city || '未知城市';
+
+		// 將數據發送到 Google 試算表
+		fetch(GAS_URL, {
+		    method: 'POST',
+		    mode: 'no-cors',
+		    headers: {
+		        'Content-Type': 'application/json'
+		    },
+		    body: JSON.stringify({
+		        action: '進行AR功能測試_eBike',
+		        country: country,
+		        city: city
+		    })
+		});
+				
+		console.log(`位置紀錄已送出: ${country}, ${city}`);
+				
+		} catch (err) {
+		    // 如果客人裝了 AdBlock 阻擋了 IP API，或者網路異常，則發送未知資訊，確保統計不中斷
+		    console.warn('無法取得地理位置，改發送預設值。', err);
+		
+		    fetch(GAS_URL, {
+		        method: 'POST',
+		        mode: 'no-cors',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify({
+		            action: '進行AR功能測試_eBike',
+		            country: '查詢失敗',
+		            city: '查詢失敗'
+		        })
+		    });
+		}
+}
 
 
 let idleTime=0;
