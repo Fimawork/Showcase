@@ -393,10 +393,10 @@ const XRBtn = document.getElementById('xr_btn');
 const USDZ_PATH = atob("Li9tb2RlbHMvRXhlcmNpc2VCaWtlXzIwMjZfWFIudXNkeg==");
 const GLB_PATH = atob("Li9tb2RlbHMvRXhlcmNpc2VCaWtlXzIwMjZfWFIuZ2xi");
         
-//XRBtn.addEventListener('click', async () => {
-//      await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'floor',XRBtn);
-//	  await TestXRRecorder();
-//});
+XRBtn.addEventListener('click', async () => {
+      await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'floor',XRBtn);
+	  await TestXRRecorder();
+});
 
 async function TestXRRecorder()
 {
@@ -461,7 +461,7 @@ async function init()
   	scene = new THREE.Scene();
 	scene.background = null;
 
-  	camera = new THREE.PerspectiveCamera( 24, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
+  	camera = new THREE.PerspectiveCamera( 24, threeContainer.clientWidth / threeContainer.clientHeight, 0.001, 1000 );//非全螢幕比例設定
   	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
   	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
 
@@ -484,6 +484,8 @@ async function init()
   	controls.panSpeed = 0.4;
   	controls.enableDamping = true;
   	controls.dampingFactor =0.015;
+
+    controls.minDistance =1;
   	controls.maxDistance = 500;
   	controls.target.copy( ControlsTargetDefaultPos );
   	controls.zoomSpeed=0.5;
