@@ -409,6 +409,7 @@ async function init()
   	controls.enableDamping = true;
   	controls.dampingFactor =0.015;
   	controls.maxDistance = 500;
+	controls.maxPolarAngle=FX.ToThreeEulerAngle(91);
   	controls.target.copy( ControlsTargetDefaultPos );
   	controls.zoomSpeed=0.5;
 	controls.autoRotate=false;
