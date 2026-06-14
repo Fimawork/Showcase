@@ -13,16 +13,258 @@
 			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
 
-			body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; }
+			body
+			{
+				margin: 0;
+				padding:0; 
+				background-color: #d6d6d6;
+				font-family: 'Inter', sans-serif;
+				overflow: hidden;
+			}
 			
-			#canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
-        
-        /* 網頁上的控制 UI */
-        #ui-overlay { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10; text-align: center; width: 100%; }
-        .ar-btn { padding: 16px 32px; font-size: 18px; font-weight: bold; background: #007AFF; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: 0.2s; }
-        .ar-btn:active { transform: scale(0.95); }
-        #loading-text { color: #fff; text-shadow: 1px 1px 3px #000; margin-bottom: 10px; font-size: 14px; }
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
 
+			.bg-text {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				font-size: 15vw;
+				font-weight: 900;
+				color: #ffffff;
+				letter-spacing: 1.5rem;
+				z-index: -1;
+				text-transform: uppercase;
+				user-select: none;
+				white-space: nowrap;
+			}
+
+			#threeContainer {
+				position: absolute;
+				top: 0; left: 0;
+				width: 100%; height: 100%;
+				z-index: 6;
+			}
+
+			.top-nav {
+				position: absolute;
+				top: 40px;
+				right: 40px;
+				display: flex;
+				align-items: center;
+				gap: 30px;
+				z-index: 20;
+			}
+
+			.top-nav a {
+				text-decoration: none;
+				color: #000;
+				font-size: 14px;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+			}
+
+			.hamburger {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+				cursor: pointer;
+			}
+
+			.hamburger span {
+				display: block;
+				width: 24px;
+				height: 2px;
+				background-color: #000;
+				transition: 0.3s;
+			}
+
+			.side-year {
+				position: absolute;
+				top: 50%;
+				left: 40px;
+				transform: translateY(-50%) rotate(-90deg);
+				font-size: 14px;
+				font-weight: 700;
+				color: #000;
+				letter-spacing: 4px;
+				z-index: 20;
+			}
+
+			#xr_btn {
+				position: absolute;
+				bottom: 40px;
+				right: 60px;
+
+				color: #ffffff;
+				padding: 16px 40px;
+	
+				font-size: 21px;
+				font-weight: 800;
+				letter-spacing: 2px;
+				text-transform: uppercase;
+				cursor: pointer;
+				z-index: 20;
+				transition: transform 0.2s, background-color 0.2s;
+
+				/* From https://css.glass */
+				background: rgba(255, 255, 255, 0.2);
+				border-radius: 16px;
+				box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+				backdrop-filter: blur(5px);
+				-webkit-backdrop-filter: blur(5px);
+				border: 1px solid rgba(255, 255, 255, 0.3);
+
+				animation: siri-pulse 2s infinite alternate;
+			}
+			#xr_btn:hover {
+				transform: scale(1.05);
+				background-color: #60bee4;
+			}
+
+			.specs-grid {
+				position: absolute;
+				bottom: 40px;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				gap: 60px;
+				text-align: center;
+				z-index: 20;
+			}
+
+			.spec-cell label {
+				display: block;
+				font-size: 12px;
+				color: #777777;
+				margin-bottom: 8px;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+				font-weight: 700;
+			}
+
+			.spec-cell span {
+				font-size: 18px;
+				font-weight: 900;
+				color: #000000;
+			}
+
+
+			@media screen and (max-width:768px)/*手機*/
+			{
+				#contact_btn
+				{
+					display: none;
+				}
+
+				#about_btn
+				{
+					display: none;
+				}
+			}
+
+			:root {
+			    --btn-width: 200px;
+			    --btn-height: 60px;
+			    /* Siri 經典的霓虹四色：桃紅、青藍、亮紫、深藍 */
+			    --siri-neon-1: #ff007f;
+			    --siri-neon-2: #00f0ff;
+			    --siri-neon-3: #7000ff;
+			    --siri-neon-4: #141526;
+			}
+
+			/* 1. 外層容器：確保按鈕與光暈完美疊加 */
+			.siri-btn-wrapper {
+			    position: relative;
+			    width: var(--btn-width);
+			    height: var(--btn-height);
+			    display: inline-block;
+			    cursor: pointer;
+			}
+
+			/* 2. 背景光暈層：利用高斯模糊與旋轉動畫營活動態流體感 */
+			.siri-glow {
+			    position: absolute;
+			    top: -8px; left: -8px; right: -8px; bottom: -8px; /* 故意比按鈕大一圈，讓光暈溢出 */
+			    border-radius: 16px; /* 剛好符合 iPhone 的微圓角方形外觀 */
+			    background: linear-gradient(
+			        45deg, 
+			        var(--siri-neon-1), 
+			        var(--siri-neon-2), 
+			        var(--siri-neon-3), 
+			        var(--siri-neon-1)
+			    );
+			    background-size: 400% 400%;
+			    filter: blur(15px); /* 🌟 關鍵：高斯模糊創造迷幻光暈 */
+			    opacity: 0.6; /* 平常淡淡的呼吸感 */
+			    z-index: 1;
+			    transition: opacity 0.5s ease, filter 0.5s ease;
+			    /* 讓漸層色自己動起來，像有生命一樣 */
+			    animation: siri-fluid-flow 8s ease infinite;
+			}
+
+			/* 3. 按鈕本體：帶有毛玻璃質感的深色微圓角正方形 */
+			.siri-button {
+			    position: relative;
+			    width: 100%;
+			    height: 100%;
+			    border: none;
+			    border-radius: 14px;
+			    /* iPhone 質感的半透明超深藍色（毛玻璃基底） */
+			    background: rgba(20, 21, 38, 0.85); 
+			    color: #ffffff;
+			    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+			    font-size: 14px;
+			    font-weight: 700;
+			    letter-spacing: 1.5px;
+			    display: flex;
+			    align-items: center;
+			    justify-content: center;
+			    gap: 10px;
+			    cursor: pointer;
+			    z-index: 2; /* 壓在光暈上方 */
+			    overflow: hidden;
+			    /* 隱約的細微邊框，像高階硬體工藝 */
+			    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+			                0 4px 20px rgba(0, 0, 0, 0.5);
+			    backdrop-filter: blur(10px); /* 增強毛玻璃質感 */
+			    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+			}
+
+			/* 4. 按鈕內部的文字與圖示樣式 */
+			.btn-icon {
+			    font-size: 16px;
+			    animation: siri-pulse 2s infinite alternate;
+			}
+
+			.btn-text {
+			    /* 讓文字帶有一點點微弱的霓虹發光感 */
+			    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+			}
+
+
+			/* 圖示的輕微呼吸放大，誘導視覺焦點 */
+			@keyframes siri-pulse {
+			    0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255,255,255,0.5)); }
+			    100% { transform: scale(1.2); filter: drop-shadow(0 0 8px var(--siri-neon-2)); }
+			}
+
+			@media screen and (max-width:768px)/*手機*/
+			{
+				#xr_btn {
+					bottom: 90%;
+					right: 6%;
+				}
+
+				.hamburger {
+					display: none;
+				}
+			}
 
 		</style>
 
@@ -40,21 +282,61 @@
 	</head>
 	
 	<body>
-		<!-- Three.js 渲染畫布的容器 -->
-    <div id="canvas-container"></div>
+		<div class="bg-text">E-BIKE</div>
 
-    <!-- UI 介面 -->
-    <div id="ui-overlay">
-        <div id="loading-text">3D 場景初始化中...</div>
-        <!-- 這是我們唯一的萬能按鈕，它會根據裝置自動變身 -->
-        <button id="ar-trigger-btn" class="ar-btn" style="display:none;">啟動 AR 空間擺放</button>
-    </div>
+		<div class="top-nav">
+			<a href="#" id="contact_btn">Contact</a>
+			<a href="#" id="about_btn">About</a>
+			<div class="hamburger">
+				<span></span><span></span><span></span>
+			</div>
+		</div>
+
+		<div class="side-year">2026</div>
+
+		<div id="threeContainer"></div> 
+		<!--<div id="loadingUI" class="rotate_anim"></div>-->
+		<div class="fimawork_logo" style="top: 3%;"onclick="parent.open('https://fimawork.tw/')"></div>
+		<!--<div class="web3d_icon"></div>-->
+
+		<div class="specs-grid">
+			<div class="spec-cell">
+				<label>Top speed</label>
+				<span>up to 25 km/h</span>
+			</div>
+			<div class="spec-cell">
+				<label>Motor torque</label>
+				<span>68 Nm</span>
+			</div>
+			<div class="spec-cell">
+				<label>Battery</label>
+				<span>60-150 km range</span>
+			</div>
+		</div>
+
+		
+		<div class="model_info">
+			<div class="titlePanel">
+				<p class="detail_title">Model</p>
+				<p class="detail_title">Author</p>
+				<p class="detail_title">Link</p>
+			</div>
+			<div class="detailPanel">
+				<p class="detail_value">Electric Motorcycle</p>
+				<p class="detail_value">MA-3D</p>
+				<p class="detail_value">https://reurl.cc/N2KN1Q</p>
+			</div>
+		</div>
+
+		<button id="xr_btn">AR</button>
 
 		<script type="module">
 
 import * as THREE from 'three';
+
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.47/fx_functions.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.48/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
 import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
@@ -62,97 +344,256 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { exerciseBike_2026 } from './models/exerciseBike_2026_slices.js';
-import { XRButton } from 'three/addons/webxr/XRButton.js';
-import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+import 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js';
 import { Inspector } from 'three/addons/inspector/Inspector.js';
 
 
 let scene, camera, renderer, stats, mixer;
-let container;
-let controller, controllerGrip;
+
+let controls;
+let threeContainer = document.getElementById("threeContainer");
 
 
-	const CameraDefaultPos=new THREE.Vector3(0,1.2,2);
+const timer = new THREE.Timer();
 
-let productModel = null;
-        let reticle = null; // AR 模式下的「找地面準心」
+const modelPosition=new THREE.Vector3(0,0,0);
+const modelRotation=new THREE.Vector3(0,FX.ToThreeEulerAngle(90), 0);
+const modeScale=1;
+
+const CameraDefaultPos=new THREE.Vector3(3.007,1.220,-2.872);
+const ControlsTargetDefaultPos=new THREE.Vector3(0.090,0.623,0.189);
+
+let main_model= new THREE.Object3D();
+
+const XRBtn = document.getElementById('xr_btn');
         
-        // 用於 WebXR 命中測試（Hit Test）的變數
-        let hitTestSource = null;
-        let hitTestSourceRequested = false;
-// 偵測裝置類型
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const USDZ_PATH = atob("Li9tb2RlbHMvRXhlcmNpc2VCaWtlXzIwMjZfWFIudXNkeg==");
+const GLB_PATH = atob("Li9tb2RlbHMvRXhlcmNpc2VCaWtlXzIwMjZfWFIuZ2xi");
+        
+XRBtn.addEventListener('click', async () => {
+      await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'floor',XRBtn);
+	  await TestXRRecorder();
+});
+
+async function TestXRRecorder()
+{
+	// 2. 同步發送紀錄到 Google 試算表 (不影響複製速度)
+	const GAS_URL = 'https://script.google.com/macros/s/AKfycbxK3AOGluqtjfJHxkOzoKnsgDnzTj7AQiiDjIRZOMWnNVtmD3bw0wTfEBNeXRRfe26A/exec';
+
+	try {
+		// 使用免費的 ipapi.co 取得訪客的地理資訊
+		const ipResponse = await fetch('https://ipapi.co/json/');
+		const ipData = await ipResponse.json();
+
+		// 提取國家名稱與城市名稱（例如：Taiwan, Taipei）
+		const country = ipData.country_name || '未知國家';
+		const city = ipData.city || '未知城市';
+
+		// 將數據發送到 Google 試算表
+		fetch(GAS_URL, {
+		    method: 'POST',
+		    mode: 'no-cors',
+		    headers: {
+		        'Content-Type': 'application/json'
+		    },
+		    body: JSON.stringify({
+		        action: '進行AR功能測試_eBike',
+		        country: country,
+		        city: city
+		    })
+		});
+				
+		console.log(`位置紀錄已送出: ${country}, ${city}`);
+				
+		} catch (err) {
+		    // 如果客人裝了 AdBlock 阻擋了 IP API，或者網路異常，則發送未知資訊，確保統計不中斷
+		    console.warn('無法取得地理位置，改發送預設值。', err);
+		
+		    fetch(GAS_URL, {
+		        method: 'POST',
+		        mode: 'no-cors',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify({
+		            action: '進行AR功能測試_eBike',
+		            country: '查詢失敗',
+		            city: '查詢失敗'
+		        })
+		    });
+		}
+}
+
+
+let idleTime=0;
+const hold_time=6;
 
 
 init();
-FX.Camera_Inspector(camera,controls);
+
 FXUI.InstLoadingEffect_Type_A(true);
 
 async function init()
 {
 	FX.SetupEnvironment("cloud");
 
-	container = document.getElementById('canvas-container');
-    document.body.appendChild(container);
-	
   	scene = new THREE.Scene();
 	scene.background = null;
 
-  	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 500);
+  	camera = new THREE.PerspectiveCamera( 24, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
 
-	camera.position.copy(CameraDefaultPos);
-	camera.lookAt(0,0.75,0);
+  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 0.9;
+  	//document.body.appendChild( renderer.domElement );
+  	threeContainer.appendChild( renderer.domElement );
 
-  	// 💡 關鍵點：使用 Three.js 的 WebGPURenderer
-    // 它會優先使用 WebGPU 渲染，並處理 WebXR 的相容問題
-    renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true, forceWebGL: true, outputBufferType: THREE.UnsignedByteType});
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.xr.enabled = true; // 告知渲染器啟用 WebXR 核心
-    container.appendChild(renderer.domElement);
-
-	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
-
-
+	//renderer.inspector = new Inspector();
 
 	// 1. 先等待 Renderer 初始化完成
-	//await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
 
-	
+  	camera.position.copy(CameraDefaultPos);
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+	controls = new OrbitControls( camera, renderer.domElement);
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.maxDistance = 500;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+
+	controls.maxPolarAngle=FX.ToThreeEulerAngle(95);
+	controls.minPolarAngle=FX.ToThreeEulerAngle(-90);
+  	controls.update();
 
   	///hdri 環境光源
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
 	scene.environmentRotation.y = FX.ToThreeEulerAngle(-180); 
 	
 	///Lamborghini_Centenario_roadster
-	const loader_exerciseBike = new GLTFLoader();
-    loader_exerciseBike.setDRACOLoader(FX.dracoLoader);
-	loader_exerciseBike.parse(
+	const loader_EBike = new GLTFLoader();
+    loader_EBike.setDRACOLoader(FX.dracoLoader);
+	loader_EBike.parse(
     FX.Base64ToArrayBuffer(exerciseBike_2026()),
     '',
     (gltf) => {
         
-		productModel = gltf.scene;
+		const model = gltf.scene;
 
-		const scale=0.001;
-		productModel.position.set(0,0,0);
-		productModel.rotation.set(0,FX.ToThreeEulerAngle(-90), 0);
-		productModel.scale.set(0.001,0.001,0.001);
+		model.position.set(0,0,0);
+		model.rotation.set(0,0, 0);
+		model.scale.set(modeScale,modeScale,modeScale);
 
-		document.getElementById('loading-text').style.display = 'none';
-		scene.add(productModel);
+		const saddle_01_material=FXM.InstEtchingMaterial(0x080808,0.4,0.3,0.75,false,1,'./textures/Leather.png',new THREE.Vector2(10,10),new THREE.Vector2(0,0),'./textures/Leather.png',new THREE.Vector2(15, 15),0);
+
+		const tube_01_material=FXM.InstMaterial(0x828282,0.263,1,0,1,0,false,1,true);
+		const tube_02_material=FXM.InstMaterial(0x828282,0.263,1,0,1,0,false,1,true);
+
+		const black_plastic_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.75,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(600, 600),2);
+
+		const logo_material=FXM.InstMaterial(0x878787,0,1,0,2.3333333333333335,1,false,1,true);
+
+		const housing_01_material=FXM.InstMaterial(0xE0E0E0,0.3,0.6,0,2.4,1,false,1,true);
+
+		const housing_02_material=FXM.InstMaterial(0x86BAFE,0.3,0.5,0,2.4,1,false,1,true);
+
+		model.traverse( function ( object ) {	
+                  
+            if(object.name.includes("saddle"))
+            {
+              FX.ReturnBufferGeometry(object,saddle_01_material,null,scene);
+            }
+
+			if(object.name.includes("handle"))
+            {
+              FX.ReturnBufferGeometry(object,saddle_01_material,null,scene);
+            }
+
+			if(object.name.includes("tube_01"))
+            {
+              FX.ReturnBufferGeometry(object,tube_01_material,null,scene);
+            }
+
+			if(object.name.includes("tube_02"))
+            {
+              FX.ReturnBufferGeometry(object,tube_02_material,null,scene);
+            }
+
+			if(object.name.includes("endCap"))
+            {
+              FX.ReturnBufferGeometry(object,black_plastic_material,null,scene);
+            }
+
+			if(object.name.includes("housing_01"))
+            {
+              FX.ReturnBufferGeometry(object,housing_01_material,null,scene);
+            }
+
+			if(object.name.includes("housing_02"))
+            {
+              FX.ReturnBufferGeometry(object,housing_02_material,null,scene);
+            }
+
+			if(object.name.includes("knob"))
+            {
+              FX.ReturnBufferGeometry(object,black_plastic_material,null,scene);
+            }
+
+			if(object.name.includes("logo"))
+            {
+              FX.ReturnBufferGeometry(object,logo_material,null,scene);
+            }
+
+        })
+
+
+		let HUD_screen = new THREE.Object3D();
+			
+		const loader_HUD_1 = new THREE.TextureLoader();
+			
+		const geometry_HUD_1 = new THREE.PlaneGeometry();
+		
+			
+		loader_HUD_1.load( './textures/Windows_UI.png', function ( texture ) {
+			
+			texture.colorSpace = THREE.SRGBColorSpace;//確保顏色空間正確
+			
+			const material_HUD = new THREE.MeshStandardMaterial( { map: texture, transparent: true,opacity:0.9 ,depthWrite: false ,	emissiveMap: texture, side:THREE.DoubleSide,emissive: new THREE.Color(0x333333), // 設定自發光的顏色與強度（白色代表完全顯色，2.0 代表兩倍亮度）
+    			emissiveIntensity: 3,} );
+			
+			const mesh_HUD = new THREE.Mesh( geometry_HUD_1, material_HUD );
+			const img_scale =0.001;
+			
+			mesh_HUD.position.set( -0.35,1.325,0 );
+			mesh_HUD.scale.set(img_scale*273,img_scale*237,1);
+		
+			//mesh_HUD.rotation.set(FX.ToThreeEulerAngle(30),FX.ToThreeEulerAngle(90), FX.ToThreeEulerAngle(-180));
+
+			mesh_HUD.rotation.set(FX.ToThreeEulerAngle(90),FX.ToThreeEulerAngle(-36), FX.ToThreeEulerAngle(90));
+			
+			HUD_screen.add(mesh_HUD);
+			//scene.add( HUD );
+		
+			scene.add(HUD_screen);
+		} );
+
+		scene.add(model);
 		
 		setTimeout(() => {
 			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
 			renderer.setAnimationLoop( animate );
 			FXUI.InstLoadingEffect_Type_A(false);
-			setupUniversalButton();
+			//FX.Camera_Inspector(camera,controls);
 			//FX.Material_Inspector(scene);
-
-			//FX.USDZ_Exporter(scene);
 		}, 1000);
 
-
+		console.log()
+		
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -160,139 +601,73 @@ async function init()
 	);
 
 	
+
+	//影子工具
+	FX.InitWebGPUShadow(scene, {
+     shadow: { blur: 0.5, darkness: 0.25 },
+     plane: { color: '#ffffff', opacity: 1 }
+});
+
+
 	///EventListener
   	window.addEventListener( 'resize', onWindowResize );  
 
-  	
+  		window.addEventListener("pointerdown", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+	
+	});
+
+	window.addEventListener( 'pointermove', function(e) {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+  	window.addEventListener("wheel", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
 	
 }
-
-// 當使用者點擊螢幕時觸發
-        function onSelect() {
-            if (reticle.visible && productServiceModel) {
-                // 複製一份載入好的產品模型
-                const product = productServiceModel.clone();
-                
-                // 將產品放置在目前瞄準框（地面）的位置與角度
-                product.position.setFromMatrixPosition(reticle.matrix);
-                product.quaternion.setFromRotationMatrix(reticle.matrix);
-                
-                scene.add(product);
-            }
-        }
 
 
 function onWindowResize() 
 {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
 	camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
 }
 
-function animate(timestamp, frame) 
+function animate(timestamp) 
 {
 
-    // 執行 WebGPU 渲染
-    renderer.render(scene, camera);
+  	controls.update();
+  	renderer.render( scene, camera );
+
+  	// 自動更新時間（用來計算移動速度、旋轉等）
+    timer.update( timestamp );
+	const delta = timer.getDelta();
+
+
+	if ( mixer ) mixer.update( delta );
+
+//	idleTime+=delta;
+//	
+//	if(idleTime>hold_time)
+//	{
+//		controls.autoRotate=true;
+//	}
+
+
+//影子工具
+FX.UpdateWebGPUShadow(renderer, scene);
 
 }
-
-
-// 7. 設定萬能分流按鈕
-        function setupUniversalButton() {
-            const btn = document.getElementById('ar-trigger-btn');
-            btn.style.display = 'inline-block';
-
-            if (isIOS) {
-                /* ==========================================================
-                   🍏 通道一：iOS / iPadOS ── 系統原生分流
-                   ========================================================== */
-                btn.innerText = '在客廳擺放 (iOS 原生)';
-                btn.addEventListener('click', () => {
-                    const iosAnchor = document.createElement('a');
-                    iosAnchor.setAttribute('rel', 'ar');
-                    iosAnchor.setAttribute('href','./models/exerciseBike_2026.usdz');
-                    iosAnchor.click();
-                });
-            } else {
-                /* ==========================================================
-                   🤖 通道二：Android / Vision Pro ── 真正的 Three.js WebXR 模式
-                   ========================================================== */
-                btn.innerText = '進入 AR 空間定位';
-                
-                // 檢查當前瀏覽器環境是否真的支援 WebXR AR 模式
-                if (navigator.xr) {
-                    navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-                        if (supported) {
-                            btn.addEventListener('click', toggleThreeJsArSession);
-                        } else {
-                            btn.innerText = '不支援此網頁 AR (請換 Chrome)';
-                            btn.style.background = '#8e8e93';
-                        }
-                    });
-                } else {
-                    btn.innerText = '您的裝置不支援 WebXR';
-                    btn.style.background = '#8e8e93';
-                }
-            }
-        }
-
-        // 8. 真正驅動 Three.js 進入 WebXR 空間渲染的函式
-        let currentSession = null;
-        function toggleThreeJsArSession() {
-            if (currentSession === null) {
-                // 請求開啟一個「包含命中測試功能」的 AR 鏡頭會話
-                navigator.xr.requestSession('immersive-ar', {
-                    requiredFeatures: ['local-floor', 'hit-test']
-                }).then(onSessionStarted);
-            } else {
-                currentSession.end();
-            }
-        }
-
-        function onSessionStarted(session) {
-            currentSession = session;
-            renderer.xr.setSession(currentSession);
-            
-            // 進入 AR 模式時，先把原本漂浮在網頁中央的模型藏起來，等待使用者找地面定位
-            if(productModel) productModel.visible = false; 
-
-            // 設置 Android 手機螢幕被點擊時的傾聽器
-            session.addEventListener('select', onScreenTap);
-            session.addEventListener('end', onSessionEnded);
-            
-            document.getElementById('ar-trigger-btn').innerText = '結束 AR';
-        }
-
-        function onSessionEnded() {
-            currentSession = null;
-            hitTestSourceRequested = false;
-            hitTestSource = null;
-            reticle.visible = false;
-            
-            // 退出 AR 回到網頁後，把模型恢復顯示在原位
-            if(productModel) {
-                productModel.visible = true;
-                productModel.position.set(0, -0.2, -0.8);
-            }
-            document.getElementById('ar-trigger-btn').innerText = '進入 AR 空間定位';
-        }
-
-        /* ==========================================================
-           🎯 WebXR 核心邏輯：即時尋找地面 & 放置模型
-           ========================================================== */
-        
-        // 9. 當使用者用手指點擊手機螢幕時：把模型移到準心當前所在的真實地面座標
-        function onScreenTap() {
-            if (reticle.visible && productModel) {
-                productModel.visible = true;
-                // 將模型的空間座標完全對齊綠色準心的世界座標
-                productModel.position.setFromMatrixPosition(reticle.matrix);
-                // 讓模型擺正
-                productModel.rotation.set(0, 0, 0); 
-                console.log('產品成功擺放在真實地面！');
-            }
-        }
 
 
 
