@@ -539,6 +539,17 @@ async function init()
               FX.ReturnBufferGeometry(object,housing_02_material,null,scene);
             }
 
+			if(object.name.includes("housing_03"))//mesh有問題無法buffergeomatry處理
+            {
+              	object.traverse((child) => {
+    			    
+    			    if (child.isMesh) {
+    			        
+    			        child.material=housing_02_material;
+    			    }
+    			});
+            }
+
 			if(object.name.includes("knob"))
             {
               FX.ReturnBufferGeometry(object,black_plastic_material,null,scene);
