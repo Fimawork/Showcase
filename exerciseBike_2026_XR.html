@@ -68,15 +68,9 @@
         /* 3D Showcase Container (Center Blank Area) */
         #threeContainer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            pointer-events: auto; /* Allow interactions on the canvas */
+			top: 0; left: 0;
+			width: 100%; height: 100%;
+			z-index: 6;
         }
 
         /* Center grid placeholder styling to guide user where the 3D model goes */
@@ -699,7 +693,7 @@ const XRBtn = document.getElementById('xr_btn');
         
 const USDZ_PATH = atob("Li9tb2RlbHMvRXhlcmNpc2VCaWtlXzIwMjZfWFIudXNkeg==");
 const GLB_PATH = atob("Li9tb2RlbHMvRXhlcmNpc2VCaWtlXzIwMjZfWFIuZ2xi");
-        
+  
 XRBtn.addEventListener('click', async () => {
       await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'floor',XRBtn);
 	  await TestXRRecorder();
