@@ -68,9 +68,15 @@
         /* 3D Showcase Container (Center Blank Area) */
         #threeContainer {
             position: absolute;
-			top: 0; left: 0;
-			width: 100%; height: 100%;
-			z-index: 6;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto; /* Allow interactions on the canvas */
         }
 
         /* Center grid placeholder styling to guide user where the 3D model goes */
@@ -487,37 +493,6 @@
             color: var(--text-main);
         }
 
-		#xr_btn {
-				position: absolute;
-				bottom: 40px;
-				right: 60px;
-
-				color: #ffffff;
-				padding: 16px 40px;
-	
-				font-size: 21px;
-				font-weight: 800;
-				letter-spacing: 2px;
-				text-transform: uppercase;
-				cursor: pointer;
-				z-index: 20;
-				transition: transform 0.2s, background-color 0.2s;
-
-				/* From https://css.glass */
-				background: rgba(255, 255, 255, 0.2);
-				border-radius: 16px;
-				box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-				backdrop-filter: blur(5px);
-				-webkit-backdrop-filter: blur(5px);
-				border: 1px solid rgba(255, 255, 255, 0.3);
-
-				animation: siri-pulse 2s infinite alternate;
-			}
-			#xr_btn:hover {
-				transform: scale(1.05);
-				background-color: #60bee4;
-			}
-
         /* Animations */
         @keyframes blink {
             0%, 100% { opacity: 1; }
@@ -566,15 +541,6 @@
             }
         }
 
-		@media screen and (max-width:768px)/*手機*/
-			{
-				#xr_btn {
-					bottom: 90%;
-					right: 6%;
-				}
-
-			}
-
 		</style>
 
 		<script type="importmap">
@@ -592,10 +558,107 @@
 	
 	<body>
 		 <!-- Ambient Neon Backgrounds -->
+    <div class="ambient-glow glow-left"></div>
+    <div class="ambient-glow glow-right"></div>
+
     <!-- Center 3D Showcase Area -->
     <div id="threeContainer"></div>
 
-<button id="xr_btn">AR</button>
+    <!-- Interface Layers Overlay -->
+    <div class="ui-layer">
+        
+        <!-- Header -->
+        <header>
+            <a href="#" class="logo">
+                <div class="logo-symbol">A</div>
+                <div class="logo-text">APEX SPORT</div>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#" class="active">CYCLES</a></li>
+                <li><a href="#">TREADMILLS</a></li>
+                <li><a href="#">STRENGTH</a></li>
+                <li><a href="#">ACCESSORIES</a></li>
+            </ul>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>SYSTEM LIVE</span>
+            </div>
+        </header>
+
+        <!-- Main side widgets panels -->
+        <div class="main-content">
+            
+            <!-- Left Overlay Panel -->
+            <div class="panel panel-left">
+                <div>
+                    <span class="brand-subtitle">Smart Racing Series</span>
+                    <h1 class="brand-title">CYCLONE-X</h1>
+                    <p class="brand-desc">Combining minimalist aesthetics with intelligent magnetic resistance, the APEX Cyclone-X delivers real-road feedback and an exceptionally smooth ride.</p>
+                </div>
+
+                <div>
+                    <div class="widget-title">COLORWAY SELECTOR</div>
+                    <div class="color-selector">
+                        <div class="color-option color-dark-obsidian active" data-color="obsidian" title="Obsidian Black"></div>
+                        <div class="color-option color-polar-white" data-color="polar" title="Polar White"></div>
+                        <div class="color-option color-cyber-neon" data-color="cyber" title="Cyber Neon"></div>
+                    </div>
+
+                    <div class="widget-title">REAL-TIME TELEMETRY</div>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-value" id="val-res">32</div>
+                            <div class="stat-label">RESISTANCE</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="val-pow">245W</div>
+                            <div class="stat-label">POWER OUTPUT</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Overlay Panel -->
+            <div class="panel panel-right">
+                <div>
+                    <div class="widget-title">SYSTEM CONTROL MODE</div>
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" id="mode-ai">AI SMART COACH</button>
+                        <button class="mode-btn" id="mode-manual">MANUAL</button>
+                    </div>
+
+                    <div class="widget-title">HARDWARE SPECS</div>
+                    <ul class="specs-list">
+                        <li class="spec-item">
+                            <span class="spec-name">Drive System</span>
+                            <span class="spec-val" id="spec-resistance">EMS Smart Magnetic</span>
+                        </li>
+                        <li class="spec-item">
+                            <span class="spec-name">Flywheel Weight</span>
+                            <span class="spec-val">16.5 kg Aerospace-grade Alum</span>
+                        </li>
+                        <li class="spec-item">
+                            <span class="spec-name">Belt Drive</span>
+                            <span class="spec-val">Hutchinson Silent Belt</span>
+                        </li>
+                        <li class="spec-item">
+                            <span class="spec-name">Connectivity</span>
+                            <span class="spec-val">BLE 5.0 / Wi-Fi 6</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <button class="cta-btn" id="xr_btn">PRE-ORDER NOW</button>
+                </div>
+            </div>
+
+        </div>
+
+
+
+    </div>
+
 
 		<script type="module">
 
@@ -636,11 +699,11 @@ const XRBtn = document.getElementById('xr_btn');
         
 const USDZ_PATH = atob("Li9tb2RlbHMvRXhlcmNpc2VCaWtlXzIwMjZfWFIudXNkeg==");
 const GLB_PATH = atob("Li9tb2RlbHMvRXhlcmNpc2VCaWtlXzIwMjZfWFIuZ2xi");
-  
-XRBtn.addEventListener('click', async () => {
-      await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'floor',XRBtn);
-	  await TestXRRecorder();
-});
+        
+//XRBtn.addEventListener('click', async () => {
+//      await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'floor',XRBtn);
+//	  await TestXRRecorder();
+//});
 
 async function TestXRRecorder()
 {
