@@ -336,7 +336,7 @@ import * as THREE from 'three';
 
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.49/fx_functions.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.50/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
 import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
@@ -608,8 +608,6 @@ async function init()
 			//FX.Material_Inspector(scene);
 		}, 1000);
 
-		console.log()
-		
     },
     (error) => {
         console.error('Failed to load model:', error);
