@@ -1,0 +1,715 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
+
+
+
+        /* 3D Showcase Container (Center Blank Area) */
+        
+body
+			{
+				margin: 0;
+				padding:0; 
+				background: radial-gradient(circle at 50% 50%, #2b2b2b 0%, #000000 100%);
+				height: 100vh;
+				width: 100vw;
+				overflow: hidden;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				color: #fff;
+				font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+
+			}
+			
+			canvas
+			{
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+   				height: 100%;
+			}
+
+            #threeContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto; /* Allow interactions on the canvas */
+        }
+
+			/* Background Elements */
+			.bg-glow {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				width: 80vh;
+				height: 80vh;
+				background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+				border-radius: 50%;
+				filter: blur(80px);
+				z-index: 0;
+				pointer-events: none;
+			}
+
+			.bg-watermark {
+				position: absolute;
+				left: 5%;
+				top: 50%;
+				transform: translateY(-50%) rotate(-90deg);
+				font-size: 15vh;
+				font-weight: 900;
+				color: rgba(255, 255, 255, 0.02);
+				white-space: nowrap;
+				user-select: none;
+				z-index: 1;
+				letter-spacing: -2px;
+				pointer-events: none;
+				text-transform: uppercase;
+			}
+
+			/* Top Header */
+			.top-nav {
+				position: absolute;
+				top: 5%;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				gap: 40px;
+				z-index: 100;
+				animation: fadeInDown 1s ease-out;
+			}
+
+			.nav-link {
+				text-decoration: none;
+				color: rgba(255, 255, 255, 0.5);
+				font-size: 0.8rem;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				transition: color 0.3s ease;
+			}
+
+			.nav-link:hover {
+				color: #fff;
+			}
+
+			/* Product Intro */
+			.product-intro {
+				position: absolute;
+				left: 8%;
+				bottom: 15%;
+				max-width: 380px;
+				z-index: 100;
+				animation: fadeInUp 1s ease-out 0.5s both;
+				pointer-events: none;
+			}
+
+			.intro-title {
+				font-size: 4rem;
+				font-weight: 800;
+				margin-bottom: 10px;
+				line-height: 1;
+				background: linear-gradient(180deg, #fff 0%, #888 100%);
+				-webkit-background-clip: text;
+				background-clip: text;
+				-webkit-text-fill-color: transparent;
+			}
+
+			.intro-desc {
+				font-size: 1.1rem;
+				font-weight: 300;
+				line-height: 1.6;
+				color: rgba(255, 255, 255, 0.6);
+			}
+
+			/* Sidebar Specs */
+			.sidebar-specs {
+				position: absolute;
+				right: 6%;
+				top: 50%;
+				transform: translateY(-50%);
+				display: flex;
+				flex-direction: column;
+				gap: 40px;
+				z-index: 100;
+				animation: fadeInSlideLeft 1s ease-out;
+				pointer-events: none;
+			}
+
+			.spec-item {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+				gap: 8px;
+				animation: staggerFadeIn 0.8s ease-out both;
+			}
+
+			.spec-item:nth-child(1) { animation-delay: 0.2s; }
+			.spec-item:nth-child(2) { animation-delay: 0.4s; }
+			.spec-item:nth-child(3) { animation-delay: 0.6s; }
+
+			.spec-icon {
+				font-size: 1.8rem;
+				opacity: 0.9;
+				margin-bottom: 5px;
+			}
+
+			.spec-label {
+				font-size: 0.75rem;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				color: rgba(255, 255, 255, 0.5);
+			}
+
+			.spec-value {
+				font-size: 1.2rem;
+				font-weight: 400;
+			}
+
+            #xr_btn {
+				position: absolute;
+				bottom: 40px;
+				right: 60px;
+
+				color: #ffffff;
+				padding: 16px 40px;
+	
+				font-size: 21px;
+				font-weight: 800;
+				letter-spacing: 2px;
+				text-transform: uppercase;
+				cursor: pointer;
+				z-index: 20;
+				transition: transform 0.2s, background-color 0.2s;
+
+				/* From https://css.glass */
+				background: rgba(255, 255, 255, 0.2);
+				border-radius: 16px;
+				box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+				backdrop-filter: blur(5px);
+				-webkit-backdrop-filter: blur(5px);
+				border: 1px solid rgba(255, 255, 255, 0.3);
+
+				animation: siri-pulse 2s infinite alternate;
+			}
+			#xr_btn:hover {
+				transform: scale(1.05);
+				background-color: #60bee4;
+			}
+
+            @keyframes siri-pulse {
+			    0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255,255,255,0.5)); }
+			    100% { transform: scale(1.2); filter: drop-shadow(0 0 8px var(--siri-neon-2)); }
+			}
+
+			/* Animations */
+			@keyframes staggerFadeIn {
+				from { opacity: 0; transform: translateX(30px); }
+				to { opacity: 1; transform: translateX(0); }
+			}
+
+			@keyframes fadeInSlideLeft {
+				from { opacity: 0; transform: translateY(-50%) translateX(50px); }
+				to { opacity: 1; transform: translateY(-50%) translateX(0); }
+			}
+
+			@keyframes fadeInUp {
+				from { opacity: 0; transform: translateY(50px); }
+				to { opacity: 1; transform: translateY(0); }
+			}
+
+			@keyframes fadeInDown {
+				from { opacity: 0; transform: translate(-50%, -50px); }
+				to { opacity: 1; transform: translate(-50%, 0); }
+			}
+
+			@media (max-width: 1024px) {
+				.sidebar-specs, .product-intro, .bg-watermark { display: none; }
+				.top-nav { gap: 20px; }
+			}
+
+			@media screen and (max-width:768px)/*手機*/
+			{
+				.web3d_icon {
+					display: none;
+				}
+
+				.fimawork_logo{
+					left: 3%;
+					top: 3%;
+				}
+
+                #xr_btn {
+					bottom: 6%;
+					right: 6%;
+				}
+
+                .sidebar-specs
+                {
+                    display: none;
+                }
+
+                .product-intro
+                {
+                    display: none;
+                }
+
+                .bg-glow
+                {
+                    display: none;
+                }
+
+                .bg-watermark
+                {
+                    display: none;
+                }
+
+                .top-nav
+                {
+                    display: none;
+                }
+			}
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+
+  
+
+    <!-- Center 3D Showcase Area -->
+    <div id="threeContainer"></div>
+
+    <div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+		<div class="web3d_icon"></div>
+
+		<!-- Background Elements -->
+		<div class="bg-glow"></div>
+		<div class="bg-watermark">Web 3D</div>
+
+		<!-- UI Elements -->
+		<header class="top-nav">
+			<a href="#" class="nav-link">CYCLES</a>
+			<a href="#" class="nav-link">TREADMILLS</a>
+			<a href="#" class="nav-link">STRENGTH</a>
+            <a href="#" class="nav-link">ACCESSORIES</a>
+		</header>
+
+		<section class="sidebar-specs">
+			<div class="spec-item">
+				<span class="spec-icon">HARDWARE SPECS</span>
+				<span class="spec-label">Drive System</span>
+				<span class="spec-value">EMS Smart Magnetic</span>
+			</div>
+			<div class="spec-item">
+				<span class="spec-label">Flywheel Weight</span>
+				<span class="spec-value">16.5 kg Aerospace-grade Alum</span>
+			</div>
+			<div class="spec-item">
+				<span class="spec-label">Belt Drive</span>
+				<span class="spec-value">Hutchinson Silent Belt</span>
+			</div>
+		</section>
+
+		<article class="product-intro">
+			<h2 class="intro-title">Web 3D Concept</h2>
+			<p class="intro-desc">Combining minimalist aesthetics with intelligent magnetic resistance, the APEX Cyclone-X delivers real-road feedback and an exceptionally smooth ride.</p>
+		</article>
+
+        <button id="xr_btn">AR</button>
+
+    </div>
+
+
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.52/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
+import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { exerciseBike_2026 } from './models/exerciseBike_2026_slices.js';
+import 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js';
+import { Inspector } from 'three/addons/inspector/Inspector.js';
+
+
+let scene, camera, renderer, stats, mixer;
+
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+
+
+const timer = new THREE.Timer();
+
+const modelPosition=new THREE.Vector3(0,0,0);
+const modelRotation=new THREE.Vector3(0,FX.ToThreeEulerAngle(90), 0);
+const modeScale=1;
+
+const CameraDefaultPos=new THREE.Vector3(3.007,1.220,-2.872);
+const ControlsTargetDefaultPos=new THREE.Vector3(0.090,0.623,0.189);
+
+let main_model= new THREE.Object3D();
+
+const XRBtn = document.getElementById('xr_btn');
+        
+const USDZ_PATH = atob("Li9tb2RlbHMvd2FsbE1vdW50V29ya3NwYWNlX1hSLnVzZHo=");
+const GLB_PATH = atob("Li9tb2RlbHMvRXhlcmNpc2VCaWtlXzIwMjZfWFIuZ2xi");
+        
+XRBtn.addEventListener('click', async () => {
+      await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'floor',XRBtn);
+	  await TestXRRecorder();
+});
+
+async function TestXRRecorder()
+{
+	// 2. 同步發送紀錄到 Google 試算表 (不影響複製速度)
+	const GAS_URL = 'https://script.google.com/macros/s/AKfycbxK3AOGluqtjfJHxkOzoKnsgDnzTj7AQiiDjIRZOMWnNVtmD3bw0wTfEBNeXRRfe26A/exec';
+
+	try {
+		// 使用免費的 ipapi.co 取得訪客的地理資訊
+		const ipResponse = await fetch('https://ipapi.co/json/');
+		const ipData = await ipResponse.json();
+
+		// 提取國家名稱與城市名稱（例如：Taiwan, Taipei）
+		const country = ipData.country_name || '未知國家';
+		const city = ipData.city || '未知城市';
+
+		// 將數據發送到 Google 試算表
+		fetch(GAS_URL, {
+		    method: 'POST',
+		    mode: 'no-cors',
+		    headers: {
+		        'Content-Type': 'application/json'
+		    },
+		    body: JSON.stringify({
+		        action: '進行AR功能測試_eBike',
+		        country: country,
+		        city: city
+		    })
+		});
+				
+		console.log(`位置紀錄已送出: ${country}, ${city}`);
+				
+		} catch (err) {
+		    // 如果客人裝了 AdBlock 阻擋了 IP API，或者網路異常，則發送未知資訊，確保統計不中斷
+		    console.warn('無法取得地理位置，改發送預設值。', err);
+		
+		    fetch(GAS_URL, {
+		        method: 'POST',
+		        mode: 'no-cors',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify({
+		            action: '進行AR功能測試_eBike',
+		            country: '查詢失敗',
+		            city: '查詢失敗'
+		        })
+		    });
+		}
+}
+
+
+let idleTime=0;
+const hold_time=6;
+
+
+init();
+
+FXUI.InstLoadingEffect_Type_A(true);
+
+async function init()
+{
+	FX.SetupEnvironment("cloud");
+
+  	scene = new THREE.Scene();
+	scene.background = null;
+
+  	camera = new THREE.PerspectiveCamera( 24, threeContainer.clientWidth / threeContainer.clientHeight, 0.001, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 0.9;
+  	//document.body.appendChild( renderer.domElement );
+  	threeContainer.appendChild( renderer.domElement );
+
+	//renderer.inspector = new Inspector();
+
+	// 1. 先等待 Renderer 初始化完成
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+
+  	camera.position.copy(CameraDefaultPos);
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+	controls = new OrbitControls( camera, renderer.domElement);
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+
+    controls.minDistance =1;
+  	controls.maxDistance = 500;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+
+	controls.maxPolarAngle=FX.ToThreeEulerAngle(95);
+	controls.minPolarAngle=FX.ToThreeEulerAngle(-90);
+  	controls.update();
+
+  	///hdri 環境光源
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
+	scene.environmentRotation.y = FX.ToThreeEulerAngle(-180); 
+	
+	///Lamborghini_Centenario_roadster
+	const loader_EBike = new GLTFLoader();
+    loader_EBike.setDRACOLoader(FX.dracoLoader);
+	loader_EBike.parse(
+    FX.Base64ToArrayBuffer(exerciseBike_2026()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+
+		model.position.set(0,0,0);
+		model.rotation.set(0,0, 0);
+		model.scale.set(modeScale,modeScale,modeScale);
+
+		const saddle_01_material=FXM.InstEtchingMaterial(0x080808,0.4,0.3,0.75,false,1,'./textures/Leather.png',new THREE.Vector2(10,10),new THREE.Vector2(0,0),'./textures/Leather.png',new THREE.Vector2(15, 15),0);
+
+		const tube_01_material=FXM.InstMaterial(0x828282,0.263,1,0,1,0,false,1,true);
+		const tube_02_material=FXM.InstMaterial(0x828282,0.263,1,0,1,0,false,1,true);
+
+		const black_plastic_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.75,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(600, 600),2);
+
+		const logo_material=FXM.InstMaterial(0x878787,0,1,0,2.3333333333333335,1,false,1,true);
+
+		const housing_01_material=FXM.InstMaterial(0xE0E0E0,0.3,0.6,0,2.4,1,false,1,true);
+
+		const housing_02_material=FXM.InstMaterial(0x86BAFE,0.3,0.5,0,2.4,1,false,1,true);
+
+		model.traverse( function ( object ) {	
+                  
+            if(object.name.includes("saddle"))
+            {
+              FX.ReturnBufferGeometry(object,saddle_01_material,null,scene);
+            }
+
+			if(object.name.includes("handle"))
+            {
+              FX.ReturnBufferGeometry(object,saddle_01_material,null,scene);
+            }
+
+			if(object.name.includes("tube_01"))
+            {
+              FX.ReturnBufferGeometry(object,tube_01_material,null,scene);
+            }
+
+			if(object.name.includes("tube_02"))
+            {
+              FX.ReturnBufferGeometry(object,tube_02_material,null,scene);
+            }
+
+			if(object.name.includes("endCap"))
+            {
+              FX.ReturnBufferGeometry(object,black_plastic_material,null,scene);
+            }
+
+			if(object.name.includes("housing_01"))
+            {
+              FX.ReturnBufferGeometry(object,housing_01_material,null,scene);
+            }
+
+			if(object.name.includes("housing_02"))
+            {
+              FX.ReturnBufferGeometry(object,housing_02_material,null,scene);
+            }
+
+			if(object.name.includes("housing_03"))//mesh有問題無法buffergeomatry處理
+            {
+              	object.traverse((child) => {
+    			    
+    			    if (child.isMesh) {
+    			        
+    			        child.material=housing_02_material;
+    			    }
+    			});
+            }
+
+			if(object.name.includes("knob"))
+            {
+              FX.ReturnBufferGeometry(object,black_plastic_material,null,scene);
+            }
+
+			if(object.name.includes("logo"))
+            {
+              FX.ReturnBufferGeometry(object,logo_material,null,scene);
+            }
+
+        })
+
+
+		let HUD_screen = new THREE.Object3D();
+			
+		const loader_HUD_1 = new THREE.TextureLoader();
+			
+		const geometry_HUD_1 = new THREE.PlaneGeometry();
+		
+			
+		loader_HUD_1.load( './textures/Windows_UI.png', function ( texture ) {
+			
+			texture.colorSpace = THREE.SRGBColorSpace;//確保顏色空間正確
+			
+			const material_HUD = new THREE.MeshStandardMaterial( { map: texture, transparent: true,opacity:0.9 ,depthWrite: false ,	emissiveMap: texture, side:THREE.DoubleSide,emissive: new THREE.Color(0x333333), // 設定自發光的顏色與強度（白色代表完全顯色，2.0 代表兩倍亮度）
+    			emissiveIntensity: 3,} );
+			
+			const mesh_HUD = new THREE.Mesh( geometry_HUD_1, material_HUD );
+			const img_scale =0.001;
+			
+			mesh_HUD.position.set( -0.35,1.325,0 );
+			mesh_HUD.scale.set(img_scale*273,img_scale*237,1);
+		
+			//mesh_HUD.rotation.set(FX.ToThreeEulerAngle(30),FX.ToThreeEulerAngle(90), FX.ToThreeEulerAngle(-180));
+
+			mesh_HUD.rotation.set(FX.ToThreeEulerAngle(90),FX.ToThreeEulerAngle(-36), FX.ToThreeEulerAngle(90));
+			
+			HUD_screen.add(mesh_HUD);
+			//scene.add( HUD );
+		
+			scene.add(HUD_screen);
+		} );
+
+		scene.add(model);
+		
+		setTimeout(() => {
+			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
+			renderer.setAnimationLoop( animate );
+			FXUI.InstLoadingEffect_Type_A(false);
+			//FX.Camera_Inspector(camera,controls);
+			//FX.Material_Inspector(scene);
+		}, 1000);
+
+		console.log()
+		
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	
+
+	//影子工具
+	FX.InitWebGPUShadow(scene, {
+     shadow: { blur: 0.5, darkness: 0.25 },
+     plane: { color: '#ffffff', opacity: 1 }
+});
+
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+  		window.addEventListener("pointerdown", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+	
+	});
+
+	window.addEventListener( 'pointermove', function(e) {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+  	window.addEventListener("wheel", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+	
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.updateProjectionMatrix();
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+}
+
+function animate(timestamp) 
+{
+
+  	controls.update();
+  	renderer.render( scene, camera );
+
+  	// 自動更新時間（用來計算移動速度、旋轉等）
+    timer.update( timestamp );
+	const delta = timer.getDelta();
+
+
+	if ( mixer ) mixer.update( delta );
+
+//	idleTime+=delta;
+//	
+//	if(idleTime>hold_time)
+//	{
+//		controls.autoRotate=true;
+//	}
+
+
+//影子工具
+FX.UpdateWebGPUShadow(renderer, scene);
+
+}
+
+
+
+
+
+		</script>
+    </body>
+
+</html>
