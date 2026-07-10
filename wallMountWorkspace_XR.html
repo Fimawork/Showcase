@@ -394,7 +394,7 @@ const USDZ_PATH = atob("Li9tb2RlbHMvd2FsbE1vdW50V29ya3NwYWNlX1hSLnVzZHo=");
 const GLB_PATH = atob("Li9tb2RlbHMvRXhlcmNpc2VCaWtlXzIwMjZfWFIuZ2xi");
         
 XRBtn.addEventListener('click', async () => {
-      await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'wall',XRBtn);
+      await LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'wall',XRBtn);
 	  await TestXRRecorder();
 });
 
@@ -704,6 +704,94 @@ function animate(timestamp)
 FX.UpdateWebGPUShadow(renderer, scene);
 
 }
+
+
+async function LoadXRSceneEvent(glb,usdz,placement,thisBtn)
+{
+    try {
+        thisBtn.disabled = true; // 防重複連擊
+        FXUI.InstLoadingEffect_Type_B(true);
+
+        function ResetButton() {
+            thisBtn.disabled = false;
+            FXUI.InstLoadingEffect_Type_B(false);
+        }
+
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        // 1. 獨立偵測瀏覽器底層是否支援 WebXR AR
+        const supportsWebXRAr = navigator.xr && typeof navigator.xr.isSessionSupported === 'function' 
+            ? await navigator.xr.isSessionSupported('immersive-ar') : false;
+
+        // 2. 確保它是 iOS 裝置與 Safari AR
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isSafariAr = isIOS && document.createElement('a').relList.supports('ar');
+        const isUAWithInApp = /Line|FBAN|FBAV|Instagram|MicroMessenger/i.test(userAgent);
+
+        // 🚨 攔截 In-App 瀏覽器
+        if (!supportsWebXRAr && !isSafariAr) {
+            if (isUAWithInApp) {
+                if (isIOS) {
+                    alert("To launch the 3D spatial AR camera, please tap the '...' icon in the top right and select 'Open in Safari'.");
+                } else {
+                    const currentUrl = window.location.href.replace(/https?:\/\//, '');
+                    window.location.href = `intent://${currentUrl}#Intent;scheme=https;package=com.android.chrome;end;`;
+                }
+                ResetButton();
+                return;
+            }
+
+            alert("Oops! Your current device or browser doesn't support augmented reality. For the best AR experience, please visit this page using Safari on iOS or Chrome on Android mobile devices.");
+            InstARQRModal.Show(window.location.href);
+            ResetButton();
+            return;
+        }
+
+        // 🌟 核心修正：平行非同步下載，減少等待時間
+        const [ghostGLB, ghostUSDZ] = await Promise.all([
+            GhostLinkFunction(glb),
+            GhostLinkFunction(usdz)
+        ]);
+
+        // 🌟 建立 model-viewer 標籤
+        const mv = document.createElement('model-viewer');
+        mv.src = ghostGLB;
+        mv.setAttribute('ios-src', `${ghostUSDZ}#canonicalWebPageURL=https://yourdomain.com`);
+        mv.setAttribute('ar', '');
+        
+        // 💡 修正順序：quick-look 必須排第一，確保 iOS 優先走原生通路；Quest 3 與 Android 則會自動往後匹配
+        mv.setAttribute('ar-modes', 'quick-look webxr scene-viewer');
+        mv.setAttribute('ar-placement', placement);
+
+        Object.assign(mv.style, { position: 'fixed', width: '0px', height: '0px', opacity: '0', zIndex: '-9999' });
+        document.body.appendChild(mv);
+
+        // 🌟 核心修正：iOS 繞過 load 事件限制，直接強行啟動 AR！
+        // model-viewer 內部會排隊等待資源，但 activateAR() 的呼叫必須維持在接近點擊的事件鏈中。
+        setTimeout(() => {
+            ResetButton();
+            try {
+                // 不管載入進度，直接呼叫啟動！model-viewer 會在資源載入完後自動拉起相機
+                mv.activateAR();
+            } catch (err) {
+                alert("空間 AR 相機啟動失敗，請重新點擊一次。");
+                mv.remove();
+            }
+        }, 50); // 給予 DOM 50毫秒的掛載快取時間，這在 iOS 的信任鏈容許範圍內
+
+        // 防禦機制：關閉 AR 時銷毀
+        mv.addEventListener('ar-status', (event) => {
+            if (event.detail.status === 'not-presenting') {
+                mv.remove();
+                URL.revokeObjectURL(ghostGLB);
+                URL.revokeObjectURL(ghostUSDZ);
+            }
+        });
+
+    } catch (error) {
+        alert("AR 核心引擎啟動失敗");
+    }
+} 
 
 
 
