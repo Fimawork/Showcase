@@ -749,8 +749,8 @@ async function LoadXRSceneEvent(glb,usdz,placement,thisBtn)
 
         // 🌟 核心修正：平行非同步下載，減少等待時間
         const [ghostGLB, ghostUSDZ] = await Promise.all([
-            GhostLinkFunction(glb),
-            GhostLinkFunction(usdz)
+            FX.GhostLinkFunction(glb),
+            FX.GhostLinkFunction(usdz)
         ]);
 
         // 🌟 建立 model-viewer 標籤
