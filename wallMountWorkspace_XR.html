@@ -3,38 +3,31 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
-		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable="no"/>
 		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
 		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<title>MED-ARM 2K7 | 智能醫療壁掛顯示支架系統</title>
 		<link rel="stylesheet" type="text/css" href="Main.css">
 		<style type="text/css">
-			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600;800&display=swap');
 			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
 
-
-
-        /* 3D Showcase Container (Center Blank Area) */
-        
-body
-			{
+			body {
 				margin: 0;
-				padding:0; 
-				background: radial-gradient(circle at 50% 50%, #2b2b2b 0%, #000000 100%);
+				padding: 0; 
+				background: radial-gradient(circle at 50% 50%, #0d1622 0%, #03070d 100%);
 				height: 100vh;
 				width: 100vw;
 				overflow: hidden;
 				display: flex;
 				justify-content: center;
 				align-items: center;
-				color: #fff;
+				color: #e0e6ed;
 				font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-
 			}
 			
-			canvas
-			{
+			canvas {
 				position: absolute;
 				top: 0;
 				left: 0;
@@ -43,253 +36,444 @@ body
 			}
 
             #threeContainer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            pointer-events: auto; /* Allow interactions on the canvas */
-        }
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 2;
+				pointer-events: auto;
+			}
 
-			/* Background Elements */
+			/* Background Grid & Glow */
 			.bg-glow {
 				position: absolute;
 				top: 50%;
 				left: 50%;
 				transform: translate(-50%, -50%);
-				width: 80vh;
-				height: 80vh;
-				background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+				width: 90vh;
+				height: 90vh;
+				background: radial-gradient(circle, rgba(0, 229, 255, 0.04) 0%, rgba(0, 0, 0, 0) 70%);
 				border-radius: 50%;
-				filter: blur(80px);
+				filter: blur(100px);
 				z-index: 0;
+				pointer-events: none;
+			}
+
+			.bg-grid {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-image: 
+					linear-gradient(rgba(0, 229, 255, 0.02) 1px, transparent 1px),
+					linear-gradient(90deg, rgba(0, 229, 255, 0.02) 1px, transparent 1px);
+				background-size: 40px 40px;
+				background-position: center;
+				z-index: 1;
 				pointer-events: none;
 			}
 
 			.bg-watermark {
 				position: absolute;
-				left: 5%;
+				left: 3%;
 				top: 50%;
 				transform: translateY(-50%) rotate(-90deg);
-				font-size: 15vh;
+				font-family: 'Orbitron', sans-serif;
+				font-size: 12vh;
 				font-weight: 900;
-				color: rgba(255, 255, 255, 0.02);
+				color: rgba(0, 229, 255, 0.02);
 				white-space: nowrap;
 				user-select: none;
 				z-index: 1;
-				letter-spacing: -2px;
+				letter-spacing: 4px;
 				pointer-events: none;
-				text-transform: uppercase;
 			}
 
-			/* Top Header */
-			.top-nav {
+			/* System Status Header */
+			.system-header {
 				position: absolute;
-				top: 5%;
-				left: 50%;
-				transform: translateX(-50%);
+				top: 25px;
+				left: 30px;
+				right: 30px;
 				display: flex;
-				gap: 40px;
+				justify-content: space-between;
+				align-items: center;
 				z-index: 100;
 				animation: fadeInDown 1s ease-out;
+				pointer-events: none;
 			}
 
-			.nav-link {
-				text-decoration: none;
-				color: rgba(255, 255, 255, 0.5);
-				font-size: 0.8rem;
-				font-weight: 600;
-				text-transform: uppercase;
+			.header-left {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
+
+			.sys-brand {
+				font-family: 'Orbitron', sans-serif;
+				font-size: 1.4rem;
+				font-weight: 900;
 				letter-spacing: 2px;
-				transition: color 0.3s ease;
+				color: #00e5ff;
+				text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
 			}
 
-			.nav-link:hover {
+			.sys-sub {
+				font-size: 0.75rem;
+				letter-spacing: 1px;
+				color: rgba(224, 230, 237, 0.6);
+			}
+
+			.header-right {
+				display: flex;
+				gap: 20px;
+				align-items: center;
+				pointer-events: auto;
+			}
+
+			.status-pill {
+				background: rgba(0, 229, 255, 0.1);
+				border: 1px solid rgba(0, 229, 255, 0.3);
+				padding: 6px 14px;
+				border-radius: 20px;
+				font-size: 0.75rem;
+				letter-spacing: 1px;
+				color: #00e5ff;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.status-dot {
+				width: 8px;
+				height: 8px;
+				background-color: #00e5ff;
+				border-radius: 50%;
+				box-shadow: 0 0 8px #00e5ff;
+				animation: pulse 1.5s infinite;
+			}
+
+			@keyframes pulse {
+				0% { opacity: 0.4; }
+				50% { opacity: 1; }
+				100% { opacity: 0.4; }
+			}
+
+			/* Glassmorphic Side Panels */
+			.panel-container {
+				position: absolute;
+				z-index: 100;
+				background: rgba(10, 22, 37, 0.55);
+				border: 1px solid rgba(0, 229, 255, 0.15);
+				backdrop-filter: blur(15px);
+				border-radius: 16px;
+				padding: 24px;
+				box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+				transition: transform 0.3s ease;
+			}
+
+			/* Left Panel - Telemetry & Vitals */
+			.left-panel {
+				left: 30px;
+				top: 100px;
+				width: 320px;
+				bottom: 100px;
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+				animation: fadeInLeft 1s ease-out both;
+				overflow-y: auto;
+			}
+
+			.panel-title {
+				font-family: 'Orbitron', sans-serif;
+				font-size: 0.9rem;
+				font-weight: 700;
+				letter-spacing: 1.5px;
+				color: #00e5ff;
+				border-bottom: 1px dashed rgba(0, 229, 255, 0.2);
+				padding-bottom: 8px;
+				margin: 0;
+			}
+
+			.patient-card {
+				background: rgba(255, 255, 255, 0.02);
+				border: 1px solid rgba(255, 255, 255, 0.05);
+				border-radius: 8px;
+				padding: 12px;
+			}
+
+			.info-row {
+				display: flex;
+				justify-content: space-between;
+				margin-bottom: 8px;
+				font-size: 0.8rem;
+			}
+
+			.info-label {
+				color: rgba(224, 230, 237, 0.5);
+			}
+
+			.info-value {
+				font-weight: 600;
+			}
+
+			.vitals-display {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
+
+			.vital-item {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				background: rgba(0, 229, 255, 0.02);
+				border: 1px solid rgba(0, 229, 255, 0.05);
+				padding: 10px;
+				border-radius: 8px;
+			}
+
+			.vital-name {
+				font-size: 0.8rem;
+				color: rgba(224, 230, 237, 0.6);
+			}
+
+			.vital-val {
+				font-family: 'Orbitron', sans-serif;
+				font-size: 1.2rem;
+				font-weight: 700;
+				color: #00e5ff;
+			}
+
+			.vital-unit {
+				font-size: 0.7rem;
+				color: rgba(0, 229, 255, 0.7);
+				margin-left: 3px;
+			}
+
+			.ecg-wave-container {
+				width: 100%;
+				height: 50px;
+				background: rgba(0, 0, 0, 0.2);
+				border-radius: 6px;
+				overflow: hidden;
+				display: flex;
+				align-items: center;
+			}
+
+			.ecg-svg {
+				width: 100%;
+				height: 100%;
+			}
+
+			.ecg-path {
+				stroke: #00e5ff;
+				stroke-width: 1.5;
+				fill: none;
+				stroke-dasharray: 1000;
+				stroke-dashoffset: 1000;
+				animation: dash 5s linear infinite;
+			}
+
+			@keyframes dash {
+				to {
+					stroke-dashoffset: 0;
+				}
+			}
+
+			/* Right Panel - Bracket & Monitor controls */
+			.right-panel {
+				right: 30px;
+				top: 100px;
+				width: 340px;
+				bottom: 100px;
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+				animation: fadeInRight 1s ease-out both;
+				overflow-y: auto;
+			}
+
+			.control-group {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
+
+			.control-label-row {
+				display: flex;
+				justify-content: space-between;
+				font-size: 0.8rem;
+			}
+
+			.control-title {
+				font-weight: 600;
+				color: rgba(224, 230, 237, 0.8);
+			}
+
+			.control-value {
+				font-family: 'Orbitron', sans-serif;
+				color: #00e5ff;
+			}
+
+			.slider-style {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 100%;
+				height: 4px;
+				border-radius: 2px;
+				background: rgba(255, 255, 255, 0.1);
+				outline: none;
+				transition: background 0.3s;
+			}
+
+			.slider-style::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 16px;
+				height: 16px;
+				border-radius: 50%;
+				background: #00e5ff;
+				box-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+				cursor: pointer;
+				transition: transform 0.1s;
+			}
+
+			.slider-style::-webkit-slider-thumb:hover {
+				transform: scale(1.2);
+			}
+
+			/* Preset Buttons */
+			.preset-grid {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 8px;
+			}
+
+			.preset-btn {
+				background: rgba(0, 229, 255, 0.05);
+				border: 1px solid rgba(0, 229, 255, 0.15);
+				color: #e0e6ed;
+				padding: 10px 4px;
+				border-radius: 8px;
+				font-size: 0.75rem;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 0.2s ease;
+				text-align: center;
+			}
+
+			.preset-btn:hover {
+				background: rgba(0, 229, 255, 0.2);
+				border-color: #00e5ff;
+				color: #fff;
+				box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+			}
+
+			.preset-btn.active {
+				background: #00e5ff;
+				color: #03070d;
+				border-color: #00e5ff;
+				font-weight: 800;
+			}
+
+			/* Screen Feed Toggle */
+			.feed-container {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			.feed-btn {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				background: rgba(255, 255, 255, 0.02);
+				border: 1px solid rgba(255, 255, 255, 0.08);
+				border-radius: 8px;
+				padding: 10px 14px;
+				color: rgba(224, 230, 237, 0.7);
+				cursor: pointer;
+				text-align: left;
+				transition: all 0.2s ease;
+			}
+
+			.feed-btn:hover {
+				background: rgba(0, 229, 255, 0.05);
+				border-color: rgba(0, 229, 255, 0.3);
 				color: #fff;
 			}
 
-			/* Product Intro */
-			.product-intro {
-				position: absolute;
-				left: 8%;
-				bottom: 15%;
-				max-width: 380px;
-				z-index: 100;
-				animation: fadeInUp 1s ease-out 0.5s both;
-				pointer-events: none;
-			}
-
-			.intro-title {
-				font-size: 4rem;
-				font-weight: 800;
-				margin-bottom: 10px;
-				line-height: 1;
-				background: linear-gradient(180deg, #fff 0%, #888 100%);
-				-webkit-background-clip: text;
-				background-clip: text;
-				-webkit-text-fill-color: transparent;
-			}
-
-			.intro-desc {
-				font-size: 1.1rem;
-				font-weight: 300;
-				line-height: 1.6;
-				color: rgba(255, 255, 255, 0.6);
-			}
-
-			/* Sidebar Specs */
-			.sidebar-specs {
-				position: absolute;
-				right: 6%;
-				top: 50%;
-				transform: translateY(-50%);
-				display: flex;
-				flex-direction: column;
-				gap: 40px;
-				z-index: 100;
-				animation: fadeInSlideLeft 1s ease-out;
-				pointer-events: none;
-			}
-
-			.spec-item {
-				display: flex;
-				flex-direction: column;
-				align-items: flex-end;
-				gap: 8px;
-				animation: staggerFadeIn 0.8s ease-out both;
-			}
-
-			.spec-item:nth-child(1) { animation-delay: 0.2s; }
-			.spec-item:nth-child(2) { animation-delay: 0.4s; }
-			.spec-item:nth-child(3) { animation-delay: 0.6s; }
-
-			.spec-icon {
-				font-size: 1.8rem;
-				opacity: 0.9;
-				margin-bottom: 5px;
-			}
-
-			.spec-label {
-				font-size: 0.75rem;
+			.feed-btn.active {
+				background: rgba(0, 229, 255, 0.12);
+				border-color: #00e5ff;
+				color: #fff;
 				font-weight: 600;
-				text-transform: uppercase;
-				letter-spacing: 2px;
-				color: rgba(255, 255, 255, 0.5);
+				box-shadow: inset 0 0 8px rgba(0, 229, 255, 0.1);
 			}
 
-			.spec-value {
-				font-size: 1.2rem;
-				font-weight: 400;
+			.feed-dot {
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: rgba(255, 255, 255, 0.3);
 			}
 
-            #xr_btn {
+			.feed-btn.active .feed-dot {
+				background: #00e5ff;
+				box-shadow: 0 0 6px #00e5ff;
+			}
+
+			/* Bottom Controls (AR, Lock status) */
+			#xr_btn {
 				position: absolute;
-				bottom: 40px;
-				right: 60px;
-
-				color: #ffffff;
-				padding: 16px 40px;
-	
-				font-size: 21px;
+				bottom: 30px;
+				right: 30px;
+				color: #03070d;
+				background: #00e5ff;
+				padding: 12px 30px;
+				font-family: 'Orbitron', sans-serif;
+				font-size: 0.9rem;
 				font-weight: 800;
 				letter-spacing: 2px;
 				text-transform: uppercase;
 				cursor: pointer;
-				z-index: 20;
-				transition: transform 0.2s, background-color 0.2s;
-
-				/* From https://css.glass */
-				background: rgba(255, 255, 255, 0.2);
-				border-radius: 16px;
-				box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-				backdrop-filter: blur(5px);
-				-webkit-backdrop-filter: blur(5px);
-				border: 1px solid rgba(255, 255, 255, 0.3);
-
-				animation: siri-pulse 2s infinite alternate;
+				z-index: 100;
+				transition: all 0.3s ease;
+				border-radius: 12px;
+				box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+				border: none;
 			}
+
 			#xr_btn:hover {
 				transform: scale(1.05);
-				background-color: #60bee4;
-			}
-
-            @keyframes siri-pulse {
-			    0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255,255,255,0.5)); }
-			    100% { transform: scale(1.2); filter: drop-shadow(0 0 8px var(--siri-neon-2)); }
+				background-color: #fff;
+				box-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
 			}
 
 			/* Animations */
-			@keyframes staggerFadeIn {
-				from { opacity: 0; transform: translateX(30px); }
+			@keyframes fadeInLeft {
+				from { opacity: 0; transform: translateX(-50px); }
 				to { opacity: 1; transform: translateX(0); }
 			}
 
-			@keyframes fadeInSlideLeft {
-				from { opacity: 0; transform: translateY(-50%) translateX(50px); }
-				to { opacity: 1; transform: translateY(-50%) translateX(0); }
-			}
-
-			@keyframes fadeInUp {
-				from { opacity: 0; transform: translateY(50px); }
-				to { opacity: 1; transform: translateY(0); }
+			@keyframes fadeInRight {
+				from { opacity: 0; transform: translateX(50px); }
+				to { opacity: 1; transform: translateX(0); }
 			}
 
 			@keyframes fadeInDown {
-				from { opacity: 0; transform: translate(-50%, -50px); }
-				to { opacity: 1; transform: translate(-50%, 0); }
+				from { opacity: 0; transform: translateY(-30px); }
+				to { opacity: 1; transform: translateY(0); }
 			}
 
+			/* Hide panels on mobile for better view */
 			@media (max-width: 1024px) {
-				.sidebar-specs, .product-intro, .bg-watermark { display: none; }
-				.top-nav { gap: 20px; }
+				.left-panel, .right-panel, .bg-watermark { display: none; }
 			}
-
-			@media screen and (max-width:768px)/*手機*/
-			{
-				.web3d_icon {
-					display: none;
-				}
-
-				.fimawork_logo{
-					left: 3%;
-					top: 3%;
-				}
-
-                #xr_btn {
-					bottom: 6%;
-					right: 6%;
-				}
-
-                .sidebar-specs
-                {
-                    display: none;
-                }
-
-                .product-intro
-                {
-                    display: none;
-                }
-
-                .bg-glow
-                {
-                    display: none;
-                }
-
-                .bg-watermark
-                {
-                    display: none;
-                }
-
-                .top-nav
-                {
-                    display: none;
-                }
-			}
-
 		</style>
 
 		<script type="importmap">
@@ -302,567 +486,586 @@ body
 			  }
 			}
 		</script>
-
 	</head>
 	
 	<body>
+		<!-- Center 3D Area -->
+		<div id="threeContainer"></div>
 
-  
+		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+		<!--<div class="web3d_icon"></div>-->
 
-    <!-- Center 3D Showcase Area -->
-    <div id="threeContainer"></div>
-
-    <div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
-		<div class="web3d_icon"></div>
-
-		<!-- Background Elements -->
+		<!-- Background elements -->
 		<div class="bg-glow"></div>
-		<div class="bg-watermark">Web 3D</div>
+		<div class="bg-grid"></div>
+		<div class="bg-watermark">MED-ARM 2K7</div>
 
-		<!-- UI Elements -->
-		<header class="top-nav">
-			<a href="#" class="nav-link">CYCLES</a>
-			<a href="#" class="nav-link">TREADMILLS</a>
-			<a href="#" class="nav-link">STRENGTH</a>
-            <a href="#" class="nav-link">ACCESSORIES</a>
+		<!-- UI Overlays -->
+		<header class="system-header">
+			<div class="header-left">
+				<div class="sys-brand">MED-ARM 2K7</div>
+				<div class="sys-sub">3D SURGICAL MONITOR DISPLAY SYSTEM</div>
+			</div>
+			<div class="header-right">
+				<div class="status-pill">
+					<div class="status-dot"></div> SYSTEM ONLINE
+				</div>
+			</div>
 		</header>
 
-		<section class="sidebar-specs">
-			<div class="spec-item">
-				<span class="spec-icon">HARDWARE SPECS</span>
-				<span class="spec-label">Drive System</span>
-				<span class="spec-value">EMS Smart Magnetic</span>
+		<!-- Left Side: Diagnostics and Telemetry -->
+		<div class="panel-container left-panel">
+			<h3 class="panel-title">PATIENT CONSOLE</h3>
+			<div class="patient-card">
+				<div class="info-row">
+					<span class="info-label">Name:</span>
+					<span class="info-value">John Doe</span>
+				</div>
+				<div class="info-row">
+					<span class="info-label">ID:</span>
+					<span class="info-value">#983-4212</span>
+				</div>
+				<div class="info-row">
+					<span class="info-label">Room:</span>
+					<span class="info-value">OR-4B</span>
+				</div>
+				<div class="info-row">
+					<span class="info-label">Procedure:</span>
+					<span class="info-value">Laparoscopic</span>
+				</div>
 			</div>
-			<div class="spec-item">
-				<span class="spec-label">Flywheel Weight</span>
-				<span class="spec-value">16.5 kg Aerospace-grade Alum</span>
+
+			<h3 class="panel-title">PATIENT VITALS</h3>
+			<div class="vitals-display">
+				<div class="vital-item">
+					<span class="vital-name">HEART RATE</span>
+					<span class="vital-val">74<span class="vital-unit">BPM</span></span>
+				</div>
+				<div class="ecg-wave-container">
+					<svg class="ecg-svg" viewBox="0 0 200 40">
+						<path class="ecg-path" d="M0,20 L40,20 L45,10 L50,30 L55,20 L90,20 L95,5 L100,35 L105,20 L130,20 L135,15 L140,25 L145,20 L200,20" />
+					</svg>
+				</div>
+				<div class="vital-item">
+					<span class="vital-name">SPO2 VALUE</span>
+					<span class="vital-val" style="color: #00ff66;">99<span class="vital-unit">%</span></span>
+				</div>
+				<div class="vital-item">
+					<span class="vital-name">BLOOD PRESSURE</span>
+					<span class="vital-val" style="color: #ffaa00;">122/81<span class="vital-unit">mmHg</span></span>
+				</div>
 			</div>
-			<div class="spec-item">
-				<span class="spec-label">Belt Drive</span>
-				<span class="spec-value">Hutchinson Silent Belt</span>
+		</div>
+
+		<!-- Right Side: Bracket Joint Controls & Screen Feed Selector -->
+		<div class="panel-container right-panel">
+			<h3 class="panel-title">PRESETS</h3>
+			<div class="preset-grid">
+				<button class="preset-btn active" id="btn_preset_surgical">SURGICAL</button>
+				<button class="preset-btn" id="btn_preset_consult">CONSULT</button>
+				<button class="preset-btn" id="btn_preset_folded">STORAGE</button>
 			</div>
-		</section>
 
-		<article class="product-intro">
-			<h2 class="intro-title">Web 3D Concept</h2>
-			<p class="intro-desc">Combining minimalist aesthetics with intelligent magnetic resistance, the APEX Cyclone-X delivers real-road feedback and an exceptionally smooth ride.</p>
-		</article>
+			<h3 class="panel-title">JOINT MOVEMENT</h3>
+			
+			<div class="control-group">
+				<div class="control-label-row">
+					<span class="control-title">Base Swivel (Horizontal)</span>
+					<span class="control-value" id="val_base_swivel">0°</span>
+				</div>
+				<input type="range" class="slider-style" id="slider_base_swivel" min="-90" max="90" value="0">
+			</div>
 
-        <button id="xr_btn">AR</button>
+			<div class="control-group">
+				<div class="control-label-row">
+					<span class="control-title">Tray Swivel</span>
+					<span class="control-value" id="val_tray_swivel">0°</span>
+				</div>
+				<input type="range" class="slider-style" id="slider_tray_swivel" min="-90" max="90" value="0">
+			</div>
 
-    </div>
+			<div class="control-group">
+				<div class="control-label-row">
+					<span class="control-title">Tray Tilt</span>
+					<span class="control-value" id="val_tray_tilt">0°</span>
+				</div>
+				<input type="range" class="slider-style" id="slider_tray_tilt" min="-30" max="30" value="0">
+			</div>
 
+			<div class="control-group">
+				<div class="control-label-row">
+					<span class="control-title">VESA Swivel</span>
+					<span class="control-value" id="val_vesa_swivel">0°</span>
+				</div>
+				<input type="range" class="slider-style" id="slider_vesa_swivel" min="-90" max="90" value="0">
+			</div>
+
+			<div class="control-group">
+				<div class="control-label-row">
+					<span class="control-title">VESA Tilt</span>
+					<span class="control-value" id="val_vesa_tilt">0°</span>
+				</div>
+				<input type="range" class="slider-style" id="slider_vesa_tilt" min="-45" max="45" value="0">
+			</div>
+
+			<h3 class="panel-title">SCREEN INPUT FEED</h3>
+			<div class="feed-container">
+				<button class="feed-btn active" id="btn_feed_vitals">
+					<div class="feed-dot"></div>
+					<span>Telemetry Vitals</span>
+				</button>
+				<button class="feed-btn" id="btn_feed_mri">
+					<div class="feed-dot"></div>
+					<span>MRI Brain Diagnostics</span>
+				</button>
+				<button class="feed-btn" id="btn_feed_rainbow">
+					<div class="feed-dot"></div>
+					<span>System Calibrator (Rainbow)</span>
+				</button>
+			</div>
+		</div>
+
+		<button id="xr_btn">AR VIEW</button>
 
 		<script type="module">
+			import * as THREE from 'three';
+			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+			import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.52/fx_functions.js';
+			import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
+			import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
+			import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+			import { draco_wallMountWorkspace_2026 } from './models/draco_wallMountWorkspace_2026_slices.js';
+			import 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js';
 
-import * as THREE from 'three';
+			let scene, camera, renderer, currentControls;
+			let threeContainer = document.getElementById("threeContainer");
 
-import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.52/fx_functions.js';
-import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
-import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.43/fx_hud.js';
-import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-import { draco_wallMountWorkspace_2026 } from './models/draco_wallMountWorkspace_2026_slices.js';
-import 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js';
-import { Inspector } from 'three/addons/inspector/Inspector.js';
+			let vesa_module = new THREE.Group();
+			let vesa_arm_module = new THREE.Group();
+			let tray_arm_module_A_vertical = new THREE.Group();
+			let tray_arm_module_A_horizontal = new THREE.Group();
+			let tray_arm_module_B = new THREE.Group();
+
+			let main_model = new THREE.Object3D();
+
+			const CameraDefaultPos = new THREE.Vector3(0.985,0.292,2.256);
+			const ControlsTargetDefaultPos = new THREE.Vector3(-0.081,0.106,0.284);
+
+			// Interpolated target rotations (in radians)
+			let targetRotations = {
+				baseSwivel: 0,
+				traySwivel: 0,
+				trayTilt: 0,
+				vesaSwivel: 0,
+				vesaTilt: 0
+			};
+
+			// Textures for monitor
+			const textureLoader = new THREE.TextureLoader();
+			let hudMaterial;
+			let texVitals, texMRI, texOriginal;
+
+			// XR Setup
+			const XRBtn = document.getElementById('xr_btn');
+			const USDZ_PATH = atob("Li9tb2RlbHMvd2FsbE1vdW50V29ya3NwYWNlX1hSLnVzZHo=");
+			const GLB_PATH = atob("Li9tb2RlbHMvd2FsbE1vdW50V29ya3NwYWNlX1hSLmdsYg==");
+			
+			XRBtn.addEventListener('click', async () => {
+				await FX.LoadXRSceneEvent(GLB_PATH, USDZ_PATH, 'wall', XRBtn);
+				await TestXRRecorder();
+			});
+
+			async function TestXRRecorder() {
+				const GAS_URL = 'https://script.google.com/macros/s/AKfycbxK3AOGluqtjfJHxkOzoKnsgDnzTj7AQiiDjIRZOMWnNVtmD3bw0wTfEBNeXRRfe26A/exec';
+				try {
+					const ipResponse = await fetch('https://ipapi.co/json/');
+					const ipData = await ipResponse.json();
+					const country = ipData.country_name || '未知國家';
+					const city = ipData.city || '未知城市';
+
+					fetch(GAS_URL, {
+						method: 'POST',
+						mode: 'no-cors',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							action: '進行AR功能測試_MedArm',
+							country: country,
+							city: city
+						})
+					});
+				} catch (err) {
+					fetch(GAS_URL, {
+						method: 'POST',
+						mode: 'no-cors',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							action: '進行AR功能測試_MedArm',
+							country: '查詢失敗',
+							city: '查詢失敗'
+						})
+					});
+				}
+			}
+
+			init();
+			FXUI.InstLoadingEffect_Type_A(true);
+
+			async function init() {
+				FX.SetupEnvironment("cloud");
+
+				scene = new THREE.Scene();
+				scene.background = null;
+
+				camera = new THREE.PerspectiveCamera(24, threeContainer.clientWidth / threeContainer.clientHeight, 0.001, 1000);
+				renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
+				renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+				renderer.setClearColor(0x000000, 0.0);
+				renderer.toneMapping = THREE.ACESFilmicToneMapping;
+				renderer.toneMappingExposure = 1.0;
+				threeContainer.appendChild(renderer.domElement);
+
+				await renderer.init();
+
+				const phone_cam_pos=new THREE.Vector3(-2.050,0.282,1.749);
+				const phone_controls_pos=new THREE.Vector3(-0.163,0.141,0.325);
+
+				let cam_pos=FX.isMobile()?phone_cam_pos:CameraDefaultPos;
+  	  
+				camera.position.copy(cam_pos);
 
 
-let scene, camera, renderer, stats, mixer;
+				let controls_pos=FX.isMobile()?phone_controls_pos:ControlsTargetDefaultPos;
+			
+				currentControls = new OrbitControls(camera, renderer.domElement);
+				currentControls.enablePan = true;
+				currentControls.panSpeed = 0.4;
+				currentControls.enableDamping = true;
+				currentControls.dampingFactor = 0.015;
+				currentControls.minDistance = 1;
+				currentControls.maxDistance = 500;
+				currentControls.target.copy(controls_pos);
+				currentControls.zoomSpeed = 0.5;
+				currentControls.autoRotate = false;
 
-let controls;
-let threeContainer = document.getElementById("threeContainer");
+				currentControls.maxPolarAngle = FX.ToThreeEulerAngle(95);
+				currentControls.minPolarAngle = FX.ToThreeEulerAngle(-90);
+				currentControls.update();
 
-let vesa_module= new THREE.Group();
-let vesa_arm_module= new THREE.Group();
-let tray_arm_module_A_vertical= new THREE.Group();
-let tray_arm_module_A_horizontal= new THREE.Group();
-let tray_arm_module_B= new THREE.Group();
-
-
-const timer = new THREE.Timer();
-
-const modelPosition=new THREE.Vector3(0,0,0);
-const modelRotation=new THREE.Vector3(0,0, 0);
-const modeScale=1;
-
-const CameraDefaultPos=new THREE.Vector3(0.959,0.336,2.401);
-const ControlsTargetDefaultPos=new THREE.Vector3(-0.163,0.141,0.325);
-
-let main_model= new THREE.Object3D();
-
-const XRBtn = document.getElementById('xr_btn');
-        
-const USDZ_PATH = atob("Li9tb2RlbHMvd2FsbE1vdW50V29ya3NwYWNlX1hSLnVzZHo=");
-const GLB_PATH = atob("Li9tb2RlbHMvd2FsbE1vdW50V29ya3NwYWNlX1hSLmdsYg==");
-        
-XRBtn.addEventListener('click', async () => {
-      await FX.LoadXRSceneEvent(GLB_PATH,USDZ_PATH,'wall',XRBtn);
-	  await TestXRRecorder();
-});
-
-async function TestXRRecorder()
-{
-	// 2. 同步發送紀錄到 Google 試算表 (不影響複製速度)
-	const GAS_URL = 'https://script.google.com/macros/s/AKfycbxK3AOGluqtjfJHxkOzoKnsgDnzTj7AQiiDjIRZOMWnNVtmD3bw0wTfEBNeXRRfe26A/exec';
-
-	try {
-		// 使用免費的 ipapi.co 取得訪客的地理資訊
-		const ipResponse = await fetch('https://ipapi.co/json/');
-		const ipData = await ipResponse.json();
-
-		// 提取國家名稱與城市名稱（例如：Taiwan, Taipei）
-		const country = ipData.country_name || '未知國家';
-		const city = ipData.city || '未知城市';
-
-		// 將數據發送到 Google 試算表
-		fetch(GAS_URL, {
-		    method: 'POST',
-		    mode: 'no-cors',
-		    headers: {
-		        'Content-Type': 'application/json'
-		    },
-		    body: JSON.stringify({
-		        action: '進行AR功能測試_eBike',
-		        country: country,
-		        city: city
-		    })
-		});
+				FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg', scene);
+				scene.environmentRotation.y = FX.ToThreeEulerAngle(-180); 
 				
-		console.log(`位置紀錄已送出: ${country}, ${city}`);
-				
-		} catch (err) {
-		    // 如果客人裝了 AdBlock 阻擋了 IP API，或者網路異常，則發送未知資訊，確保統計不中斷
-		    console.warn('無法取得地理位置，改發送預設值。', err);
-		
-		    fetch(GAS_URL, {
-		        method: 'POST',
-		        mode: 'no-cors',
-		        headers: { 'Content-Type': 'application/json' },
-		        body: JSON.stringify({
-		            action: '進行AR功能測試_eBike',
-		            country: '查詢失敗',
-		            city: '查詢失敗'
-		        })
-		    });
-		}
-}
-
-
-let idleTime=0;
-const hold_time=6;
-
-
-init();
-
-FXUI.InstLoadingEffect_Type_A(true);
-
-async function init()
-{
-	FX.SetupEnvironment("cloud");
-
-  	scene = new THREE.Scene();
-	scene.background = null;
-
-  	camera = new THREE.PerspectiveCamera( 24, threeContainer.clientWidth / threeContainer.clientHeight, 0.001, 1000 );//非全螢幕比例設定
-  	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
-  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
-
-  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
-  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  	renderer.toneMappingExposure = 0.9;
-  	//document.body.appendChild( renderer.domElement );
-  	threeContainer.appendChild( renderer.domElement );
-
-	//renderer.inspector = new Inspector();
-
-	// 1. 先等待 Renderer 初始化完成
-	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
-
-  	camera.position.copy(CameraDefaultPos);
-  
-  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
-	controls = new OrbitControls( camera, renderer.domElement);
-  	controls.enablePan = true;//右鍵平移效果
-  	controls.panSpeed = 0.4;
-  	controls.enableDamping = true;
-  	controls.dampingFactor =0.015;
-
-    controls.minDistance =1;
-  	controls.maxDistance = 500;
-  	controls.target.copy( ControlsTargetDefaultPos );
-  	controls.zoomSpeed=0.5;
-	controls.autoRotate=false;
-	controls.autoRotateSpeed=0.3;
-
-	controls.maxPolarAngle=FX.ToThreeEulerAngle(95);
-	controls.minPolarAngle=FX.ToThreeEulerAngle(-90);
-  	controls.update();
-
-  	///hdri 環境光源
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
-	scene.environmentRotation.y = FX.ToThreeEulerAngle(-180); 
-	
-	///Lamborghini_Centenario_roadster
-	const loader_EBike = new GLTFLoader();
-    loader_EBike.setDRACOLoader(FX.dracoLoader);
-	loader_EBike.parse(
-    FX.Base64ToArrayBuffer(draco_wallMountWorkspace_2026()),
-    '',
-    (gltf) => {
-        
-		const model = gltf.scene;
-
-		model.position.copy(modelPosition);
-		model.rotation.copy(modelRotation);
-		model.scale.set(modeScale,modeScale,modeScale);
-
-		const black_housing_material=FXM.InstEtchingMaterial(0x363636,0.3,0.6,0.7500000000000001,false,1,"/textures/Gravel.png",new THREE.Vector2(0,100),new THREE.Vector2(0,0),"/textures/Gravel.png",new THREE.Vector2(1016.7,1065.9),2);
-
-		const gray_housing_material=FXM.InstEtchingMaterial(0x595959,0.2,0.5,0.7500000000000001,false,1,"/textures/Gravel.png",new THREE.Vector2(0,100),new THREE.Vector2(0,0),"/textures/Gravel.png",new THREE.Vector2(1016.7,1065.9),2);
-
-		const white_housing=FXM.InstEtchingMaterial(0xE6E6E6,0.3,0,0.7540000000000001,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(0,100),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(10,10),1);
-
-		
-
-		model.traverse( function ( object ) {	
-			
-                  
-            if(object.name==="axle_a")
-            {
-				object.layers.set(1);
-			  	tray_arm_module_B.position.copy(FX.ReturnModelCenter(object));
-            }
-
-			if(object.name==="axle_b")
-            {
-				object.layers.set(1);
-              	tray_arm_module_A_horizontal.position.copy(FX.ReturnModelCenter(object));
-			  	
-            }
-
-			if(object.name==="axle_c")
-            {
-				object.layers.set(1);
-              	tray_arm_module_A_vertical.position.copy(FX.ReturnModelCenter(object));
-            }
-
-			if(object.name==="axle_d")
-            {
-				object.layers.set(1);
-              	vesa_arm_module.position.copy(FX.ReturnModelCenter(object));
-            }
-
-			if(object.name==="axle_e")
-            {
-				object.layers.set(1);
-              	vesa_module.position.copy(FX.ReturnModelCenter(object));
-            }
-
-			if(object.name.includes("VESA"))
-            {
-              FX.ReturnBufferGeometry(object,null,vesa_module,scene);
-            }
-
-			if(object.name.includes("veseHousing"))
-            {
-              FX.ReturnBufferGeometry(object,gray_housing_material,vesa_module,scene);
-            }
-
-			if(object.name.includes("Screw"))
-            {
-              FX.ReturnBufferGeometry(object,null,main_model,scene);
-            }
-
-			if(object.name.includes("Screen"))
-            {
-              FX.ReturnBufferGeometry(object,null,vesa_module,scene);
-            }
-
-			if(object.name.includes("logo"))
-            {
-              FX.ReturnBufferGeometry(object,null,vesa_module,scene);
-            }
-
-			if(object.name.includes("Button"))
-            {
-              FX.ReturnBufferGeometry(object,null,vesa_module,scene);
-            }
-
-			if(object.name.includes("TV"))
-            {
-              FX.ReturnBufferGeometry(object,black_housing_material,vesa_module,scene);
-            }
-
-			if(object.name.includes("UpperAluminumArm"))
-            {
-              FX.ReturnBufferGeometry(object,null,vesa_arm_module,scene);
-            }
-
-			if(object.name.includes("UpperArmHousing"))
-            {
-              FX.ReturnBufferGeometry(object,gray_housing_material,vesa_arm_module,scene);
-            }
-			
-			if(object.name.includes("BottomArmSupport"))
-            {
-              FX.ReturnBufferGeometry(object,gray_housing_material,tray_arm_module_A_vertical,scene);
-            }
-
-			if(object.name.includes("BottomAluminumArm"))
-            {
-              FX.ReturnBufferGeometry(object,null,tray_arm_module_B,scene);
-            }
-
-			if(object.name.includes("BottomArmHorizontalAxle"))
-            {
-              FX.ReturnBufferGeometry(object,null,tray_arm_module_B,scene);
-            }
-
-			if(object.name.includes("Keyboard"))
-            {
-              FX.ReturnBufferGeometry(object,black_housing_material,tray_arm_module_A_vertical,scene);
-            }
-
-			if(object.name.includes("KeyboardLight"))
-            {
-              FX.ReturnBufferGeometry(object,null,tray_arm_module_A_vertical,scene);
-            }
-
-			if(object.name.includes("Mouse"))
-            {
-              FX.ReturnBufferGeometry(object,black_housing_material,tray_arm_module_A_vertical,scene);
-            }
-
-			if(object.name.includes("Wheel"))
-            {
-              FX.ReturnBufferGeometry(object,null,tray_arm_module_A_vertical,scene);
-            }
-
-			if(object.name.includes("Tray"))
-            {
-              FX.ReturnBufferGeometry(object,white_housing,tray_arm_module_A_vertical,scene);
-            }
-
-			if(object.name==="ArmHousing")
-            {
-              FX.ReturnBufferGeometry(object,null,main_model,scene);
-            }
-            
-			if(object.name.includes("Base"))
-            {
-              FX.ReturnBufferGeometry(object,null,main_model,scene);
-            }
-
-			if(object.name.includes("Rail"))
-            {
-              FX.ReturnBufferGeometry(object,null,main_model,scene);
-            }
-
-
-        });
-
-		
-
-
-		///先都加到模型最上層的節點後才可加到其他group內，可確保組件在正確的相對位置上。
-		main_model.attach(vesa_arm_module);
-		main_model.attach(vesa_module);
-		main_model.attach(tray_arm_module_B);
-		main_model.attach(tray_arm_module_A_vertical);
-		main_model.attach(tray_arm_module_A_horizontal);
-		
-
-		
-		//vesa_arm_module.attach(vesa_module);
-		//tray_arm_module_A_horizontal.attach(tray_arm_module_A_vertical);
-		//tray_arm_module_B.attach(tray_arm_module_A_horizontal);
-
-		let HUD_screen = new THREE.Object3D();
-			
-		const loader_HUD_1 = new THREE.TextureLoader();
-			
-		const geometry_HUD_1 = new THREE.PlaneGeometry();
-		
-			
-		loader_HUD_1.load( './textures/rainbow-bloom.jpg', function ( texture ) {
-			
-			texture.colorSpace = THREE.SRGBColorSpace;//確保顏色空間正確
-			
-			const material_HUD = new THREE.MeshPhysicalMaterial( { map: texture, transparent: true,opacity:0.9 ,depthWrite: false ,	side:THREE.DoubleSide} );
-			
-			const mesh_HUD = new THREE.Mesh( geometry_HUD_1, material_HUD );
-			const img_scale =0.002635;
-			
-			mesh_HUD.position.set( -0.005,0.291,0.365 );
-			mesh_HUD.scale.set(img_scale*192,img_scale*108,1);
-		
-			//mesh_HUD.rotation.set(FX.ToThreeEulerAngle(30),FX.ToThreeEulerAngle(90), FX.ToThreeEulerAngle(-180));
-
-			mesh_HUD.rotation.set(FX.ToThreeEulerAngle(0),FX.ToThreeEulerAngle(0), FX.ToThreeEulerAngle(0));
-			
-			HUD_screen.add(mesh_HUD);
-			//scene.add( HUD );
-		
-			vesa_module.attach(HUD_screen);
-		} );
-
-		
-
-		//console.log("這個 parent 的縮放 (Scale):", tray_arm_module_B.scale);
-		
-		
-		scene.add(main_model);
-
-		ResetBufferGeometryPosition("BottomAluminumArm",tray_arm_module_B);
-		ResetBufferGeometryPosition("BottomArmHorizontalAxle",tray_arm_module_B);
-
-        ResetBufferGeometryPosition("VESA",vesa_module);
-		ResetBufferGeometryPosition("TV",vesa_module);
-
-		ResetBufferGeometryPosition("UpperAluminumArm",vesa_arm_module);
-		ResetBufferGeometryPosition("UpperArmHousing",vesa_arm_module);
-
-		ResetBufferGeometryPosition("Tray",tray_arm_module_A_vertical);
-		ResetBufferGeometryPosition("BottomArmSupport",tray_arm_module_A_vertical);
-		ResetBufferGeometryPosition("Keyboard",tray_arm_module_A_vertical);
-		ResetBufferGeometryPosition("KeyboardLight",tray_arm_module_A_vertical);
-		ResetBufferGeometryPosition("Mouse",tray_arm_module_A_vertical);
-		ResetBufferGeometryPosition("Wheel",tray_arm_module_A_vertical);
-        
-
-		///位置先還原後才可加到旋轉模組內，可確保組件在正確的相對位置上。
-        vesa_arm_module.attach(vesa_module);
-		tray_arm_module_A_horizontal.attach(tray_arm_module_A_vertical);
-		tray_arm_module_B.attach(tray_arm_module_A_horizontal);
-		
-
-	//scene.getObjectByName("BufferGeometry_BottomAluminumArm").position.set(-tray_arm_module_B.position.x,-tray_arm_module_B.position.y,-tray_arm_module_B.position.z);
-    //scene.getObjectByName("BufferGeometry_BottomArmHorizontalAxle").position.set(-tray_arm_module_B.position.x,-tray_arm_module_B.position.y,-tray_arm_module_B.position.//z);
-
-		setTimeout(() => {
-			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
-			renderer.setAnimationLoop( animate );
-			FXUI.InstLoadingEffect_Type_A(false);
-			//FX.Camera_Inspector(camera,controls);
-			//FX.Material_Inspector(scene);
-		}, 1000);
-
-		//console.log()
-		
-    },
-    (error) => {
-        console.error('Failed to load model:', error);
-    }
-	);
-
-	
-
-	//影子工具
-	FX.InitWebGPUShadow(scene, {
-     shadow: { blur: 0.5, darkness: 0.25 },
-     plane: { color: '#ffffff', opacity: 1 }
-});
-
-
-	///EventListener
-  	window.addEventListener( 'resize', onWindowResize );  
-
-  		window.addEventListener("pointerdown", (event) => {
-		
-		idleTime=0;
-		controls.autoRotate=false;
-	
-	});
-
-	window.addEventListener( 'pointermove', function(e) {
-		
-		idleTime=0;
-		controls.autoRotate=false;
-		
-	});
-
-  	window.addEventListener("wheel", (event) => {
-		
-		idleTime=0;
-		controls.autoRotate=false;
-		
-	});
-	
-}
-
-
-function onWindowResize() 
-{
-    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
-	camera.updateProjectionMatrix();
-    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
-}
-
-function animate(timestamp) 
-{
-
-  	controls.update();
-  	renderer.render( scene, camera );
-
-  	// 自動更新時間（用來計算移動速度、旋轉等）
-    //timer.update( timestamp );
-	//const delta = timer.getDelta();
-
-
-	//if ( mixer ) mixer.update( delta );
-
-//	idleTime+=delta;
-//	
-//	if(idleTime>hold_time)
-//	{
-//		controls.autoRotate=true;
-//	}
-
-
-//vesa_arm_module.rotation.y+=0.001;
-//vesa_module.rotation.x+=0.001;
-//tray_arm_module_A_vertical.rotation.x+=0.001;
-//tray_arm_module_A_horizontal.rotation.y+=0.001;
-//tray_arm_module_B.rotation.y+=0.001;
-
-}
-
-function VESA_Vertical_Rotate(i)
-{
-    vesa_module.rotation.x+=i;
-}
-
-function VESA_Horizontal_Rotate(i)
-{
-	vesa_arm_module.rotation.y+=i;
-}
-
-function TrayArm_Vertical_Rotate(i)
-{
-	tray_arm_module_A_vertical.rotation.x+=i;
-}
-
-function TrayArm_Horizontal_Rotate(i)
-{
-	tray_arm_module_A_horizontal.rotation.y+=i;
-}
-
-function BottomArm_Hozizontal_Rotate(i)
-{
-	tray_arm_module_B.rotation.y+=i;
-}
-
-function ResetBufferGeometryPosition(thisName,parent)
-{
-	let target=scene.getObjectByName("BufferGeometry_"+thisName);
-
-	target.position.set(-1*parent.position.x,-1*parent.position.y,-1*parent.position.z);
-}
+				const loader = new GLTFLoader();
+				loader.setDRACOLoader(FX.dracoLoader);
+				loader.parse(
+					FX.Base64ToArrayBuffer(draco_wallMountWorkspace_2026()),
+					'',
+					(gltf) => {
+						const model = gltf.scene;
+
+						model.position.set(0, 0, 0);
+						model.rotation.set(0, 0, 0);
+						model.scale.set(1, 1, 1);
+
+						const black_housing_material = FXM.InstEtchingMaterial(0x202428, 0.25, 0.5, 0.75, false, 1, "/textures/Gravel.png", new THREE.Vector2(0, 100), new THREE.Vector2(0, 0), "/textures/Gravel.png", new THREE.Vector2(1016.7, 1065.9), 2);
+						const gray_housing_material = FXM.InstEtchingMaterial(0x454b52, 0.2, 0.4, 0.75, false, 1, "/textures/Gravel.png", new THREE.Vector2(0, 100), new THREE.Vector2(0, 0), "/textures/Gravel.png", new THREE.Vector2(1016.7, 1065.9), 2);
+						const white_housing = FXM.InstEtchingMaterial(0xEcf0f3, 0.15, 0.2, 0.8, false, 1, "./textures/Light_Gravel.png", new THREE.Vector2(0, 100), new THREE.Vector2(0, 0), "./textures/Light_Gravel.png", new THREE.Vector2(10, 10), 1);
+
+						model.traverse(function (object) {	
+							if (object.name === "axle_a") {
+								object.layers.set(1);
+								tray_arm_module_B.position.copy(FX.ReturnModelCenter(object));
+							}
+							if (object.name === "axle_b") {
+								object.layers.set(1);
+								tray_arm_module_A_horizontal.position.copy(FX.ReturnModelCenter(object));
+							}
+							if (object.name === "axle_c") {
+								object.layers.set(1);
+								tray_arm_module_A_vertical.position.copy(FX.ReturnModelCenter(object));
+							}
+							if (object.name === "axle_d") {
+								object.layers.set(1);
+								vesa_arm_module.position.copy(FX.ReturnModelCenter(object));
+							}
+							if (object.name === "axle_e") {
+								object.layers.set(1);
+								vesa_module.position.copy(FX.ReturnModelCenter(object));
+							}
+
+							if (object.name.includes("VESA")) {
+								FX.ReturnBufferGeometry(object, null, vesa_module, scene);
+							}
+							if (object.name.includes("veseHousing")) {
+								FX.ReturnBufferGeometry(object, gray_housing_material, vesa_module, scene);
+							}
+							if (object.name.includes("Screw")) {
+								FX.ReturnBufferGeometry(object, null, main_model, scene);
+							}
+							if (object.name.includes("Screen")) {
+								FX.ReturnBufferGeometry(object, null, vesa_module, scene);
+							}
+							if (object.name.includes("logo")) {
+								FX.ReturnBufferGeometry(object, null, vesa_module, scene);
+							}
+							if (object.name.includes("Button")) {
+								FX.ReturnBufferGeometry(object, null, vesa_module, scene);
+							}
+							if (object.name.includes("TV")) {
+								FX.ReturnBufferGeometry(object, black_housing_material, vesa_module, scene);
+							}
+							if (object.name.includes("UpperAluminumArm")) {
+								FX.ReturnBufferGeometry(object, null, vesa_arm_module, scene);
+							}
+							if (object.name.includes("UpperArmHousing")) {
+								FX.ReturnBufferGeometry(object, gray_housing_material, vesa_arm_module, scene);
+							}
+							if (object.name.includes("BottomArmSupport")) {
+								FX.ReturnBufferGeometry(object, gray_housing_material, tray_arm_module_A_vertical, scene);
+							}
+							if (object.name.includes("BottomAluminumArm")) {
+								FX.ReturnBufferGeometry(object, null, tray_arm_module_B, scene);
+							}
+							if (object.name.includes("BottomArmHorizontalAxle")) {
+								FX.ReturnBufferGeometry(object, null, tray_arm_module_A_horizontal, scene);
+							}
+							if (object.name.includes("Keyboard")) {
+								FX.ReturnBufferGeometry(object, black_housing_material, tray_arm_module_A_vertical, scene);
+							}
+							if (object.name.includes("KeyboardLight")) {
+								FX.ReturnBufferGeometry(object, null, tray_arm_module_A_vertical, scene);
+							}
+							if (object.name.includes("Mouse")) {
+								FX.ReturnBufferGeometry(object, black_housing_material, tray_arm_module_A_vertical, scene);
+							}
+							if (object.name.includes("Wheel")) {
+								FX.ReturnBufferGeometry(object, null, tray_arm_module_A_vertical, scene);
+							}
+							if (object.name.includes("Tray")) {
+								FX.ReturnBufferGeometry(object, white_housing, tray_arm_module_A_vertical, scene);
+							}
+							if (object.name === "ArmHousing") {
+								FX.ReturnBufferGeometry(object, null, main_model, scene);
+							}
+							if (object.name.includes("Base")) {
+								FX.ReturnBufferGeometry(object, null, main_model, scene);
+							}
+							if (object.name.includes("Rail")) {
+								FX.ReturnBufferGeometry(object, null, main_model, scene);
+							}
+						});
+
+						main_model.attach(vesa_arm_module);
+						main_model.attach(vesa_module);
+						main_model.attach(tray_arm_module_B);
+						main_model.attach(tray_arm_module_A_vertical);
+						main_model.attach(tray_arm_module_A_horizontal);
+
+						// Setup monitor screen with customizable textures
+						let HUD_screen = new THREE.Object3D();
+						const geometry_HUD_1 = new THREE.PlaneGeometry();
+
+						// Load textures
+						texOriginal = textureLoader.load('./textures/rainbow-bloom.jpg', (tex) => { tex.colorSpace = THREE.SRGBColorSpace; });
+						texVitals = textureLoader.load('./textures/medical_vitals.png', (tex) => { tex.colorSpace = THREE.SRGBColorSpace; });
+						texMRI = textureLoader.load('./textures/mri_scan.png', (tex) => { tex.colorSpace = THREE.SRGBColorSpace; });
+
+						// Pre-setup screen feed using medical vitals as default
+						hudMaterial = new THREE.MeshPhysicalMaterial({ 
+							map: texVitals, 
+							transparent: true, 
+							opacity: 0.95, 
+							depthWrite: false, 
+							side: THREE.DoubleSide 
+						});
+						
+						const mesh_HUD = new THREE.Mesh(geometry_HUD_1, hudMaterial);
+						const img_scale = 0.002635;
+						mesh_HUD.position.set(-0.005, 0.291, 0.365);
+						mesh_HUD.scale.set(img_scale * 192, img_scale * 108, 1);
+						mesh_HUD.rotation.set(0, 0, 0);
+						
+						HUD_screen.add(mesh_HUD);
+						vesa_module.attach(HUD_screen);
+
+						scene.add(main_model);
+
+						ResetBufferGeometryPosition("BottomAluminumArm", tray_arm_module_B);
+						ResetBufferGeometryPosition("BottomArmHorizontalAxle", tray_arm_module_A_horizontal);
+						ResetBufferGeometryPosition("VESA", vesa_module);
+						ResetBufferGeometryPosition("TV", vesa_module);
+						ResetBufferGeometryPosition("UpperAluminumArm", vesa_arm_module);
+						ResetBufferGeometryPosition("UpperArmHousing", vesa_arm_module);
+						ResetBufferGeometryPosition("Tray", tray_arm_module_A_vertical);
+						ResetBufferGeometryPosition("BottomArmSupport", tray_arm_module_A_vertical);
+						ResetBufferGeometryPosition("Keyboard", tray_arm_module_A_vertical);
+						ResetBufferGeometryPosition("KeyboardLight", tray_arm_module_A_vertical);
+						ResetBufferGeometryPosition("Mouse", tray_arm_module_A_vertical);
+						ResetBufferGeometryPosition("Wheel", tray_arm_module_A_vertical);
+						ResetBufferGeometryPosition("logo", vesa_module);
+
+						vesa_arm_module.attach(vesa_module);
+						tray_arm_module_A_horizontal.attach(tray_arm_module_A_vertical);
+						tray_arm_module_B.attach(tray_arm_module_A_horizontal);
+
+						setTimeout(() => {
+							renderer.setAnimationLoop(animate);
+							FXUI.InstLoadingEffect_Type_A(false);
+							//FX.Camera_Inspector(camera,currentControls);
+							
+							// Trigger initial preset Surgical
+							applyPreset('surgical');
+						}, 1000);
+					},
+					(error) => {
+						console.error('Failed to load model:', error);
+					}
+				);
+
+				FX.InitWebGPUShadow(scene, {
+					shadow: { blur: 0.5, darkness: 0.25 },
+					plane: { color: '#ffffff', opacity: 1 }
+				});
+
+				window.addEventListener('resize', onWindowResize);  
+			}
+
+			function onWindowResize() {
+				camera.aspect = threeContainer.clientWidth / threeContainer.clientHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+			}
+
+			// Rotation Smooth LERP Animation Loop
+			function animate(timestamp) {
+				currentControls.update();
+
+				// Smooth LERP rotations
+				tray_arm_module_B.rotation.y += (targetRotations.baseSwivel - tray_arm_module_B.rotation.y) * 0.08;
+				tray_arm_module_A_horizontal.rotation.y += (targetRotations.traySwivel - tray_arm_module_A_horizontal.rotation.y) * 0.08;
+				tray_arm_module_A_vertical.rotation.x += (targetRotations.trayTilt - tray_arm_module_A_vertical.rotation.x) * 0.08;
+				vesa_arm_module.rotation.y += (targetRotations.vesaSwivel - vesa_arm_module.rotation.y) * 0.08;
+				vesa_module.rotation.x += (targetRotations.vesaTilt - vesa_module.rotation.x) * 0.08;
+
+				// Update slider positions and displayed values to reflect actual rotations
+				updateUIDisplays();
+
+				renderer.render(scene, camera);
+			}
+
+			function updateUIDisplays() {
+				const baseDeg = Math.round(THREE.MathUtils.radToDeg(tray_arm_module_B.rotation.y));
+				const traySwivelDeg = Math.round(THREE.MathUtils.radToDeg(tray_arm_module_A_horizontal.rotation.y));
+				const trayTiltDeg = Math.round(THREE.MathUtils.radToDeg(tray_arm_module_A_vertical.rotation.x));
+				const vesaSwivelDeg = Math.round(THREE.MathUtils.radToDeg(vesa_arm_module.rotation.y));
+				const vesaTiltDeg = Math.round(THREE.MathUtils.radToDeg(vesa_module.rotation.x));
+
+				document.getElementById("val_base_swivel").textContent = baseDeg + "°";
+				document.getElementById("val_tray_swivel").textContent = traySwivelDeg + "°";
+				document.getElementById("val_tray_tilt").textContent = trayTiltDeg + "°";
+				document.getElementById("val_vesa_swivel").textContent = vesaSwivelDeg + "°";
+				document.getElementById("val_vesa_tilt").textContent = vesaTiltDeg + "°";
+
+				// Update sliders (only if the user is not dragging them to prevent jitter)
+				if (document.activeElement !== document.getElementById("slider_base_swivel")) {
+					document.getElementById("slider_base_swivel").value = baseDeg;
+				}
+				if (document.activeElement !== document.getElementById("slider_tray_swivel")) {
+					document.getElementById("slider_tray_swivel").value = traySwivelDeg;
+				}
+				if (document.activeElement !== document.getElementById("slider_tray_tilt")) {
+					document.getElementById("slider_tray_tilt").value = trayTiltDeg;
+				}
+				if (document.activeElement !== document.getElementById("slider_vesa_swivel")) {
+					document.getElementById("slider_vesa_swivel").value = vesaSwivelDeg;
+				}
+				if (document.activeElement !== document.getElementById("slider_vesa_tilt")) {
+					document.getElementById("slider_vesa_tilt").value = vesaTiltDeg;
+				}
+			}
+
+			function ResetBufferGeometryPosition(thisName, parent) {
+				let target = scene.getObjectByName("BufferGeometry_" + thisName);
+				target.position.set(-1 * parent.position.x, -1 * parent.position.y, -1 * parent.position.z);
+			}
+
+			// Sliders interaction
+			document.getElementById("slider_base_swivel").addEventListener("input", (e) => {
+				targetRotations.baseSwivel = THREE.MathUtils.degToRad(parseFloat(e.target.value));
+				deactivatePresets();
+			});
+			document.getElementById("slider_tray_swivel").addEventListener("input", (e) => {
+				targetRotations.traySwivel = THREE.MathUtils.degToRad(parseFloat(e.target.value));
+				deactivatePresets();
+			});
+			document.getElementById("slider_tray_tilt").addEventListener("input", (e) => {
+				targetRotations.trayTilt = THREE.MathUtils.degToRad(parseFloat(e.target.value));
+				deactivatePresets();
+			});
+			document.getElementById("slider_vesa_swivel").addEventListener("input", (e) => {
+				targetRotations.vesaSwivel = THREE.MathUtils.degToRad(parseFloat(e.target.value));
+				deactivatePresets();
+			});
+			document.getElementById("slider_vesa_tilt").addEventListener("input", (e) => {
+				targetRotations.vesaTilt = THREE.MathUtils.degToRad(parseFloat(e.target.value));
+				deactivatePresets();
+			});
+
+			// Preset function
+			function applyPreset(presetName) {
+				deactivatePresets();
+				const btn = document.getElementById("btn_preset_" + presetName);
+				if (btn) btn.classList.add("active");
+
+				if (presetName === 'surgical') {
+					targetRotations.baseSwivel = THREE.MathUtils.degToRad(20);
+					targetRotations.traySwivel = THREE.MathUtils.degToRad(-15);
+					targetRotations.trayTilt = THREE.MathUtils.degToRad(5);
+					targetRotations.vesaSwivel = THREE.MathUtils.degToRad(-10);
+					targetRotations.vesaTilt = THREE.MathUtils.degToRad(-5);
+				} else if (presetName === 'consult') {
+					targetRotations.baseSwivel = THREE.MathUtils.degToRad(-45);
+					targetRotations.traySwivel = THREE.MathUtils.degToRad(30);
+					targetRotations.trayTilt = THREE.MathUtils.degToRad(15);
+					targetRotations.vesaSwivel = THREE.MathUtils.degToRad(40);
+					targetRotations.vesaTilt = THREE.MathUtils.degToRad(10);
+				} else if (presetName === 'folded') {
+					targetRotations.baseSwivel = THREE.MathUtils.degToRad(90);
+					targetRotations.traySwivel = THREE.MathUtils.degToRad(0);
+					targetRotations.trayTilt = THREE.MathUtils.degToRad(-15);
+					targetRotations.vesaSwivel = THREE.MathUtils.degToRad(0);
+					targetRotations.vesaTilt = THREE.MathUtils.degToRad(-25);
+				}
+			}
+
+			function deactivatePresets() {
+				document.querySelectorAll(".preset-btn").forEach(btn => btn.classList.remove("active"));
+			}
+
+			document.getElementById("btn_preset_surgical").addEventListener("click", () => applyPreset('surgical'));
+			document.getElementById("btn_preset_consult").addEventListener("click", () => applyPreset('consult'));
+			document.getElementById("btn_preset_folded").addEventListener("click", () => applyPreset('folded'));
+
+			// Screen feed selection
+			function selectScreenFeed(feedName) {
+				document.querySelectorAll(".feed-btn").forEach(btn => btn.classList.remove("active"));
+				document.getElementById("btn_feed_" + feedName).classList.add("active");
+
+				if (!hudMaterial) return;
+				if (feedName === 'vitals') {
+					hudMaterial.map = texVitals;
+				} else if (feedName === 'mri') {
+					hudMaterial.map = texMRI;
+				} else if (feedName === 'rainbow') {
+					hudMaterial.map = texOriginal;
+				}
+				hudMaterial.needsUpdate = true;
+			}
+
+			document.getElementById("btn_feed_vitals").addEventListener("click", () => selectScreenFeed('vitals'));
+			document.getElementById("btn_feed_mri").addEventListener("click", () => selectScreenFeed('mri'));
+			document.getElementById("btn_feed_rainbow").addEventListener("click", () => selectScreenFeed('rainbow'));
+
 		</script>
     </body>
-
 </html>
