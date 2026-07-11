@@ -366,7 +366,7 @@ import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-import { exerciseBike_2026 } from './models/exerciseBike_2026_slices.js';
+import { draco_wallMountWorkspace_2026 } from './models/draco_wallMountWorkspace_2026_slices.js';
 import 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js';
 import { Inspector } from 'three/addons/inspector/Inspector.js';
 
@@ -376,15 +376,21 @@ let scene, camera, renderer, stats, mixer;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
 
+let vesa_module= new THREE.Object3D();
+let vesa_arm_module= new THREE.Object3D();
+let tray_arm_module_A_vertical= new THREE.Object3D();
+let tray_arm_module_A_horizontal= new THREE.Object3D();
+let tray_arm_module_B= new THREE.Object3D();
+
 
 const timer = new THREE.Timer();
 
 const modelPosition=new THREE.Vector3(0,0,0);
-const modelRotation=new THREE.Vector3(0,FX.ToThreeEulerAngle(90), 0);
+const modelRotation=new THREE.Vector3(0,0, 0);
 const modeScale=1;
 
-const CameraDefaultPos=new THREE.Vector3(3.007,1.220,-2.872);
-const ControlsTargetDefaultPos=new THREE.Vector3(0.090,0.623,0.189);
+const CameraDefaultPos=new THREE.Vector3(0.959,0.336,2.401);
+const ControlsTargetDefaultPos=new THREE.Vector3(-0.163,0.141,0.325);
 
 let main_model= new THREE.Object3D();
 
@@ -504,89 +510,165 @@ async function init()
 	const loader_EBike = new GLTFLoader();
     loader_EBike.setDRACOLoader(FX.dracoLoader);
 	loader_EBike.parse(
-    FX.Base64ToArrayBuffer(exerciseBike_2026()),
+    FX.Base64ToArrayBuffer(draco_wallMountWorkspace_2026()),
     '',
     (gltf) => {
         
 		const model = gltf.scene;
 
-		model.position.set(0,0,0);
-		model.rotation.set(0,0, 0);
+		model.position.copy(modelPosition);
+		model.rotation.copy(modelRotation);
 		model.scale.set(modeScale,modeScale,modeScale);
 
-		const saddle_01_material=FXM.InstEtchingMaterial(0x080808,0.4,0.3,0.75,false,1,'./textures/Leather.png',new THREE.Vector2(10,10),new THREE.Vector2(0,0),'./textures/Leather.png',new THREE.Vector2(15, 15),0);
+		const black_housing_material=FXM.InstEtchingMaterial(0x363636,0.3,0.6,0.7500000000000001,false,1,"/textures/Gravel.png",new THREE.Vector2(0,100),new THREE.Vector2(0,0),"/textures/Gravel.png",new THREE.Vector2(1016.7,1065.9),2);
 
-		const tube_01_material=FXM.InstMaterial(0x828282,0.263,1,0,1,0,false,1,true);
-		const tube_02_material=FXM.InstMaterial(0x828282,0.263,1,0,1,0,false,1,true);
+		const gray_housing_material=FXM.InstEtchingMaterial(0x595959,0.2,0.5,0.7500000000000001,false,1,"/textures/Gravel.png",new THREE.Vector2(0,100),new THREE.Vector2(0,0),"/textures/Gravel.png",new THREE.Vector2(1016.7,1065.9),2);
 
-		const black_plastic_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.75,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(600, 600),2);
+		const white_housing=FXM.InstEtchingMaterial(0xE6E6E6,0.3,0,0.7540000000000001,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(0,100),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(10,10),1);
 
-		const logo_material=FXM.InstMaterial(0x878787,0,1,0,2.3333333333333335,1,false,1,true);
-
-		const housing_01_material=FXM.InstMaterial(0xE0E0E0,0.3,0.6,0,2.4,1,false,1,true);
-
-		const housing_02_material=FXM.InstMaterial(0x86BAFE,0.3,0.5,0,2.4,1,false,1,true);
+		
 
 		model.traverse( function ( object ) {	
+			
                   
-            if(object.name.includes("saddle"))
+            if(object.name==="axle_a")
             {
-              FX.ReturnBufferGeometry(object,saddle_01_material,null,scene);
+				object.layers.set(1);
+			  	tray_arm_module_B.position.copy(FX.ReturnModelCenter(object));
             }
 
-			if(object.name.includes("handle"))
+			if(object.name==="axle_b")
             {
-              FX.ReturnBufferGeometry(object,saddle_01_material,null,scene);
+				object.layers.set(1);
+              	tray_arm_module_A_horizontal.position.copy(FX.ReturnModelCenter(object));
+			  	
             }
 
-			if(object.name.includes("tube_01"))
+			if(object.name==="axle_c")
             {
-              FX.ReturnBufferGeometry(object,tube_01_material,null,scene);
+				object.layers.set(1);
+              	tray_arm_module_A_vertical.position.copy(FX.ReturnModelCenter(object));
             }
 
-			if(object.name.includes("tube_02"))
+			if(object.name==="axle_d")
             {
-              FX.ReturnBufferGeometry(object,tube_02_material,null,scene);
+				object.layers.set(1);
+              	vesa_arm_module.position.copy(FX.ReturnModelCenter(object));
             }
 
-			if(object.name.includes("endCap"))
+			if(object.name==="axle_e")
             {
-              FX.ReturnBufferGeometry(object,black_plastic_material,null,scene);
+				object.layers.set(1);
+              	vesa_module.position.copy(FX.ReturnModelCenter(object));
             }
 
-			if(object.name.includes("housing_01"))
+			if(object.name.includes("VESA"))
             {
-              FX.ReturnBufferGeometry(object,housing_01_material,null,scene);
+              FX.ReturnBufferGeometry(object,null,vesa_module,scene);
             }
 
-			if(object.name.includes("housing_02"))
+			if(object.name.includes("veseHousing"))
             {
-              FX.ReturnBufferGeometry(object,housing_02_material,null,scene);
+              FX.ReturnBufferGeometry(object,gray_housing_material,vesa_module,scene);
             }
 
-			if(object.name.includes("housing_03"))//mesh有問題無法buffergeomatry處理
+			if(object.name.includes("vesaScrew"))
             {
-              	object.traverse((child) => {
-    			    
-    			    if (child.isMesh) {
-    			        
-    			        child.material=housing_02_material;
-    			    }
-    			});
+              FX.ReturnBufferGeometry(object,null,vesa_module,scene);
             }
 
-			if(object.name.includes("knob"))
+			if(object.name.includes("Screen"))
             {
-              FX.ReturnBufferGeometry(object,black_plastic_material,null,scene);
+              FX.ReturnBufferGeometry(object,null,vesa_module,scene);
             }
 
 			if(object.name.includes("logo"))
             {
-              FX.ReturnBufferGeometry(object,logo_material,null,scene);
+              FX.ReturnBufferGeometry(object,null,vesa_module,scene);
             }
 
-        })
+			if(object.name.includes("Button"))
+            {
+              FX.ReturnBufferGeometry(object,null,vesa_module,scene);
+            }
 
+			if(object.name.includes("TV"))
+            {
+              FX.ReturnBufferGeometry(object,black_housing_material,vesa_module,scene);
+            }
+
+			if(object.name.includes("UpperAluminumArm"))
+            {
+              FX.ReturnBufferGeometry(object,null,vesa_arm_module,scene);
+            }
+
+			if(object.name.includes("UpperArmHousing"))
+            {
+              FX.ReturnBufferGeometry(object,gray_housing_material,vesa_arm_module,scene);
+            }
+			
+			if(object.name.includes("BottomArmSupport"))
+            {
+              FX.ReturnBufferGeometry(object,gray_housing_material,tray_arm_module_A_vertical,scene);
+            }
+
+			if(object.name.includes("BottomAluminumArm"))
+            {
+              FX.ReturnBufferGeometry(object,null,tray_arm_module_B,scene);
+            }
+
+			if(object.name.includes("BottomArmHorizontalAxle"))
+            {
+              FX.ReturnBufferGeometry(object,null,tray_arm_module_B,scene);
+            }
+
+			if(object.name.includes("Keyboard"))
+            {
+              FX.ReturnBufferGeometry(object,black_housing_material,tray_arm_module_A_vertical,scene);
+            }
+
+			if(object.name.includes("KeyboardLight"))
+            {
+              FX.ReturnBufferGeometry(object,null,tray_arm_module_A_vertical,scene);
+            }
+
+			if(object.name.includes("Mouse"))
+            {
+              FX.ReturnBufferGeometry(object,black_housing_material,tray_arm_module_A_vertical,scene);
+            }
+
+			if(object.name.includes("MouseWheel"))
+            {
+              FX.ReturnBufferGeometry(object,null,tray_arm_module_A_vertical,scene);
+            }
+
+			if(object.name.includes("Tray"))
+            {
+              FX.ReturnBufferGeometry(object,white_housing,tray_arm_module_A_vertical,scene);
+            }
+
+			if(object.name==="ArmHousing")
+            {
+              FX.ReturnBufferGeometry(object,null,null,scene);
+            }
+
+        });
+
+		
+
+
+		//先都加到模型最上層的節點後再才可加到其他group內，可確保組件在正確的相對位置上。
+		model.attach(vesa_arm_module);
+		model.attach(vesa_module);
+		model.attach(tray_arm_module_B);
+		model.attach(tray_arm_module_A_vertical);
+		model.attach(tray_arm_module_A_horizontal);
+		
+
+		
+		vesa_arm_module.attach(vesa_module);
+		tray_arm_module_A_horizontal.attach(tray_arm_module_A_vertical);
+		tray_arm_module_B.attach(tray_arm_module_A_horizontal);
 
 		let HUD_screen = new THREE.Object3D();
 			
@@ -595,31 +677,38 @@ async function init()
 		const geometry_HUD_1 = new THREE.PlaneGeometry();
 		
 			
-		loader_HUD_1.load( './textures/Windows_UI.png', function ( texture ) {
+		loader_HUD_1.load( './textures/rainbow-bloom.jpg', function ( texture ) {
 			
 			texture.colorSpace = THREE.SRGBColorSpace;//確保顏色空間正確
 			
-			const material_HUD = new THREE.MeshStandardMaterial( { map: texture, transparent: true,opacity:0.9 ,depthWrite: false ,	emissiveMap: texture, side:THREE.DoubleSide,emissive: new THREE.Color(0x333333), // 設定自發光的顏色與強度（白色代表完全顯色，2.0 代表兩倍亮度）
-    			emissiveIntensity: 3,} );
+			const material_HUD = new THREE.MeshPhysicalMaterial( { map: texture, transparent: true,opacity:0.9 ,depthWrite: false ,	side:THREE.DoubleSide} );
 			
 			const mesh_HUD = new THREE.Mesh( geometry_HUD_1, material_HUD );
-			const img_scale =0.001;
+			const img_scale =0.002635;
 			
-			mesh_HUD.position.set( -0.35,1.325,0 );
-			mesh_HUD.scale.set(img_scale*273,img_scale*237,1);
+			mesh_HUD.position.set( -0.005,0.291,0.365 );
+			mesh_HUD.scale.set(img_scale*192,img_scale*108,1);
 		
 			//mesh_HUD.rotation.set(FX.ToThreeEulerAngle(30),FX.ToThreeEulerAngle(90), FX.ToThreeEulerAngle(-180));
 
-			mesh_HUD.rotation.set(FX.ToThreeEulerAngle(90),FX.ToThreeEulerAngle(-36), FX.ToThreeEulerAngle(90));
+			mesh_HUD.rotation.set(FX.ToThreeEulerAngle(0),FX.ToThreeEulerAngle(0), FX.ToThreeEulerAngle(0));
 			
 			HUD_screen.add(mesh_HUD);
 			//scene.add( HUD );
 		
-			scene.add(HUD_screen);
+			vesa_arm_module.attach(HUD_screen);
 		} );
 
-		scene.add(model);
 		
+
+		//console.log("這個 parent 的縮放 (Scale):", tray_arm_module_B.scale);
+		
+		
+		scene.add(model);
+
+		scene.getObjectByName("BufferGeometry_BottomAluminumArm").position.set(-tray_arm_module_B.position.x,-tray_arm_module_B.position.y,-tray_arm_module_B.position.z);
+        scene.getObjectByName("BufferGeometry_BottomArmHorizontalAxle").position.set(-tray_arm_module_B.position.x,-tray_arm_module_B.position.y,-tray_arm_module_B.position.z);
+
 		setTimeout(() => {
 			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
 			renderer.setAnimationLoop( animate );
@@ -628,7 +717,7 @@ async function init()
 			//FX.Material_Inspector(scene);
 		}, 1000);
 
-		console.log()
+		//console.log()
 		
     },
     (error) => {
@@ -686,11 +775,11 @@ function animate(timestamp)
   	renderer.render( scene, camera );
 
   	// 自動更新時間（用來計算移動速度、旋轉等）
-    timer.update( timestamp );
-	const delta = timer.getDelta();
+    //timer.update( timestamp );
+	//const delta = timer.getDelta();
 
 
-	if ( mixer ) mixer.update( delta );
+	//if ( mixer ) mixer.update( delta );
 
 //	idleTime+=delta;
 //	
@@ -700,9 +789,37 @@ function animate(timestamp)
 //	}
 
 
-//影子工具
-FX.UpdateWebGPUShadow(renderer, scene);
+//vesa_arm_module.rotation.y+=0.001;
+//vesa_module.rotation.x+=0.001;
+//tray_arm_module_A_vertical.rotation.x+=0.001;
+//tray_arm_module_A_horizontal.rotation.y+=0.001;
+//tray_arm_module_B.rotation.y+=0.001;
 
+}
+
+function VESA_Vertical_Rotate(i)
+{
+    vesa_module.rotation.x+=i;
+}
+
+function VESA_Horizontal_Rotate(i)
+{
+	vesa_arm_module.rotation.y+=i;
+}
+
+function TrayArm_Vertical_Rotate(i)
+{
+	tray_arm_module_A_vertical.rotation.x+=i;
+}
+
+function TrayArm_Horizontal_Rotate(i)
+{
+	tray_arm_module_A_horizontal.rotation.y+=i;
+}
+
+function BottomArm_Hozizontal_Rotate(i)
+{
+	tray_arm_module_B.rotation.y+=i;
 }
 		</script>
     </body>
