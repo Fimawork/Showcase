@@ -376,11 +376,11 @@ let scene, camera, renderer, stats, mixer;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
 
-let vesa_module= new THREE.Object3D();
-let vesa_arm_module= new THREE.Object3D();
-let tray_arm_module_A_vertical= new THREE.Object3D();
-let tray_arm_module_A_horizontal= new THREE.Object3D();
-let tray_arm_module_B= new THREE.Object3D();
+let vesa_module= new THREE.Group();
+let vesa_arm_module= new THREE.Group();
+let tray_arm_module_A_vertical= new THREE.Group();
+let tray_arm_module_A_horizontal= new THREE.Group();
+let tray_arm_module_B= new THREE.Group();
 
 
 const timer = new THREE.Timer();
@@ -572,9 +572,9 @@ async function init()
               FX.ReturnBufferGeometry(object,gray_housing_material,vesa_module,scene);
             }
 
-			if(object.name.includes("vesaScrew"))
+			if(object.name.includes("Screw"))
             {
-              FX.ReturnBufferGeometry(object,null,vesa_module,scene);
+              FX.ReturnBufferGeometry(object,null,main_model,scene);
             }
 
 			if(object.name.includes("Screen"))
@@ -637,7 +637,7 @@ async function init()
               FX.ReturnBufferGeometry(object,black_housing_material,tray_arm_module_A_vertical,scene);
             }
 
-			if(object.name.includes("MouseWheel"))
+			if(object.name.includes("Wheel"))
             {
               FX.ReturnBufferGeometry(object,null,tray_arm_module_A_vertical,scene);
             }
@@ -649,26 +649,37 @@ async function init()
 
 			if(object.name==="ArmHousing")
             {
-              FX.ReturnBufferGeometry(object,null,null,scene);
+              FX.ReturnBufferGeometry(object,null,main_model,scene);
             }
+            
+			if(object.name.includes("Base"))
+            {
+              FX.ReturnBufferGeometry(object,null,main_model,scene);
+            }
+
+			if(object.name.includes("Rail"))
+            {
+              FX.ReturnBufferGeometry(object,null,main_model,scene);
+            }
+
 
         });
 
 		
 
 
-		//先都加到模型最上層的節點後再才可加到其他group內，可確保組件在正確的相對位置上。
-		model.attach(vesa_arm_module);
-		model.attach(vesa_module);
-		model.attach(tray_arm_module_B);
-		model.attach(tray_arm_module_A_vertical);
-		model.attach(tray_arm_module_A_horizontal);
+		///先都加到模型最上層的節點後才可加到其他group內，可確保組件在正確的相對位置上。
+		main_model.attach(vesa_arm_module);
+		main_model.attach(vesa_module);
+		main_model.attach(tray_arm_module_B);
+		main_model.attach(tray_arm_module_A_vertical);
+		main_model.attach(tray_arm_module_A_horizontal);
 		
 
 		
-		vesa_arm_module.attach(vesa_module);
-		tray_arm_module_A_horizontal.attach(tray_arm_module_A_vertical);
-		tray_arm_module_B.attach(tray_arm_module_A_horizontal);
+		//vesa_arm_module.attach(vesa_module);
+		//tray_arm_module_A_horizontal.attach(tray_arm_module_A_vertical);
+		//tray_arm_module_B.attach(tray_arm_module_A_horizontal);
 
 		let HUD_screen = new THREE.Object3D();
 			
@@ -696,7 +707,7 @@ async function init()
 			HUD_screen.add(mesh_HUD);
 			//scene.add( HUD );
 		
-			vesa_arm_module.attach(HUD_screen);
+			vesa_module.attach(HUD_screen);
 		} );
 
 		
@@ -704,10 +715,33 @@ async function init()
 		//console.log("這個 parent 的縮放 (Scale):", tray_arm_module_B.scale);
 		
 		
-		scene.add(model);
+		scene.add(main_model);
 
-		scene.getObjectByName("BufferGeometry_BottomAluminumArm").position.set(-tray_arm_module_B.position.x,-tray_arm_module_B.position.y,-tray_arm_module_B.position.z);
-        scene.getObjectByName("BufferGeometry_BottomArmHorizontalAxle").position.set(-tray_arm_module_B.position.x,-tray_arm_module_B.position.y,-tray_arm_module_B.position.z);
+		ResetBufferGeometryPosition("BottomAluminumArm",tray_arm_module_B);
+		ResetBufferGeometryPosition("BottomArmHorizontalAxle",tray_arm_module_B);
+
+        ResetBufferGeometryPosition("VESA",vesa_module);
+		ResetBufferGeometryPosition("TV",vesa_module);
+
+		ResetBufferGeometryPosition("UpperAluminumArm",vesa_arm_module);
+		ResetBufferGeometryPosition("UpperArmHousing",vesa_arm_module);
+
+		ResetBufferGeometryPosition("Tray",tray_arm_module_A_vertical);
+		ResetBufferGeometryPosition("BottomArmSupport",tray_arm_module_A_vertical);
+		ResetBufferGeometryPosition("Keyboard",tray_arm_module_A_vertical);
+		ResetBufferGeometryPosition("KeyboardLight",tray_arm_module_A_vertical);
+		ResetBufferGeometryPosition("Mouse",tray_arm_module_A_vertical);
+		ResetBufferGeometryPosition("Wheel",tray_arm_module_A_vertical);
+        
+
+		///位置先還原後才可加到旋轉模組內，可確保組件在正確的相對位置上。
+        vesa_arm_module.attach(vesa_module);
+		tray_arm_module_A_horizontal.attach(tray_arm_module_A_vertical);
+		tray_arm_module_B.attach(tray_arm_module_A_horizontal);
+		
+
+	//scene.getObjectByName("BufferGeometry_BottomAluminumArm").position.set(-tray_arm_module_B.position.x,-tray_arm_module_B.position.y,-tray_arm_module_B.position.z);
+    //scene.getObjectByName("BufferGeometry_BottomArmHorizontalAxle").position.set(-tray_arm_module_B.position.x,-tray_arm_module_B.position.y,-tray_arm_module_B.position.//z);
 
 		setTimeout(() => {
 			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
@@ -820,6 +854,13 @@ function TrayArm_Horizontal_Rotate(i)
 function BottomArm_Hozizontal_Rotate(i)
 {
 	tray_arm_module_B.rotation.y+=i;
+}
+
+function ResetBufferGeometryPosition(thisName,parent)
+{
+	let target=scene.getObjectByName("BufferGeometry_"+thisName);
+
+	target.position.set(-1*parent.position.x,-1*parent.position.y,-1*parent.position.z);
 }
 		</script>
     </body>
