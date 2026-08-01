@@ -1426,6 +1426,13 @@ function SetupOceanEnvironment() {
 		// ── Auto Rotate toggle ───────────────────────────────────────
 		document.getElementById('chkWave').addEventListener('change', function() {
 			
+
+			const sc = window._yachtScene;
+			if (sc && sc.bloomNode) {
+				sc.bloomNode.strength.value = this.checked ? 0.1:0.075;
+			}
+			
+
 			isWave=this.checked;
 
 			water.visible=this.checked;
@@ -1435,10 +1442,10 @@ function SetupOceanEnvironment() {
 
 		// ── Bloom toggle ─────────────────────────────────────────────
 		document.getElementById('chkSunset').addEventListener('change', function() {
-			const sc = window._yachtScene;
-			if (sc && sc.bloomNode) {
-				sc.bloomNode.strength.value = this.checked ? 0.1:0.18;
-			}
+			//onst sc = window._yachtScene;
+			//f (sc && sc.bloomNode) {
+			//	sc.bloomNode.strength.value = this.checked ? 0.1:0.18;
+			//
 
 			if(this.checked)
 			{
