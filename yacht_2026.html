@@ -1,0 +1,333 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>Yacht 2026 | Fimawork Premium Showcase</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+			body {
+				margin: 0;
+				padding: 0; 
+				overflow: hidden;
+			}
+			
+			canvas {
+				width: 100%;
+   				height: 100%;
+			}
+
+            #threeContainer {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 2;
+				pointer-events: auto;
+			}
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<div id="threeContainer"></div>
+
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { pass ,positionWorld, smoothstep} from 'three/tsl';
+import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.53/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { yacht_2026 } from './models/yacht_2026_slices.js';
+import { WaterMesh } from 'three/addons/objects/WaterMesh.js';
+import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
+
+
+let scene, camera, renderer, stats, mixer;
+let bloomPass;
+let renderPipeline;
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+// 定義圖層常數
+
+// 1. 定義獨立圖層
+// 1. 建立兩個獨立的 Scene
+const skyAndSeaScene = new THREE.Scene(); // 只放 天空與海面
+const shipScene = new THREE.Scene();      // 只放 遊艇船隻
+
+const timer = new THREE.Timer();
+const CameraDefaultPos=new THREE.Vector3(176.215,69.471,155.429);
+const ControlsTargetDefaultPos=new THREE.Vector3(41.415,12.123,-3.110);
+
+let yacht=new THREE.Object3D();
+
+init();
+
+async function init()
+{
+	FX.SetupEnvironment("cloud");
+
+  	scene = new THREE.Scene();
+
+  	camera = new THREE.PerspectiveCamera( 25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 3000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGPURenderer( { antialias: true } );
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+	
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 0.15;
+  	threeContainer.appendChild( renderer.domElement );
+
+	///hdri 環境光源
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/kloofendal_48d_partly_cloudy_puresky_1k.jpg',shipScene);
+	shipScene.environmentRotation.y = FX.ToThreeEulerAngle(-90); 
+
+	//生成海景
+	SetupOceanEnvironment();
+
+	//// 初始化 RenderPipeline
+	renderPipeline = new THREE.RenderPipeline( renderer );
+	//const scenePass = pass( scene, camera );
+	//const scenePassColor = scenePass.getTextureNode( 'output' );
+
+	// Pass A: 先渲染「天空與海」
+const seaPass = pass( skyAndSeaScene, camera );
+const seaColor = seaPass.getTextureNode( 'output' );
+
+// Pass B: 再渲染「船隻」
+const shipPass = pass( shipScene, camera );
+shipScene.background = null;
+const shipColor = shipPass.getTextureNode( 'output' );
+
+// 3. 將兩層顏色合成 (把船疊加在海面上)
+// 若 Pass B 有開啟 depth test/write，直接用 composite 或 add 混合即可
+const combinedColor = seaColor.mul( shipColor.a.oneMinus() ).add( shipColor );
+
+
+	//bloomPass = bloom( scenePassColor );
+	bloomPass = bloom( combinedColor );
+	bloomPass.threshold.value = 0;
+	bloomPass.strength.value = 0.18;
+	bloomPass.radius.value = 0.5;
+
+	//renderPipeline.outputNode = scenePassColor.add( bloomPass );
+	renderPipeline.outputNode = combinedColor.add( bloomPass );
+
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+	//renderer.setAnimationLoop( animate );
+
+  	camera.position.copy(CameraDefaultPos);
+
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+  	controls = new OrbitControls( camera, renderer.domElement );
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	//controls.maxDistance =400;
+	//controls.minDistance = 60;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+  	controls.update();
+
+
+	const loader_yacht_2026 = new GLTFLoader();
+    loader_yacht_2026.setDRACOLoader(FX.dracoLoader);
+	loader_yacht_2026.parse(
+    FX.Base64ToArrayBuffer(yacht_2026()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+
+		model.position.set(0,-3.5,0);
+		model.scale.set(0.01,0.01,0.01);
+
+		const window_material=FXM.InstMaterial(0x696969,0,0.75,1,2.4,1,true,0,true);
+		const window_material_02=FXM.InstMaterial(0x000000,0,1,1,2.4,1,true,0.96,true);
+		const silver_paint_material=FXM.InstEtchingMaterial(0x95B6D6,0.24,0.702,1,true,1,"./textures/Light_Gravel.png",new THREE.Vector2(100,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(50,50),10);
+		const white_paint_material=FXM.InstEtchingMaterial(0xFFFFFF,0,0.1,1,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(100,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(20,20),2);
+		const black_paint_material=FXM.InstEtchingMaterial(0x000000,0,0.1,1,true,1,"./textures/Light_Gravel.png",new THREE.Vector2(100,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(20,20),2);
+		const windlass_material=FXM.InstMaterial(0xFFFFFF,0.5,1,0,2.3333333333333335,1,false,1,true);
+		const wood_material=FXM.InstEtchingMaterial(0xC4C5AF,0.6,0,1,false,1,"./textures/African_teak_100_DP_column.jpg",new THREE.Vector2(10,10),new THREE.Vector2(0,0),"./textures/African_teak_100_DP_column.jpg",new THREE.Vector2(100,50),10);
+		const cushion_material=FXM.InstEtchingMaterial(0xB3B3B3,1,0,1,false,1,"./textures/Natural_white_tissu_50_DB.jpg",new THREE.Vector2(50,50),new THREE.Vector2(0,0),"./textures/Natural_white_tissu_50_DB.jpg",new THREE.Vector2(200,200),50);
+		const stript_material=FXM.InstMaterial(0xD1D1D1,0.557,0.577,0,1,0,false,1,true);
+		
+
+		FX.ReturnBufferGeometry(model.getObjectByName("Window_Top"),window_material,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("Window_Bottom"),window_material_02,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("Chrome"),null,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("Body_Black"),silver_paint_material,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("Teak"),wood_material,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("WhitePaint"),white_paint_material,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("BlackPaint"),black_paint_material,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("Windlass"),null,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("Nav"),null,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("chairCushion"),cushion_material,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("Bollard"),null,model,scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("Stripe"),stript_material,model,scene);
+
+		shipScene.add(model);
+		yacht=model;
+		
+
+		//需在材質變更之後
+		model.traverse((child) => {
+    		if (child.isMesh && child.material) 
+			{
+        		const materials = Array.isArray(child.material) ? child.material : [child.material];
+        		materials.forEach((mat) => {
+            		mat.transparent = true;
+
+            		// 在 Y = -0.5 到 Y = 0.5 之間做漸變透明羽化
+            		// Y < -0.5 為完全透明(0)，Y > 0.5 為完全不透明(1)
+            		const alphaGradient = smoothstep( -0.5, 0.5, positionWorld.y );
+					
+            		mat.opacityNode = alphaGradient;
+        		});
+    		}
+		});
+
+		renderer.setAnimationLoop( animate );
+
+		//setTimeout(() => {
+//
+		//	
+		//	FX.Hierarchy(model,camera,shipScene,renderer,controls);
+		//	
+		//}, 1000);
+
+		
+
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.updateProjectionMatrix();
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+}
+
+function animate(timestamp) 
+{
+	//timer.update(timestamp); // 只要更新 Timer，WebGPU 的 TSL 全域時間節點就會自動推動 WaterMesh！
+  	controls.update();
+	renderPipeline.render();
+	//renderer.render( scene, camera );
+	const time = performance.now() * 0.00175;//頻率
+	yacht.position.y = -3.5+Math.sin( time );//幅度
+}
+
+function SetupOceanEnvironment()
+{
+	let sun = new THREE.Vector3();
+
+	// Water
+
+	const waterGeometry = new THREE.PlaneGeometry( 10000, 10000 );
+	const loader = new THREE.TextureLoader();
+	const waterNormals = loader.load( './textures/waternormals.jpg' );
+	waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+
+	let water = new WaterMesh(
+		waterGeometry,
+		{
+			waterNormals: waterNormals,
+			sunDirection: new THREE.Vector3(),
+			sunColor: 0xffffff,
+			waterColor: 0x001e0f,
+			distortionScale: 3.7,
+			size:10,//比例
+			alpha:1
+		}
+	);
+
+	water.rotation.x = - Math.PI / 2;
+	//water.size=10;
+
+	skyAndSeaScene.add( water );
+
+	// Skybox
+
+	let sky = new SkyMesh();
+	sky.scale.setScalar( 10000 );
+	skyAndSeaScene.add( sky );
+
+	sky.turbidity.value = 2;//濁度
+	sky.rayleigh.value = 2;//瑞利散射 0:暗，若太高會變成灰階
+	sky.mieCoefficient.value = 0.005;//米氏散射係數
+	sky.mieDirectionalG.value = 0.8;//米氏散射方向性因子，-1~1
+	sky.cloudCoverage.value = 0.36;//雲密度
+	sky.cloudDensity.value = 0.84;//天空亮度
+	sky.cloudElevation.value = 0.1;//天空高度
+
+	const parameters = {
+		elevation: 60,//太陽的垂直位置
+		azimuth: 180//太陽的水平位置
+	};
+
+    const phi = THREE.MathUtils.degToRad( 90 - parameters.elevation );
+    const theta = THREE.MathUtils.degToRad( parameters.azimuth );
+
+    sun.setFromSphericalCoords( 1, phi, theta );
+
+    // 1. 更新天空與水面的太陽方向 (TSL 節點會自動跟著更新)
+    sky.sunPosition.value.copy( sun );
+    water.sunDirection.value.copy( sun ).normalize();
+
+	// 1. 加入基礎環境光（讓陰影處不會完全黑掉）
+	const ambientLight = new THREE.AmbientLight( 0x073763, 1 );
+	shipScene.add( ambientLight );
+
+	// 2. 加入太陽方向光
+	const sunLight = new THREE.DirectionalLight( 0xffffff, 12 );
+	shipScene.add( sunLight );
+
+	
+	// 讓方向光的位置指向太陽的方向
+    sunLight.position.copy( sun ).multiplyScalar( 1000 );
+
+}
+		</script>
+    </body>
+
+</html>
+
