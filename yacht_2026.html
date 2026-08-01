@@ -1,38 +1,758 @@
 <!doctype html>
-<html>
+<html lang="zh-TW">
 	<head>
 		<meta charset="utf-8">
 		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
-		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
-		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
-		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<meta name="description" content="Yacht 2026 — Premium 3D Showcase by Fimawork. Experience luxury superyacht design in immersive 3D."/>
+		<meta name="keywords" content="Yacht 2026, Luxury Superyacht, 3D Showcase, Fimawork, 3D Website Design"/>
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 		<title>Yacht 2026 | Fimawork Premium Showcase</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Montserrat:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="Main.css">
+
 		<style type="text/css">
-			body {
-				margin: 0;
-				padding: 0; 
-				overflow: hidden;
-			}
-			
-			canvas {
-				width: 100%;
-   				height: 100%;
+
+			/* ─────────────────────────────────────────────
+			   BASE RESET
+			───────────────────────────────────────────── */
+			*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+			:root {
+				--navy:       #010d18;
+				--navy-mid:   #041c2e;
+				--navy-light: #0a2a42;
+				--gold:       #c9a84c;
+				--gold-light: #e2c97e;
+				--gold-dim:   rgba(201,168,76,0.18);
+				--white:      #f0f4f8;
+				--muted:      rgba(200,220,240,0.45);
+				--glass-bg:   rgba(4,28,46,0.72);
+				--glass-border: rgba(201,168,76,0.22);
+				--panel-w:    300px;
+				--transition: 0.28s cubic-bezier(0.4,0,0.2,1);
 			}
 
-            #threeContainer {
+			body {
+				margin: 0; padding: 0;
+				background: var(--navy);
+				overflow: hidden;
+				font-family: 'Montserrat', sans-serif;
+				color: var(--white);
+				height: 100vh; width: 100vw;
+			}
+
+			/* ─────────────────────────────────────────────
+			   THREE.JS CANVAS CONTAINER
+			───────────────────────────────────────────── */
+			canvas { width: 100%; height: 100%; }
+
+			#threeContainer {
 				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
+				top: 0; left: 0;
+				width: 100%; height: 100%;
 				z-index: 2;
 				pointer-events: auto;
 			}
+
+			/* ─────────────────────────────────────────────
+			   BACKGROUND DECORATIONS
+			───────────────────────────────────────────── */
+			.bg-grid {
+				position: absolute;
+				inset: 0;
+				background-image:
+					linear-gradient(rgba(201,168,76,0.025) 1px, transparent 1px),
+					linear-gradient(90deg, rgba(201,168,76,0.025) 1px, transparent 1px);
+				background-size: 50px 50px;
+				z-index: 1;
+				pointer-events: none;
+			}
+
+			.bg-watermark {
+				position: absolute;
+				bottom: 8%;
+				left: 50%;
+				transform: translateX(-50%);
+				font-family: 'Playfair Display', serif;
+				font-size: clamp(4rem, 12vw, 11rem);
+				font-weight: 900;
+				font-style: italic;
+				color: rgba(201,168,76,0.04);
+				white-space: nowrap;
+				letter-spacing: 0.15em;
+				pointer-events: none;
+				z-index: 1;
+				user-select: none;
+			}
+
+			/* Horizon line glow */
+			.bg-horizon {
+				position: absolute;
+				bottom: 0; left: 0; right: 0;
+				height: 2px;
+				background: linear-gradient(90deg, transparent 0%, var(--gold) 40%, var(--gold-light) 50%, var(--gold) 60%, transparent 100%);
+				opacity: 0.18;
+				z-index: 1;
+				pointer-events: none;
+			}
+
+			/* ─────────────────────────────────────────────
+			   UI LAYER  (z-index 10+)
+			───────────────────────────────────────────── */
+			.ui-layer {
+				position: absolute;
+				inset: 0;
+				z-index: 10;
+				pointer-events: none;
+			}
+
+			/* ─────────────────────────────────────────────
+			   TOP HEADER
+			───────────────────────────────────────────── */
+			.top-header {
+				position: absolute;
+				top: 0; left: 0; right: 0;
+				height: 68px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0 32px;
+				background: linear-gradient(180deg, rgba(1,9,24,0.92) 0%, transparent 100%);
+				border-bottom: 1px solid rgba(201,168,76,0.12);
+				z-index: 20;
+				pointer-events: auto;
+				animation: fadeInDown 0.8s ease-out both;
+			}
+
+			.brand-logo {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+			}
+
+			.brand-name {
+				font-family: 'Playfair Display', serif;
+				font-size: 1.45rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				color: var(--gold-light);
+				text-shadow: 0 0 18px rgba(201,168,76,0.4);
+				line-height: 1;
+			}
+
+			.brand-tagline {
+				font-size: 0.6rem;
+				letter-spacing: 0.28em;
+				color: var(--muted);
+				text-transform: uppercase;
+			}
+
+			.top-nav {
+				display: flex;
+				align-items: center;
+				gap: 36px;
+			}
+
+			.top-nav a {
+				text-decoration: none;
+				font-size: 0.72rem;
+				font-weight: 600;
+				letter-spacing: 0.16em;
+				text-transform: uppercase;
+				color: rgba(200,220,240,0.6);
+				transition: color var(--transition);
+				position: relative;
+			}
+
+			.top-nav a::after {
+				content: '';
+				position: absolute;
+				bottom: -3px; left: 0; right: 0;
+				height: 1px;
+				background: var(--gold);
+				transform: scaleX(0);
+				transform-origin: center;
+				transition: transform var(--transition);
+			}
+
+			.top-nav a:hover { color: var(--gold-light); }
+			.top-nav a:hover::after { transform: scaleX(1); }
+			.top-nav a.active { color: var(--gold-light); }
+			.top-nav a.active::after { transform: scaleX(1); }
+
+			.top-nav-right {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+			}
+
+			.live-pill {
+				display: flex;
+				align-items: center;
+				gap: 7px;
+				background: rgba(0,200,130,0.08);
+				border: 1px solid rgba(0,200,130,0.22);
+				border-radius: 20px;
+				padding: 5px 12px;
+				font-size: 0.65rem;
+				letter-spacing: 0.12em;
+				color: #00c882;
+				text-transform: uppercase;
+			}
+
+			.live-dot {
+				width: 7px; height: 7px;
+				border-radius: 50%;
+				background: #00c882;
+				box-shadow: 0 0 7px #00c882;
+				animation: pulse-live 1.6s infinite;
+			}
+
+			@keyframes pulse-live {
+				0%, 100% { opacity: 0.4; transform: scale(1); }
+				50%       { opacity: 1;   transform: scale(1.2); }
+			}
+
+			.cta-btn {
+				background: transparent;
+				border: 1px solid var(--gold);
+				color: var(--gold-light);
+				padding: 9px 24px;
+				border-radius: 3px;
+				font-family: 'Montserrat', sans-serif;
+				font-size: 0.68rem;
+				font-weight: 700;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+				cursor: pointer;
+				position: relative;
+				overflow: hidden;
+				transition: all var(--transition);
+			}
+
+			.cta-btn::before {
+				content: '';
+				position: absolute;
+				top: 0; left: -100%;
+				width: 100%; height: 100%;
+				background: linear-gradient(90deg, transparent, rgba(201,168,76,0.25), transparent);
+				transition: left 0.55s ease;
+			}
+
+			.cta-btn:hover { background: rgba(201,168,76,0.1); box-shadow: 0 0 18px rgba(201,168,76,0.2); }
+			.cta-btn:hover::before { left: 100%; }
+
+			/* ─────────────────────────────────────────────
+			   GLASS PANEL BASE
+			───────────────────────────────────────────── */
+			.glass-panel {
+				background: var(--glass-bg);
+				border: 1px solid var(--glass-border);
+				backdrop-filter: blur(22px) saturate(140%);
+				-webkit-backdrop-filter: blur(22px) saturate(140%);
+				border-radius: 12px;
+				padding: 22px 20px;
+				box-shadow: 0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(201,168,76,0.08);
+			}
+
+			.panel-title {
+				font-family: 'Orbitron', sans-serif;
+				font-size: 0.65rem;
+				font-weight: 700;
+				letter-spacing: 0.22em;
+				color: var(--gold);
+				text-transform: uppercase;
+				margin-bottom: 16px;
+				padding-bottom: 10px;
+				border-bottom: 1px solid rgba(201,168,76,0.18);
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.panel-title-icon {
+				width: 16px; height: 16px;
+				opacity: 0.7;
+			}
+
+			/* ─────────────────────────────────────────────
+			   LEFT PANEL — YACHT SPECS
+			───────────────────────────────────────────── */
+			.left-panel {
+				position: absolute;
+				left: 26px;
+				top: 86px;
+				bottom: 90px;
+				width: var(--panel-w);
+				display: flex;
+				flex-direction: column;
+				gap: 14px;
+				z-index: 15;
+				pointer-events: auto;
+				animation: fadeInLeft 0.9s 0.4s ease-out both;
+				overflow-y: auto;
+				scrollbar-width: none;
+			}
+			.left-panel::-webkit-scrollbar { display: none; }
+
+			/* Model identity card */
+			.yacht-identity {
+				background: linear-gradient(135deg, rgba(201,168,76,0.1) 0%, rgba(4,28,46,0.6) 100%);
+				border: 1px solid rgba(201,168,76,0.28);
+				border-radius: 10px;
+				padding: 16px 18px;
+				position: relative;
+				overflow: hidden;
+			}
+
+			.yacht-identity::before {
+				content: '';
+				position: absolute;
+				top: 0; left: 0; right: 0;
+				height: 2px;
+				background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+			}
+
+			.yacht-model-name {
+				font-family: 'Playfair Display', serif;
+				font-size: 1.4rem;
+				font-weight: 700;
+				color: var(--gold-light);
+				letter-spacing: 0.04em;
+				line-height: 1.1;
+			}
+
+			.yacht-class {
+				font-size: 0.65rem;
+				letter-spacing: 0.22em;
+				color: var(--muted);
+				text-transform: uppercase;
+				margin-top: 4px;
+			}
+
+			.yacht-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 5px;
+				margin-top: 10px;
+				background: rgba(201,168,76,0.12);
+				border: 1px solid rgba(201,168,76,0.25);
+				border-radius: 20px;
+				padding: 3px 10px;
+				font-size: 0.6rem;
+				letter-spacing: 0.15em;
+				color: var(--gold);
+				text-transform: uppercase;
+			}
+
+			/* Specs grid */
+			.specs-list {
+				display: flex;
+				flex-direction: column;
+				gap: 1px;
+			}
+
+			.spec-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 9px 12px;
+				background: rgba(10,42,66,0.45);
+				border-radius: 6px;
+				transition: background var(--transition);
+				cursor: default;
+			}
+
+			.spec-row:hover { background: rgba(201,168,76,0.07); }
+
+			.spec-label {
+				font-size: 0.67rem;
+				letter-spacing: 0.14em;
+				color: rgba(200,220,240,0.5);
+				text-transform: uppercase;
+				display: flex;
+				align-items: center;
+				gap: 7px;
+			}
+
+			.spec-icon {
+				width: 14px; height: 14px;
+				opacity: 0.5;
+				flex-shrink: 0;
+			}
+
+			.spec-value {
+				font-family: 'Orbitron', sans-serif;
+				font-size: 0.88rem;
+				font-weight: 700;
+				color: var(--white);
+				letter-spacing: 0.06em;
+			}
+
+			.spec-unit {
+				font-size: 0.6rem;
+				font-weight: 400;
+				color: var(--gold);
+				margin-left: 3px;
+				font-family: 'Montserrat', sans-serif;
+			}
+
+			/* Speed gauge SVG */
+			.gauge-wrapper {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 14px 0 6px;
+			}
+
+			.gauge-label-row {
+				display: flex;
+				justify-content: space-between;
+				width: 100%;
+				font-size: 0.6rem;
+				letter-spacing: 0.12em;
+				color: rgba(200,220,240,0.4);
+				text-transform: uppercase;
+				margin-top: 6px;
+				padding: 0 6px;
+			}
+
+			.gauge-center-val {
+				font-family: 'Orbitron', sans-serif;
+				font-size: 1.6rem;
+				font-weight: 900;
+				color: var(--gold-light);
+				letter-spacing: 0.04em;
+				text-align: center;
+				margin-top: -8px;
+			}
+
+			.gauge-center-unit {
+				text-align: center;
+				font-size: 0.6rem;
+				letter-spacing: 0.18em;
+				color: var(--muted);
+				text-transform: uppercase;
+				margin-top: 2px;
+			}
+
+			/* ─────────────────────────────────────────────
+			   RIGHT PANEL — CONTROLS
+			───────────────────────────────────────────── */
+			.right-panel {
+				position: absolute;
+				right: 26px;
+				top: 86px;
+				bottom: 90px;
+				width: var(--panel-w);
+				display: flex;
+				flex-direction: column;
+				gap: 14px;
+				z-index: 15;
+				pointer-events: auto;
+				animation: fadeInRight 0.9s 0.5s ease-out both;
+				overflow-y: auto;
+				scrollbar-width: none;
+			}
+			.right-panel::-webkit-scrollbar { display: none; }
+
+			/* Color selector */
+			.color-swatches {
+				display: flex;
+				gap: 10px;
+				flex-wrap: wrap;
+				margin-top: 4px;
+			}
+
+			.swatch {
+				width: 40px; height: 40px;
+				border-radius: 50%;
+				border: 2px solid transparent;
+				cursor: pointer;
+				transition: all var(--transition);
+				position: relative;
+				flex-shrink: 0;
+			}
+
+			.swatch::after {
+				content: attr(data-label);
+				position: absolute;
+				bottom: -18px;
+				left: 50%;
+				transform: translateX(-50%);
+				font-size: 0.5rem;
+				letter-spacing: 0.1em;
+				color: rgba(200,220,240,0.5);
+				white-space: nowrap;
+				text-transform: uppercase;
+				opacity: 0;
+				transition: opacity var(--transition);
+			}
+
+			.swatch:hover::after { opacity: 1; }
+
+			.swatch:hover {
+				transform: scale(1.12);
+				box-shadow: 0 0 18px rgba(201,168,76,0.4);
+			}
+
+			.swatch.active {
+				border-color: var(--gold);
+				box-shadow: 0 0 14px rgba(201,168,76,0.5);
+			}
+
+			.swatch-pearl     { background: radial-gradient(circle at 35% 35%, #f5f5f0, #c8c8c0); }
+			.swatch-midnight  { background: radial-gradient(circle at 35% 35%, #1e3a5f, #0a1e35); }
+			.swatch-titanium  { background: radial-gradient(circle at 35% 35%, #b0b8c4, #6a7580); }
+			.swatch-obsidian  { background: radial-gradient(circle at 35% 35%, #2a2a2a, #101010); }
+
+			/* Camera presets */
+			.cam-presets {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px;
+				margin-top: 4px;
+			}
+
+			.cam-btn {
+				background: rgba(10,42,66,0.55);
+				border: 1px solid rgba(201,168,76,0.15);
+				color: rgba(200,220,240,0.7);
+				padding: 10px 8px;
+				border-radius: 7px;
+				font-family: 'Montserrat', sans-serif;
+				font-size: 0.65rem;
+				font-weight: 600;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				cursor: pointer;
+				transition: all var(--transition);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 5px;
+			}
+
+			.cam-btn svg { opacity: 0.6; transition: opacity var(--transition); }
+
+			.cam-btn:hover {
+				background: rgba(201,168,76,0.1);
+				border-color: var(--gold);
+				color: var(--gold-light);
+				box-shadow: 0 0 10px rgba(201,168,76,0.15);
+			}
+
+			.cam-btn:hover svg { opacity: 1; }
+			.cam-btn.active {
+				background: rgba(201,168,76,0.18);
+				border-color: var(--gold);
+				color: var(--gold-light);
+			}
+
+			/* Toggle switches */
+			.toggle-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 10px 0;
+				border-bottom: 1px solid rgba(201,168,76,0.07);
+			}
+			.toggle-row:last-child { border-bottom: none; }
+
+			.toggle-label {
+				font-size: 0.72rem;
+				letter-spacing: 0.1em;
+				color: rgba(200,220,240,0.7);
+			}
+
+			.toggle-switch {
+				position: relative;
+				width: 38px; height: 20px;
+				cursor: pointer;
+			}
+
+			.toggle-switch input { display: none; }
+
+			.toggle-track {
+				position: absolute;
+				inset: 0;
+				background: rgba(10,42,66,0.8);
+				border: 1px solid rgba(201,168,76,0.2);
+				border-radius: 10px;
+				transition: all var(--transition);
+			}
+
+			.toggle-thumb {
+				position: absolute;
+				top: 3px; left: 3px;
+				width: 14px; height: 14px;
+				border-radius: 50%;
+				background: rgba(200,220,240,0.4);
+				transition: all var(--transition);
+			}
+
+			.toggle-switch input:checked ~ .toggle-track {
+				background: rgba(201,168,76,0.25);
+				border-color: var(--gold);
+			}
+
+			.toggle-switch input:checked ~ .toggle-thumb {
+				left: 21px;
+				background: var(--gold);
+				box-shadow: 0 0 8px rgba(201,168,76,0.6);
+			}
+
+			/* Feature tags */
+			.feature-tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 7px;
+				margin-top: 4px;
+			}
+
+			.feat-tag {
+				background: rgba(10,42,66,0.6);
+				border: 1px solid rgba(201,168,76,0.18);
+				border-radius: 4px;
+				padding: 5px 11px;
+				font-size: 0.62rem;
+				letter-spacing: 0.12em;
+				color: rgba(200,220,240,0.65);
+				text-transform: uppercase;
+				transition: all var(--transition);
+			}
+
+			.feat-tag:hover {
+				background: rgba(201,168,76,0.1);
+				border-color: var(--gold);
+				color: var(--gold-light);
+			}
+
+			/* ─────────────────────────────────────────────
+			   BOTTOM STATS BAR
+			───────────────────────────────────────────── */
+			.stats-bar {
+				position: absolute;
+				bottom: 0; left: 0; right: 0;
+				height: 76px;
+				background: linear-gradient(0deg, rgba(1,9,24,0.95) 0%, transparent 100%);
+				border-top: 1px solid rgba(201,168,76,0.1);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0;
+				z-index: 15;
+				pointer-events: auto;
+				animation: fadeInUp 0.9s 0.6s ease-out both;
+			}
+
+			.stat-cell {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 3px;
+				padding: 0 clamp(18px, 3.5vw, 50px);
+				position: relative;
+			}
+
+			.stat-cell + .stat-cell::before {
+				content: '';
+				position: absolute;
+				left: 0; top: 20%; bottom: 20%;
+				width: 1px;
+				background: rgba(201,168,76,0.18);
+			}
+
+			.stat-num {
+				font-family: 'Orbitron', sans-serif;
+				font-size: clamp(1rem, 1.8vw, 1.4rem);
+				font-weight: 700;
+				color: var(--gold-light);
+				letter-spacing: 0.06em;
+			}
+
+			.stat-label {
+				font-size: clamp(0.5rem, 0.8vw, 0.62rem);
+				letter-spacing: 0.18em;
+				color: rgba(200,220,240,0.4);
+				text-transform: uppercase;
+			}
+
+			/* ─────────────────────────────────────────────
+			   SIDE VERTICAL LABELS
+			───────────────────────────────────────────── */
+			.side-label-left {
+				position: absolute;
+				left: 16px;
+				top: 50%;
+				transform: translateY(-50%) rotate(-90deg);
+				font-size: 0.55rem;
+				letter-spacing: 0.28em;
+				color: rgba(201,168,76,0.2);
+				text-transform: uppercase;
+				white-space: nowrap;
+				pointer-events: none;
+				z-index: 5;
+				user-select: none;
+				animation: fadeIn 1.2s ease-out both;
+			}
+
+			/* ─────────────────────────────────────────────
+			   FIMAWORK LOGO
+			───────────────────────────────────────────── */
+			.fimawork_logo {
+				cursor: pointer;
+				z-index: 20;
+			}
+
+			/* ─────────────────────────────────────────────
+			   MODEL INFO (bottom-left credit)
+			───────────────────────────────────────────── */
+			.model_info {
+				z-index: 20;
+			}
+
+			/* ─────────────────────────────────────────────
+			   KEYFRAME ANIMATIONS
+			───────────────────────────────────────────── */
+			@keyframes fadeInDown {
+				from { opacity: 0; transform: translateY(-20px); }
+				to   { opacity: 1; transform: translateY(0); }
+			}
+			@keyframes fadeInLeft {
+				from { opacity: 0; transform: translateX(-30px); }
+				to   { opacity: 1; transform: translateX(0); }
+			}
+			@keyframes fadeInRight {
+				from { opacity: 0; transform: translateX(30px); }
+				to   { opacity: 1; transform: translateX(0); }
+			}
+			@keyframes fadeInUp {
+				from { opacity: 0; transform: translateY(20px); }
+				to   { opacity: 1; transform: translateY(0); }
+			}
+			@keyframes fadeIn {
+				from { opacity: 0; }
+				to   { opacity: 1; }
+			}
+			@keyframes gauge-fill {
+				from { stroke-dashoffset: 314; }
+				to   { stroke-dashoffset: 126; }
+			}
+
+			/* ─────────────────────────────────────────────
+			   RESPONSIVE — HIDE PANELS ON SMALL SCREENS
+			───────────────────────────────────────────── */
+			@media screen and (max-width: 900px) {
+				.left-panel  { display: none; }
+				.right-panel { display: none; }
+				.top-nav > a { display: none; }
+				.stats-bar .stat-cell:nth-child(n+4) { display: none; }
+			}
+
 		</style>
 
 		<script type="importmap">
@@ -49,286 +769,709 @@
 	</head>
 	
 	<body>
+
+		<!-- ── BACKGROUND DECORATIONS ── -->
+		<div class="bg-grid"></div>
+		<div class="bg-watermark">SOLARIS</div>
+		<div class="bg-horizon"></div>
+		<div class="side-label-left">FIMAWORK STUDIO · PREMIUM 3D SHOWCASE · 2026</div>
+
+		<!-- ── THREE.JS CONTAINER ── -->
 		<div id="threeContainer"></div>
 
+		<!-- ── FIMAWORK LOGO ── -->
+		<div class="fimawork_logo" style="top: 3%;" onclick="parent.open('https://fimawork.tw/')"></div>
+
+		<!-- ── MODEL INFO ── -->
+		<div class="model_info">
+			<div class="titlePanel">
+				<p class="detail_title">Model</p>
+				<p class="detail_title">Category</p>
+				<p class="detail_title">Year</p>
+			</div>
+			<div class="detailPanel">
+				<p class="detail_value">Solaris Yacht 2026</p>
+				<p class="detail_value">Luxury Superyacht</p>
+				<p class="detail_value">2026</p>
+			</div>
+		</div>
+
+		<!-- ════════════════════════════════════════════
+		     TOP HEADER
+		════════════════════════════════════════════ -->
+		<header class="top-header" id="topHeader">
+			<!-- Brand -->
+			<div class="brand-logo">
+				<div class="brand-name">SOLARIS</div>
+				<div class="brand-tagline">Luxury Maritime · Est. 2026</div>
+			</div>
+
+			<!-- Navigation -->
+			<nav class="top-nav">
+				<a href="#" class="active" id="nav-overview">Overview</a>
+				<a href="#" id="nav-specs">Specifications</a>
+				<a href="#" id="nav-gallery">Gallery</a>
+			</nav>
+
+			<!-- Right controls -->
+			<div class="top-nav-right">
+				<div class="live-pill">
+					<div class="live-dot"></div>
+					Live 3D
+				</div>
+				<button class="cta-btn" id="ctaBtn">Inquire Now</button>
+			</div>
+		</header>
+
+		<!-- ════════════════════════════════════════════
+		     LEFT PANEL — YACHT SPECIFICATIONS
+		════════════════════════════════════════════ -->
+		<aside class="left-panel" id="leftPanel">
+
+			<!-- Identity card -->
+			<div class="yacht-identity">
+				<div class="yacht-model-name">Solaris<br>28.5 m</div>
+				<div class="yacht-class">Sport Cruiser · Flybridge</div>
+				<div class="yacht-badge">
+					<svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
+					New 2026
+				</div>
+			</div>
+
+			<!-- Specs list -->
+			<div class="glass-panel">
+				<div class="panel-title">
+					<svg class="panel-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/>
+						<line x1="9" y1="21" x2="9" y2="9"/>
+					</svg>
+					Technical Specs
+				</div>
+
+				<div class="specs-list">
+					<div class="spec-row">
+						<span class="spec-label">
+							<svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/><polyline points="18 8 22 12 18 16"/></svg>
+							Length
+						</span>
+						<span class="spec-value"><span class="countup" data-target="285" data-decimal="1">–</span><span class="spec-unit">m</span></span>
+					</div>
+					<div class="spec-row">
+						<span class="spec-label">
+							<svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+							Beam
+						</span>
+						<span class="spec-value"><span class="countup" data-target="64" data-decimal="1">–</span><span class="spec-unit">m</span></span>
+					</div>
+					<div class="spec-row">
+						<span class="spec-label">
+							<svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+							Max Speed
+						</span>
+						<span class="spec-value"><span class="countup" data-target="32">–</span><span class="spec-unit">kn</span></span>
+					</div>
+					<div class="spec-row">
+						<span class="spec-label">
+							<svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6l9 6-9 6"/></svg>
+							Range
+						</span>
+						<span class="spec-value"><span class="countup" data-target="650">–</span><span class="spec-unit">nm</span></span>
+					</div>
+					<div class="spec-row">
+						<span class="spec-label">
+							<svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+							Engines
+						</span>
+						<span class="spec-value" style="font-size:0.7rem; letter-spacing:0.03em;">2×MAN V12</span>
+					</div>
+					<div class="spec-row">
+						<span class="spec-label">
+							<svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+							Guests
+						</span>
+						<span class="spec-value"><span class="countup" data-target="10">–</span><span class="spec-unit">+ 6 crew</span></span>
+					</div>
+					<div class="spec-row">
+						<span class="spec-label">
+							<svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 12c0-5.523 4.477-10 10-10s10 4.477 10 10"/><path d="M2 12c0 5.523 4.477 10 10 10s10-4.477 10-10"/></svg>
+							Draft
+						</span>
+						<span class="spec-value"><span class="countup" data-target="18" data-decimal="1">–</span><span class="spec-unit">m</span></span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Speed Gauge -->
+			<div class="glass-panel">
+				<div class="panel-title">
+					<svg class="panel-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 0-6.88 17.3M12 2a10 10 0 0 1 6.88 17.3"/><line x1="12" y1="12" x2="17" y2="7"/></svg>
+					Speed Monitor
+				</div>
+				<div class="gauge-wrapper">
+					<svg width="160" height="96" viewBox="0 0 160 96">
+						<defs>
+							<linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+								<stop offset="0%"   stop-color="#0a2a42"/>
+								<stop offset="50%"  stop-color="#c9a84c"/>
+								<stop offset="100%" stop-color="#e2c97e"/>
+							</linearGradient>
+						</defs>
+						<!-- Track arc -->
+						<path d="M 14 90 A 66 66 0 0 1 146 90"
+							fill="none" stroke="rgba(201,168,76,0.1)" stroke-width="10" stroke-linecap="round"/>
+						<!-- Value arc -->
+						<path id="gaugeArc" d="M 14 90 A 66 66 0 0 1 146 90"
+							fill="none" stroke="url(#gaugeGrad)" stroke-width="10" stroke-linecap="round"
+							stroke-dasharray="207" stroke-dashoffset="207"
+							style="transition: stroke-dashoffset 2s cubic-bezier(0.4,0,0.2,1)"/>
+						<!-- Tick marks -->
+						<g stroke="rgba(201,168,76,0.3)" stroke-width="1">
+							<line x1="80" y1="24" x2="80" y2="18"/>
+							<line x1="27" y1="46" x2="23" y2="43"/>
+							<line x1="133" y1="46" x2="137" y2="43"/>
+						</g>
+						<!-- Labels -->
+						<text x="80" y="16" text-anchor="middle" fill="rgba(200,220,240,0.35)" font-size="7" font-family="Montserrat">32</text>
+						<text x="18" y="44" text-anchor="middle" fill="rgba(200,220,240,0.35)" font-size="7" font-family="Montserrat">0</text>
+						<text x="143" y="44" text-anchor="middle" fill="rgba(200,220,240,0.35)" font-size="7" font-family="Montserrat">40</text>
+					</svg>
+					<div class="gauge-center-val" id="gaugeVal">32</div>
+					<div class="gauge-center-unit">Knots · Max Speed</div>
+					<div class="gauge-label-row">
+						<span>Cruise</span>
+						<span>24 kn</span>
+					</div>
+				</div>
+			</div>
+
+		</aside>
+
+		<!-- ════════════════════════════════════════════
+		     RIGHT PANEL — CONTROLS & FEATURES
+		════════════════════════════════════════════ -->
+		<aside class="right-panel" id="rightPanel">
+
+			<!-- Hull Color Selector -->
+			<div class="glass-panel">
+				<div class="panel-title">
+					<svg class="panel-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+					Hull Colour
+				</div>
+				<div class="color-swatches" id="colorSwatches">
+					<div class="swatch swatch-pearl active"    data-color="pearl"    data-label="Pearl White" id="swatch-pearl" title="Pearl White"></div>
+					<div class="swatch swatch-midnight"        data-color="midnight" data-label="Midnight Blue" id="swatch-midnight" title="Midnight Blue"></div>
+					<div class="swatch swatch-titanium"        data-color="titanium" data-label="Titanium" id="swatch-titanium" title="Titanium"></div>
+					<div class="swatch swatch-obsidian"        data-color="obsidian" data-label="Obsidian" id="swatch-obsidian" title="Obsidian"></div>
+				</div>
+			</div>
+
+			<!-- Camera Presets -->
+			<div class="glass-panel">
+				<div class="panel-title">
+					<svg class="panel-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+					Camera View
+				</div>
+				<div class="cam-presets" id="camPresets">
+					<button class="cam-btn active" id="cam-side" data-cam="side">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
+						Side View
+					</button>
+					<button class="cam-btn" id="cam-bow" data-cam="bow">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/></svg>
+						Bow
+					</button>
+					<button class="cam-btn" id="cam-aerial" data-cam="aerial">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+						Aerial
+					</button>
+					<button class="cam-btn" id="cam-stern" data-cam="stern">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12H3"/><circle cx="12" cy="12" r="3"/></svg>
+						Stern
+					</button>
+				</div>
+			</div>
+
+			<!-- Scene controls -->
+			<div class="glass-panel">
+				<div class="panel-title">
+					<svg class="panel-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M5.34 5.34l-1.41-1.41M12 20v2M12 2v2"/></svg>
+					Scene Settings
+				</div>
+
+				<div class="toggle-row">
+					<span class="toggle-label">Auto Rotate</span>
+					<label class="toggle-switch" id="toggleRotate">
+						<input type="checkbox" id="chkRotate">
+						<div class="toggle-track"></div>
+						<div class="toggle-thumb"></div>
+					</label>
+				</div>
+
+				<div class="toggle-row">
+					<span class="toggle-label">Ocean Effect</span>
+					<label class="toggle-switch" id="toggleSunset">
+						<input type="checkbox" id="chkWave" checked>
+						<div class="toggle-track"></div>
+						<div class="toggle-thumb"></div>
+					</label>
+				</div>
+
+				<div class="toggle-row">
+					<span class="toggle-label">Sunset Effect</span>
+					<label class="toggle-switch" id="toggleBloom">
+						<input type="checkbox" id="chkSunset">
+						<div class="toggle-track"></div>
+						<div class="toggle-thumb"></div>
+					</label>
+				</div>
+			</div>
+
+			<!-- Features -->
+			<div class="glass-panel">
+				<div class="panel-title">
+					<svg class="panel-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+					Premium Features
+				</div>
+				<div class="feature-tags">
+					<span class="feat-tag">Flybridge</span>
+					<span class="feat-tag">Jacuzzi</span>
+					<span class="feat-tag">Helipad</span>
+					<span class="feat-tag">SUP Garage</span>
+					<span class="feat-tag">Zero Speed</span>
+					<span class="feat-tag">Teak Deck</span>
+					<span class="feat-tag">Full Beam</span>
+					<span class="feat-tag">Stabilizers</span>
+				</div>
+			</div>
+
+		</aside>
+
+		<!-- ════════════════════════════════════════════
+		     BOTTOM STATS BAR
+		════════════════════════════════════════════ -->
+		<footer class="stats-bar" id="statsBar">
+			<div class="stat-cell">
+				<div class="stat-num"><span class="countup" data-target="285" data-decimal="1">–</span><span style="font-size:0.7em; color:var(--gold); margin-left:2px;">m</span></div>
+				<div class="stat-label">LOA Length</div>
+			</div>
+			<div class="stat-cell">
+				<div class="stat-num"><span class="countup" data-target="210">–</span><span style="font-size:0.7em; color:var(--gold); margin-left:2px;">t</span></div>
+				<div class="stat-label">Displacement</div>
+			</div>
+			<div class="stat-cell">
+				<div class="stat-num"><span class="countup" data-target="5">–</span></div>
+				<div class="stat-label">Cabins</div>
+			</div>
+			<div class="stat-cell">
+				<div class="stat-num"><span class="countup" data-target="32">–</span><span style="font-size:0.7em; color:var(--gold); margin-left:2px;">kn</span></div>
+				<div class="stat-label">Max Speed</div>
+			</div>
+			<div class="stat-cell">
+				<div class="stat-num"><span class="countup" data-target="650">–</span><span style="font-size:0.7em; color:var(--gold); margin-left:2px;">nm</span></div>
+				<div class="stat-label">Range</div>
+			</div>
+			<div class="stat-cell">
+				<div class="stat-num" style="font-size:clamp(0.7rem,1.2vw,1rem); font-family:'Montserrat',sans-serif; font-weight:700; letter-spacing:0.04em;">FIMAWORK</div>
+				<div class="stat-label">Builder Studio</div>
+			</div>
+		</footer>
+
+		<!-- ════════════════════════════════════════════
+		     THREE.JS MODULE SCRIPT
+		════════════════════════════════════════════ -->
 		<script type="module">
 
 import * as THREE from 'three';
-
-import { pass ,positionWorld, smoothstep} from 'three/tsl';
+import { pass, positionWorld, smoothstep } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
-
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.53/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { yacht_2026 } from './models/yacht_2026_slices.js';
 import { WaterMesh } from 'three/addons/objects/WaterMesh.js';
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
 
-
-let scene, camera, renderer, stats, mixer;
-let bloomPass;
+let scene, camera, renderer, mixer;
+let bloomPass, bloomNode;
 let renderPipeline;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
-// 定義圖層常數
 
-// 1. 定義獨立圖層
-// 1. 建立兩個獨立的 Scene
-const skyAndSeaScene = new THREE.Scene(); // 只放 天空與海面
-const shipScene = new THREE.Scene();      // 只放 遊艇船隻
+const skyAndSeaScene = new THREE.Scene();
+const shipScene = new THREE.Scene();
 
 const timer = new THREE.Timer();
-const CameraDefaultPos=new THREE.Vector3(176.215,69.471,155.429);
-const ControlsTargetDefaultPos=new THREE.Vector3(41.415,12.123,-3.110);
+const CameraDefaultPos = new THREE.Vector3(176.215, 69.471, 155.429);
+const ControlsTargetDefaultPos = new THREE.Vector3(41.415, 12.123, -3.110);
 
-let yacht=new THREE.Object3D();
+// Camera preset positions
+const camPresets = {
+	side:   { pos: new THREE.Vector3(176.215,  69.471,  155.429), target: new THREE.Vector3(41.415, 12.123, -3.110) },
+	bow:    { pos: new THREE.Vector3(-50,       40,      220),     target: new THREE.Vector3(-20, 10, 0) },
+	aerial: { pos: new THREE.Vector3(50,        200,     50),      target: new THREE.Vector3(40, 0, 0) },
+	stern:  { pos: new THREE.Vector3(210,       50,      -180),    target: new THREE.Vector3(80, 10, -60) },
+};
+
+let yacht = new THREE.Object3D();
+let white_paint_material, black_paint_material, silver_paint_material;
+
+let water, sun, sky;
+let isWave;
+
+// Expose to global for UI bridge
+window._yachtScene = {
+	controls: null,
+	camera: null,
+	bloomPass: null,
+};
 
 init();
 
-async function init()
+async function init() 
 {
+	isWave=true;
+
 	FX.SetupEnvironment("cloud");
+	scene = new THREE.Scene();
 
-  	scene = new THREE.Scene();
+	camera = new THREE.PerspectiveCamera(25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 3000);
+	renderer = new THREE.WebGPURenderer({ antialias: true });
+	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+	renderer.toneMappingExposure = 0.15;
+	threeContainer.appendChild(renderer.domElement);
 
-  	camera = new THREE.PerspectiveCamera( 25, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 3000 );//非全螢幕比例設定
-  	renderer = new THREE.WebGPURenderer( { antialias: true } );
-  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
-	
-  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  	renderer.toneMappingExposure = 0.15;
-  	threeContainer.appendChild( renderer.domElement );
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/kloofendal_48d_partly_cloudy_puresky_1k.jpg', shipScene);
+	shipScene.environmentRotation.y = FX.ToThreeEulerAngle(-90);
 
-	///hdri 環境光源
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/kloofendal_48d_partly_cloudy_puresky_1k.jpg',shipScene);
-	shipScene.environmentRotation.y = FX.ToThreeEulerAngle(-90); 
-
-	//生成海景
 	SetupOceanEnvironment();
 
-	//// 初始化 RenderPipeline
-	renderPipeline = new THREE.RenderPipeline( renderer );
-	//const scenePass = pass( scene, camera );
-	//const scenePassColor = scenePass.getTextureNode( 'output' );
+	renderPipeline = new THREE.RenderPipeline(renderer);
 
-	// Pass A: 先渲染「天空與海」
-const seaPass = pass( skyAndSeaScene, camera );
-const seaColor = seaPass.getTextureNode( 'output' );
+	const seaPass  = pass(skyAndSeaScene, camera);
+	const seaColor = seaPass.getTextureNode('output');
+	const shipPass  = pass(shipScene, camera);
+	shipScene.background = null;
+	const shipColor = shipPass.getTextureNode('output');
+	const combinedColor = seaColor.mul(shipColor.a.oneMinus()).add(shipColor);
 
-// Pass B: 再渲染「船隻」
-const shipPass = pass( shipScene, camera );
-shipScene.background = null;
-const shipColor = shipPass.getTextureNode( 'output' );
+	bloomNode = bloom(combinedColor);
+	bloomNode.threshold.value = 0;
+	bloomNode.strength.value  = 0.18;
+	bloomNode.radius.value    = 0.5;
 
-// 3. 將兩層顏色合成 (把船疊加在海面上)
-// 若 Pass B 有開啟 depth test/write，直接用 composite 或 add 混合即可
-const combinedColor = seaColor.mul( shipColor.a.oneMinus() ).add( shipColor );
+	renderPipeline.outputNode = combinedColor.add(bloomNode);
 
+	await renderer.init();
 
-	//bloomPass = bloom( scenePassColor );
-	bloomPass = bloom( combinedColor );
-	bloomPass.threshold.value = 0;
-	bloomPass.strength.value = 0.18;
-	bloomPass.radius.value = 0.5;
+	camera.position.copy(CameraDefaultPos);
 
-	//renderPipeline.outputNode = scenePassColor.add( bloomPass );
-	renderPipeline.outputNode = combinedColor.add( bloomPass );
+	controls = new OrbitControls(camera, renderer.domElement);
+	controls.enablePan      = true;
+	controls.panSpeed       = 0.4;
+	controls.enableDamping  = true;
+	controls.dampingFactor  = 0.015;
+	controls.maxPolarAngle=FX.ToThreeEulerAngle(84);
+	controls.target.copy(ControlsTargetDefaultPos);
+	controls.zoomSpeed      = 0.5;
+	controls.autoRotate     = false;
+	controls.autoRotateSpeed = 0.3;
+	controls.update();
 
-	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
-	//renderer.setAnimationLoop( animate );
-
-  	camera.position.copy(CameraDefaultPos);
-
-  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
-  	controls = new OrbitControls( camera, renderer.domElement );
-  	controls.enablePan = true;//右鍵平移效果
-  	controls.panSpeed = 0.4;
-  	controls.enableDamping = true;
-  	controls.dampingFactor =0.015;
-  	//controls.maxDistance =400;
-	//controls.minDistance = 60;
-  	controls.target.copy( ControlsTargetDefaultPos );
-  	controls.zoomSpeed=0.5;
-	controls.autoRotate=false;
-	controls.autoRotateSpeed=0.3;
-  	controls.update();
-
+	// expose to UI
+	window._yachtScene.controls  = controls;
+	window._yachtScene.camera    = camera;
+	window._yachtScene.bloomNode = bloomNode;
 
 	const loader_yacht_2026 = new GLTFLoader();
-    loader_yacht_2026.setDRACOLoader(FX.dracoLoader);
+	loader_yacht_2026.setDRACOLoader(FX.dracoLoader);
 	loader_yacht_2026.parse(
-    FX.Base64ToArrayBuffer(yacht_2026()),
-    '',
-    (gltf) => {
-        
-		const model = gltf.scene;
+		FX.Base64ToArrayBuffer(yacht_2026()),
+		'',
+		(gltf) => {
+			const model = gltf.scene;
+			model.position.set(0, -3.5, 0);
+			model.scale.set(0.01, 0.01, 0.01);
 
-		model.position.set(0,-3.5,0);
-		model.scale.set(0.01,0.01,0.01);
+			const window_material    = FXM.InstMaterial(0x696969, 0, 0.75, 1, 2.4, 1, true, 0, true);
+			const window_material_02 = FXM.InstMaterial(0x000000, 0, 1, 1, 2.4, 1, true, 0.96, true);
+			silver_paint_material    = FXM.InstEtchingMaterial(0x95B6D6, 0.24, 0.702, 1, true, 1, "./textures/Light_Gravel.png", new THREE.Vector2(100, 10), new THREE.Vector2(0, 0), "./textures/Light_Gravel.png", new THREE.Vector2(50, 50), 10);
+			white_paint_material     = FXM.InstEtchingMaterial(0xFFFFFF, 0, 0.1, 1, false, 1, "./textures/Light_Gravel.png", new THREE.Vector2(100, 10), new THREE.Vector2(0, 0), "./textures/Light_Gravel.png", new THREE.Vector2(20, 20), 2);
+			black_paint_material     = FXM.InstEtchingMaterial(0x000000, 0, 0.1, 1, true, 1, "./textures/Light_Gravel.png", new THREE.Vector2(100, 10), new THREE.Vector2(0, 0), "./textures/Light_Gravel.png", new THREE.Vector2(20, 20), 2);
+			const windlass_material  = FXM.InstMaterial(0xFFFFFF, 0.5, 1, 0, 2.3333333333333335, 1, false, 1, true);
+			const wood_material      = FXM.InstEtchingMaterial(0xC4C5AF, 0.6, 0, 1, false, 1, "./textures/African_teak_100_DP_column.jpg", new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), "./textures/African_teak_100_DP_column.jpg", new THREE.Vector2(100, 50), 10);
+			const cushion_material   = FXM.InstEtchingMaterial(0xB3B3B3, 1, 0, 1, false, 1, "./textures/Natural_white_tissu_50_DB.jpg", new THREE.Vector2(50, 50), new THREE.Vector2(0, 0), "./textures/Natural_white_tissu_50_DB.jpg", new THREE.Vector2(200, 200), 50);
+			const stript_material    = FXM.InstMaterial(0xD1D1D1, 0.557, 0.577, 0, 1, 0, false, 1, true);
 
-		const window_material=FXM.InstMaterial(0x696969,0,0.75,1,2.4,1,true,0,true);
-		const window_material_02=FXM.InstMaterial(0x000000,0,1,1,2.4,1,true,0.96,true);
-		const silver_paint_material=FXM.InstEtchingMaterial(0x95B6D6,0.24,0.702,1,true,1,"./textures/Light_Gravel.png",new THREE.Vector2(100,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(50,50),10);
-		const white_paint_material=FXM.InstEtchingMaterial(0xFFFFFF,0,0.1,1,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(100,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(20,20),2);
-		const black_paint_material=FXM.InstEtchingMaterial(0x000000,0,0.1,1,true,1,"./textures/Light_Gravel.png",new THREE.Vector2(100,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(20,20),2);
-		const windlass_material=FXM.InstMaterial(0xFFFFFF,0.5,1,0,2.3333333333333335,1,false,1,true);
-		const wood_material=FXM.InstEtchingMaterial(0xC4C5AF,0.6,0,1,false,1,"./textures/African_teak_100_DP_column.jpg",new THREE.Vector2(10,10),new THREE.Vector2(0,0),"./textures/African_teak_100_DP_column.jpg",new THREE.Vector2(100,50),10);
-		const cushion_material=FXM.InstEtchingMaterial(0xB3B3B3,1,0,1,false,1,"./textures/Natural_white_tissu_50_DB.jpg",new THREE.Vector2(50,50),new THREE.Vector2(0,0),"./textures/Natural_white_tissu_50_DB.jpg",new THREE.Vector2(200,200),50);
-		const stript_material=FXM.InstMaterial(0xD1D1D1,0.557,0.577,0,1,0,false,1,true);
-		
+			FX.ReturnBufferGeometry(model.getObjectByName("Window_Top"),    window_material,    model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Window_Bottom"), window_material_02, model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Chrome"),        null,               model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Body_Black"),    silver_paint_material, model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Teak"),          wood_material,      model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("WhitePaint"),    white_paint_material,  model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("BlackPaint"),    black_paint_material,  model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Windlass"),      null,               model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Nav"),           null,               model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("chairCushion"),  cushion_material,   model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Bollard"),       null,               model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Stripe"),        stript_material,    model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Hatch"),         null,               model, scene);
 
-		FX.ReturnBufferGeometry(model.getObjectByName("Window_Top"),window_material,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("Window_Bottom"),window_material_02,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("Chrome"),null,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("Body_Black"),silver_paint_material,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("Teak"),wood_material,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("WhitePaint"),white_paint_material,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("BlackPaint"),black_paint_material,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("Windlass"),null,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("Nav"),null,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("chairCushion"),cushion_material,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("Bollard"),null,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("Stripe"),stript_material,model,scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("Hatch"),null,model,scene);
+			shipScene.add(model);
+			yacht = model;
 
-		shipScene.add(model);
-		yacht=model;
-		
+			// expose materials for color switching
+			window._yachtScene.white_paint = white_paint_material;
+			window._yachtScene.black_paint = black_paint_material;
+			window._yachtScene.silver_paint = silver_paint_material;
 
-		//需在材質變更之後
-		model.traverse((child) => {
-    		if (child.isMesh && child.material) 
-			{
-        		const materials = Array.isArray(child.material) ? child.material : [child.material];
-        		materials.forEach((mat) => {
-            		mat.transparent = true;
+			model.traverse((child) => {
+				if (child.isMesh && child.material) {
+					const materials = Array.isArray(child.material) ? child.material : [child.material];
+					materials.forEach((mat) => {
+						mat.transparent = true;
+						const alphaGradient = smoothstep(-0.5, 0.5, positionWorld.y);
+						mat.opacityNode = alphaGradient;
+					});
+				}
+			});
 
-            		// 在 Y = -0.5 到 Y = 0.5 之間做漸變透明羽化
-            		// Y < -0.5 為完全透明(0)，Y > 0.5 為完全不透明(1)
-            		const alphaGradient = smoothstep( -0.5, 0.5, positionWorld.y );
-					
-            		mat.opacityNode = alphaGradient;
-        		});
-    		}
-		});
+			renderer.setAnimationLoop(animate);
 
-		renderer.setAnimationLoop( animate );
-
-		//setTimeout(() => {
-//
-		//	
-		//	FX.Hierarchy(model,camera,shipScene,renderer,controls);
-		//	
-		//}, 1000);
-
-		
-
-    },
-    (error) => {
-        console.error('Failed to load model:', error);
-    }
+			// Trigger gauge animation after load
+			setTimeout(() => {
+				const arc = document.getElementById('gaugeArc');
+				if (arc) arc.style.strokeDashoffset = '75'; // ~32/40 filled
+				//FX.Camera_Inspector(camera,controls);
+			}, 800);
+		},
+		(error) => { console.error('Failed to load model:', error); }
 	);
 
-	
-	///EventListener
-  	window.addEventListener( 'resize', onWindowResize );  
-
+	window.addEventListener('resize', onWindowResize);
 }
 
-
-function onWindowResize() 
-{
-    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+function onWindowResize() {
+	camera.aspect = threeContainer.clientWidth / threeContainer.clientHeight;
 	camera.updateProjectionMatrix();
-    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
 }
 
-function animate(timestamp) 
-{
-	//timer.update(timestamp); // 只要更新 Timer，WebGPU 的 TSL 全域時間節點就會自動推動 WaterMesh！
-  	controls.update();
+function animate(timestamp) {
+	controls.update();
 	renderPipeline.render();
-	//renderer.render( scene, camera );
-	const time = performance.now() * 0.00175;//頻率
-	yacht.position.y = -3.5+Math.sin( time );//幅度
+	const time = performance.now() * 0.00175;
+
+	if(isWave)
+	{
+		yacht.position.y = -3.5 + Math.sin(time);
+	}
+	
 }
 
-function SetupOceanEnvironment()
-{
-	let sun = new THREE.Vector3();
-
-	// Water
-
-	const waterGeometry = new THREE.PlaneGeometry( 10000, 10000 );
+function SetupOceanEnvironment() {
+	sun = new THREE.Vector3();
+	const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
 	const loader = new THREE.TextureLoader();
-	const waterNormals = loader.load( './textures/waternormals.jpg' );
+	const waterNormals = loader.load('./textures/waternormals.jpg');
 	waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
 
-	let water = new WaterMesh(
-		waterGeometry,
-		{
-			waterNormals: waterNormals,
-			sunDirection: new THREE.Vector3(),
-			sunColor: 0xffffff,
-			waterColor: 0x001e0f,
-			distortionScale: 3.7,
-			size:10,//比例
-			alpha:1
-		}
-	);
+	water = new WaterMesh(waterGeometry, {
+		waterNormals,
+		sunDirection: new THREE.Vector3(),
+		sunColor: 0xffffff,
+		waterColor: 0x001e0f,
+		distortionScale: 3.7,
+		size: 10,
+		alpha: 1
+	});
+	water.rotation.x = -Math.PI / 2;
+	skyAndSeaScene.add(water);
 
-	water.rotation.x = - Math.PI / 2;
-	//water.size=10;
+	sky = new SkyMesh();
+	sky.scale.setScalar(10000);
+	skyAndSeaScene.add(sky);
 
-	skyAndSeaScene.add( water );
+	sky.turbidity.value       = 2;
+	sky.rayleigh.value        = 2;
+	sky.mieCoefficient.value  = 0.005;
+	sky.mieDirectionalG.value = 0.8;
+	sky.cloudCoverage.value   = 0.36;
+	sky.cloudDensity.value    = 0.84;
+	sky.cloudElevation.value  = 0.1;
 
-	// Skybox
+	const parameters = { elevation: 60, azimuth: 180 };
+	const phi   = THREE.MathUtils.degToRad(90 - parameters.elevation);
+	const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+	sun.setFromSphericalCoords(1, phi, theta);
 
-	let sky = new SkyMesh();
-	sky.scale.setScalar( 10000 );
-	skyAndSeaScene.add( sky );
+	sky.sunPosition.value.copy(sun);
+	water.sunDirection.value.copy(sun).normalize();
 
-	sky.turbidity.value = 2;//濁度
-	sky.rayleigh.value = 2;//瑞利散射 0:暗，若太高會變成灰階
-	sky.mieCoefficient.value = 0.005;//米氏散射係數
-	sky.mieDirectionalG.value = 0.8;//米氏散射方向性因子，-1~1
-	sky.cloudCoverage.value = 0.36;//雲密度
-	sky.cloudDensity.value = 0.84;//天空亮度
-	sky.cloudElevation.value = 0.1;//天空高度
-
-	const parameters = {
-		elevation: 60,//太陽的垂直位置
-		azimuth: 180//太陽的水平位置
-	};
-
-    const phi = THREE.MathUtils.degToRad( 90 - parameters.elevation );
-    const theta = THREE.MathUtils.degToRad( parameters.azimuth );
-
-    sun.setFromSphericalCoords( 1, phi, theta );
-
-    // 1. 更新天空與水面的太陽方向 (TSL 節點會自動跟著更新)
-    sky.sunPosition.value.copy( sun );
-    water.sunDirection.value.copy( sun ).normalize();
-
-	// 1. 加入基礎環境光（讓陰影處不會完全黑掉）
-	const ambientLight = new THREE.AmbientLight( 0x073763, 1 );
-	shipScene.add( ambientLight );
-
-	// 2. 加入太陽方向光
-	const sunLight = new THREE.DirectionalLight( 0xffffff, 12 );
-	shipScene.add( sunLight );
-
-	
-	// 讓方向光的位置指向太陽的方向
-    sunLight.position.copy( sun ).multiplyScalar( 1000 );
-
+	const ambientLight = new THREE.AmbientLight(0x073763, 1);
+	shipScene.add(ambientLight);
+	const sunLight = new THREE.DirectionalLight(0xffffff, 12);
+	shipScene.add(sunLight);
+	sunLight.position.copy(sun).multiplyScalar(1000);
 }
+
+		// ── Count-up animation ──────────────────────────────────────
+		function countUp(el, target, decimal, duration) {
+			const start  = 0;
+			const step   = timestamp => {
+				if (!startTime) startTime = timestamp;
+				const progress = Math.min((timestamp - startTime) / duration, 1);
+				const ease     = 1 - Math.pow(1 - progress, 3);
+				let val = start + (target - start) * ease;
+				if (decimal) {
+					val = val / Math.pow(10, decimal);
+					el.textContent = val.toFixed(decimal);
+				} else {
+					el.textContent = Math.round(val);
+				}
+				if (progress < 1) requestAnimationFrame(step);
+			};
+			let startTime = null;
+			requestAnimationFrame(step);
+		}
+
+		// Trigger count-ups after a short delay for 3D load
+		setTimeout(() => {
+			document.querySelectorAll('.countup').forEach(el => {
+				const target  = parseInt(el.dataset.target, 10);
+				const decimal = parseInt(el.dataset.decimal || '0', 10);
+				countUp(el, target, decimal, 1800);
+			});
+		}, 600);
+
+		// ── Color Swatch switcher ────────────────────────────────────
+		const colorMap = {
+			pearl:    { white: 0xF5F5F0, black: 0xD0D0C8, silver: 0xBBC8D4 },
+			midnight: { white: 0x1A3A5E, black: 0x0A1E35, silver: 0x1E3A55 },
+			titanium: { white: 0xA8B4C0, black: 0x6A7580, silver: 0x8A9AA8 },
+			obsidian: { white: 0x1C1C1C, black: 0x0A0A0A, silver: 0x2A2A2A },
+		};
+
+		document.getElementById('colorSwatches').addEventListener('click', (e) => {
+			const swatch = e.target.closest('.swatch');
+			if (!swatch) return;
+
+			// Update active state
+			document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+			swatch.classList.add('active');
+
+			const colorKey = swatch.dataset.color;
+			const cols = colorMap[colorKey];
+
+			// Apply to Three.js materials (when scene is ready)
+			const retry = () => {
+				const sc = window._yachtScene;
+				if (sc && sc.white_paint && sc.black_paint && sc.silver_paint) {
+					if (sc.white_paint.color)  sc.white_paint.color.setHex(cols.white);
+					if (sc.black_paint.color)  sc.black_paint.color.setHex(cols.black);
+					if (sc.silver_paint.color) sc.silver_paint.color.setHex(cols.silver);
+				} else {
+					setTimeout(retry, 300);
+				}
+			};
+			retry();
+		});
+
+		// ── Camera Preset buttons ────────────────────────────────────
+		const camData = {
+			side:   { pos: [176.215, 69.471,  155.429], target: [41.415, 12.123, -3.110] },
+			bow:    { pos: [14.887,48.158,227.736],     target: [46.264,10.309,-3.430] },
+			aerial: { pos: [-82.400,81.766,101.800],      target: [43.049,5.781,-5.214] },
+			stern:  { pos: [182.798,49.788,-112.655],    target: [98.723,24.000,-35.050] },
+		};
+
+		function lerpV3(obj, targetArr, duration) {
+			const start   = { x: obj.x, y: obj.y, z: obj.z };
+			const end     = { x: targetArr[0], y: targetArr[1], z: targetArr[2] };
+			const t0 = performance.now();
+			const animate = (now) => {
+				const t = Math.min((now - t0) / duration, 1);
+				const e = 1 - Math.pow(1 - t, 3);
+				obj.x = start.x + (end.x - start.x) * e;
+				obj.y = start.y + (end.y - start.y) * e;
+				obj.z = start.z + (end.z - start.z) * e;
+				if (t < 1) requestAnimationFrame(animate);
+			};
+			requestAnimationFrame(animate);
+		}
+
+		document.getElementById('camPresets').addEventListener('click', (e) => {
+			const btn = e.target.closest('.cam-btn');
+			if (!btn) return;
+			document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
+			btn.classList.add('active');
+
+			const key = btn.dataset.cam;
+			const preset = camData[key];
+			const sc = window._yachtScene;
+			if (sc && sc.camera && sc.controls) {
+				lerpV3(sc.camera.position, preset.pos,    1200);
+				lerpV3(sc.controls.target, preset.target, 1200);
+			}
+		});
+
+		// ── Auto Rotate toggle ───────────────────────────────────────
+		document.getElementById('chkRotate').addEventListener('change', function() {
+			const sc = window._yachtScene;
+			if (sc && sc.controls) sc.controls.autoRotate = this.checked;
+		});
+
+		// ── Auto Rotate toggle ───────────────────────────────────────
+		document.getElementById('chkWave').addEventListener('change', function() {
+			
+			isWave=this.checked;
+
+			water.visible=this.checked;
+			sky.visible=this.checked;
+
+		});
+
+		// ── Bloom toggle ─────────────────────────────────────────────
+		document.getElementById('chkSunset').addEventListener('change', function() {
+			const sc = window._yachtScene;
+			if (sc && sc.bloomNode) {
+				sc.bloomNode.strength.value = this.checked ? 0.1:0.18;
+			}
+
+			if(this.checked)
+			{
+				const phi = THREE.MathUtils.degToRad( 84 );
+				const theta = THREE.MathUtils.degToRad( 180 );
+
+				sun.setFromSphericalCoords( 1, phi, theta );
+
+				sky.sunPosition.value.copy( sun );
+				water.sunDirection.value.copy( sun ).normalize();
+			}
+			
+			else
+			{
+				const phi = THREE.MathUtils.degToRad( 30 );
+				const theta = THREE.MathUtils.degToRad( 180 );
+
+				sun.setFromSphericalCoords( 1, phi, theta );
+
+				sky.sunPosition.value.copy( sun );
+				water.sunDirection.value.copy( sun ).normalize();
+			}
+		});
+
+		// ── Nav active state ─────────────────────────────────────────
+		document.querySelectorAll('.top-nav a').forEach(link => {
+			link.addEventListener('click', function(e) {
+				e.preventDefault();
+				document.querySelectorAll('.top-nav a').forEach(l => l.classList.remove('active'));
+				this.classList.add('active');
+			});
+		});
+
 		</script>
-    </body>
-
+	</body>
 </html>
-
