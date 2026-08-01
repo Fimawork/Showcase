@@ -999,7 +999,7 @@
 				<div class="toggle-row">
 					<span class="toggle-label">Ocean Effect</span>
 					<label class="toggle-switch" id="toggleSunset">
-						<input type="checkbox" id="chkWave" checked>
+						<input type="checkbox" id="chkWave">
 						<div class="toggle-track"></div>
 						<div class="toggle-thumb"></div>
 					</label>
@@ -1120,8 +1120,6 @@ init();
 
 async function init() 
 {
-	isWave=true;
-
 	FX.SetupEnvironment("cloud");
 	scene = new THREE.Scene();
 
@@ -1142,7 +1140,7 @@ async function init()
 	const seaPass  = pass(skyAndSeaScene, camera);
 	const seaColor = seaPass.getTextureNode('output');
 	const shipPass  = pass(shipScene, camera);
-	shipScene.background = null;
+	shipScene.background = new THREE.Color(0x0a0a0a);
 	const shipColor = shipPass.getTextureNode('output');
 	const combinedColor = seaColor.mul(shipColor.a.oneMinus()).add(shipColor);
 
@@ -1278,6 +1276,8 @@ function SetupOceanEnvironment() {
 	});
 	water.rotation.x = -Math.PI / 2;
 	skyAndSeaScene.add(water);
+
+	water.visible=false;
 
 	sky = new SkyMesh();
 	sky.scale.setScalar(10000);
