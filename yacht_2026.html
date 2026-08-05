@@ -1074,13 +1074,13 @@ import * as THREE from 'three';
 import { pass, positionWorld, smoothstep } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.53/fx_functions.js';
-import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.0/fx_materials.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_materials.js';
+import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_hud.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { yacht_2026 } from './models/yacht_2026_slices.js';
-import { WaterMesh } from 'three/addons/objects/WaterMesh.js';
-import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
+
 
 let scene, camera, renderer, mixer;
 let bloomPass, bloomNode;
@@ -1106,7 +1106,6 @@ const camPresets = {
 let yacht = new THREE.Object3D();
 let white_paint_material, black_paint_material, silver_paint_material;
 
-let water, sun, sky;
 let isWave;
 
 // Expose to global for UI bridge
@@ -1117,6 +1116,7 @@ window._yachtScene = {
 };
 
 init();
+FXUI.LoadingEffectManager("C",true);
 
 async function init() 
 {
@@ -1133,7 +1133,14 @@ async function init()
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/kloofendal_48d_partly_cloudy_puresky_1k.jpg', shipScene);
 	shipScene.environmentRotation.y = FX.ToThreeEulerAngle(-90);
 
-	SetupOceanEnvironment();
+	FXM.InstOceanEnvironment();
+	skyAndSeaScene.add(FXM.sky).add(FXM.water);
+
+	const ambientLight = new THREE.AmbientLight(0x073763, 1);
+	shipScene.add(ambientLight);
+	const sunLight = new THREE.DirectionalLight(0xffffff, 12);
+	shipScene.add(sunLight);
+	sunLight.position.copy(FXM.sun).multiplyScalar(1000);
 
 	renderPipeline = new THREE.RenderPipeline(renderer);
 
@@ -1232,6 +1239,7 @@ async function init()
 				const arc = document.getElementById('gaugeArc');
 				if (arc) arc.style.strokeDashoffset = '75'; // ~32/40 filled
 				//FX.Camera_Inspector(camera,controls);
+				FXUI.LoadingEffectManager("C",false);
 			}, 800);
 		},
 		(error) => { console.error('Failed to load model:', error); }
@@ -1256,54 +1264,6 @@ function animate(timestamp) {
 		yacht.position.y = -3.5 + Math.sin(time);
 	}
 	
-}
-
-function SetupOceanEnvironment() {
-	sun = new THREE.Vector3();
-	const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
-	const loader = new THREE.TextureLoader();
-	const waterNormals = loader.load('./textures/waternormals.jpg');
-	waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
-
-	water = new WaterMesh(waterGeometry, {
-		waterNormals,
-		sunDirection: new THREE.Vector3(),
-		sunColor: 0xffffff,
-		waterColor: 0x001e0f,
-		distortionScale: 3.7,
-		size: 10,
-		alpha: 1
-	});
-	water.rotation.x = -Math.PI / 2;
-	skyAndSeaScene.add(water);
-
-	water.visible=false;
-
-	sky = new SkyMesh();
-	sky.scale.setScalar(10000);
-	skyAndSeaScene.add(sky);
-
-	sky.turbidity.value       = 2;
-	sky.rayleigh.value        = 2;
-	sky.mieCoefficient.value  = 0.005;
-	sky.mieDirectionalG.value = 0.8;
-	sky.cloudCoverage.value   = 0.36;
-	sky.cloudDensity.value    = 0.84;
-	sky.cloudElevation.value  = 0.1;
-
-	const parameters = { elevation: 60, azimuth: 180 };
-	const phi   = THREE.MathUtils.degToRad(90 - parameters.elevation);
-	const theta = THREE.MathUtils.degToRad(parameters.azimuth);
-	sun.setFromSphericalCoords(1, phi, theta);
-
-	sky.sunPosition.value.copy(sun);
-	water.sunDirection.value.copy(sun).normalize();
-
-	const ambientLight = new THREE.AmbientLight(0x073763, 1);
-	shipScene.add(ambientLight);
-	const sunLight = new THREE.DirectionalLight(0xffffff, 12);
-	shipScene.add(sunLight);
-	sunLight.position.copy(sun).multiplyScalar(1000);
 }
 
 		// ── Count-up animation ──────────────────────────────────────
@@ -1369,12 +1329,13 @@ function SetupOceanEnvironment() {
 		});
 
 		// ── Camera Preset buttons ────────────────────────────────────
-		const camData = {
-			side:   { pos: [176.215, 69.471,  155.429], target: [41.415, 12.123, -3.110] },
-			bow:    { pos: [14.887,48.158,227.736],     target: [46.264,10.309,-3.430] },
-			aerial: { pos: [-82.400,81.766,101.800],      target: [43.049,5.781,-5.214] },
-			stern:  { pos: [182.798,49.788,-112.655],    target: [98.723,24.000,-35.050] },
-		};
+		FX.posData[1]={ camera_pos:new THREE.Vector3(176.215, 69.471,  155.429), controlsTarget_pos:new THREE.Vector3(41.415, 12.123, -3.110)};
+
+  		FX.posData[2]={ camera_pos:new THREE.Vector3(14.887,48.158,227.736), controlsTarget_pos:new 		THREE.Vector3(46.264,10.309,-3.430)};
+
+  		FX.posData[3]={ camera_pos:new THREE.Vector3(-82.400,81.766,101.800), controlsTarget_pos:new 		THREE.Vector3(43.049,5.781,-5.214)};
+
+  		FX.posData[4]={ camera_pos:new THREE.Vector3(182.798,49.788,-112.655), controlsTarget_pos:new 		THREE.Vector3(98.723,24.000,-35.050)};
 
 		function lerpV3(obj, targetArr, duration) {
 			const start   = { x: obj.x, y: obj.y, z: obj.z };
@@ -1398,12 +1359,10 @@ function SetupOceanEnvironment() {
 			btn.classList.add('active');
 
 			const key = btn.dataset.cam;
-			const preset = camData[key];
-			const sc = window._yachtScene;
-			if (sc && sc.camera && sc.controls) {
-				lerpV3(sc.camera.position, preset.pos,    1200);
-				lerpV3(sc.controls.target, preset.target, 1200);
-			}
+			if(key==="bow")FX.CameraManager_Type_B(1,camera,controls,threeContainer,1000);
+			if(key==="aerial")FX.CameraManager_Type_B(2,camera,controls,threeContainer,1000);
+			if(key==="stern")FX.CameraManager_Type_B(3,camera,controls,threeContainer,1000);
+			if(key==="side")FX.CameraManager_Type_B(4,camera,controls,threeContainer,1000);
 		});
 
 		// ── Auto Rotate toggle ───────────────────────────────────────
@@ -1419,7 +1378,7 @@ function SetupOceanEnvironment() {
 
 			isWave=this.checked;
 
-			water.visible=this.checked;
+			FXM.water.visible=this.checked;
 			//sky.visible=this.checked;
 
 		});
@@ -1433,24 +1392,12 @@ function SetupOceanEnvironment() {
 
 			if(this.checked)
 			{
-				const phi = THREE.MathUtils.degToRad( 84 );
-				const theta = THREE.MathUtils.degToRad( 180 );
-
-				sun.setFromSphericalCoords( 1, phi, theta );
-
-				sky.sunPosition.value.copy( sun );
-				water.sunDirection.value.copy( sun ).normalize();
+				FXM.UpdateSun(6,180);
 			}
 			
 			else
 			{
-				const phi = THREE.MathUtils.degToRad( 30 );
-				const theta = THREE.MathUtils.degToRad( 180 );
-
-				sun.setFromSphericalCoords( 1, phi, theta );
-
-				sky.sunPosition.value.copy( sun );
-				water.sunDirection.value.copy( sun ).normalize();
+				FXM.UpdateSun(60,180);
 			}
 		});
 
