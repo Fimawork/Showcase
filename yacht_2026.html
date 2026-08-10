@@ -1256,14 +1256,20 @@ function onWindowResize() {
 
 function animate(timestamp) {
 	controls.update();
-	renderPipeline.render();
-	const time = performance.now() * 0.00175;
-
+	
 	if(isWave)
 	{
+		const time = performance.now() * 0.00175;
 		yacht.position.y = -3.5 + Math.sin(time);
+		renderPipeline.render();
+		renderer.toneMappingExposure = 0.15;
 	}
 	
+	else
+	{
+		renderer.render( shipScene, camera );
+		renderer.toneMappingExposure = 0.39;
+	}
 }
 
 		// ── Count-up animation ──────────────────────────────────────
