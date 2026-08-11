@@ -1191,11 +1191,11 @@ async function init()
 
 			const window_material    = FXM.InstMaterial(0x696969, 0, 0.75, 1, 2.4, 1, true, 0, true);
 			const window_material_02 = FXM.InstMaterial(0x000000, 0, 1, 1, 2.4, 1, true, 0.96, true);
-			silver_paint_material    = FXM.InstEtchingMaterial(0x95B6D6, 0.24, 0.702, 1, true, 1, "./textures/Light_Gravel.png", new THREE.Vector2(100, 10), new THREE.Vector2(0, 0), "./textures/Light_Gravel.png", new THREE.Vector2(50, 50), 10);
-			white_paint_material     = FXM.InstEtchingMaterial(0xFFFFFF, 0, 0.1, 1, false, 1, "./textures/Light_Gravel.png", new THREE.Vector2(100, 10), new THREE.Vector2(0, 0), "./textures/Light_Gravel.png", new THREE.Vector2(20, 20), 2);
+			silver_paint_material    = FXM.InstEtchingMaterial(0x0A1E35,0.1,0.702,1,true,1,"./textures/Light_Gravel.png",new THREE.Vector2(100,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(500,500),10);
+			white_paint_material     = FXM.InstEtchingMaterial(0xFFFFFF,0.15,0.3,1,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(100,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(50,50),2);
 			black_paint_material     = FXM.InstEtchingMaterial(0x000000, 0, 0.1, 1, true, 1, "./textures/Light_Gravel.png", new THREE.Vector2(100, 10), new THREE.Vector2(0, 0), "./textures/Light_Gravel.png", new THREE.Vector2(20, 20), 2);
 			const windlass_material  = FXM.InstMaterial(0xFFFFFF, 0.5, 1, 0, 2.3333333333333335, 1, false, 1, true);
-			const wood_material      = FXM.InstEtchingMaterial(0xC4C5AF, 0.6, 0, 1, false, 1, "./textures/African_teak_100_DP_column.jpg", new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), "./textures/African_teak_100_DP_column.jpg", new THREE.Vector2(100, 50), 10);
+			const wood_material      = FXM.InstEtchingMaterial(0xE2E2D4,0.49,0.3,1,true,1,"./textures/African_teak_100_DP_column.jpg",new THREE.Vector2(10,10),new THREE.Vector2(0,0),"./textures/African_teak_100_DP_column.jpg",new THREE.Vector2(100,10),5);
 			const cushion_material   = FXM.InstEtchingMaterial(0xB3B3B3, 1, 0, 1, false, 1, "./textures/Natural_white_tissu_50_DB.jpg", new THREE.Vector2(50, 50), new THREE.Vector2(0, 0), "./textures/Natural_white_tissu_50_DB.jpg", new THREE.Vector2(200, 200), 50);
 			const stript_material    = FXM.InstMaterial(0xD1D1D1, 0.557, 0.577, 0, 1, 0, false, 1, true);
 
@@ -1212,6 +1212,10 @@ async function init()
 			FX.ReturnBufferGeometry(model.getObjectByName("Bollard"),       null,               model, scene);
 			FX.ReturnBufferGeometry(model.getObjectByName("Stripe"),        stript_material,    model, scene);
 			FX.ReturnBufferGeometry(model.getObjectByName("Hatch"),         null,               model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Sink"),         null,               model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Handle"),         null,               model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Cabinet"),         null,               model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Cockpit"),         null,               model, scene);
 
 			shipScene.add(model);
 			yacht = model;
@@ -1238,7 +1242,7 @@ async function init()
 			setTimeout(() => {
 				const arc = document.getElementById('gaugeArc');
 				if (arc) arc.style.strokeDashoffset = '75'; // ~32/40 filled
-				//FX.Camera_Inspector(camera,controls);
+				//FX.Hierarchy(model,camera,shipScene,renderer,controls); 
 				FXUI.LoadingEffectManager("C",false);
 			}, 800);
 		},
@@ -1303,7 +1307,7 @@ function animate(timestamp) {
 
 		// ── Color Swatch switcher ────────────────────────────────────
 		const colorMap = {
-			pearl:    { white: 0xF5F5F0, black: 0xD0D0C8, silver: 0xBBC8D4 },
+			pearl:    { white: 0xF5F5F0, black: 0x0A1E35, silver: 0x1E3A55},
 			midnight: { white: 0x1A3A5E, black: 0x0A1E35, silver: 0x1E3A55 },
 			titanium: { white: 0xA8B4C0, black: 0x6A7580, silver: 0x8A9AA8 },
 			obsidian: { white: 0x1C1C1C, black: 0x0A0A0A, silver: 0x2A2A2A },
