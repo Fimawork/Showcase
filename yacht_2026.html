@@ -1189,7 +1189,7 @@ async function init()
 			model.position.set(0, -3.5, 0);
 			model.scale.set(0.01, 0.01, 0.01);
 
-			const window_material    = FXM.InstMaterial(0x696969, 0, 0.75, 1, 2.4, 1, true, 0, true);
+			const window_material    = FXM.InstMaterial(0x696969, 0, 0.9, 1, 2.4, 1, true, 0, true);
 			const window_material_02 = FXM.InstMaterial(0x000000, 0, 1, 1, 2.4, 1, true, 0.96, true);
 			silver_paint_material    = FXM.InstEtchingMaterial(0x0A1E35,0.1,0.702,1,true,1,"./textures/Light_Gravel.png",new THREE.Vector2(100,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(500,500),10);
 			white_paint_material     = FXM.InstEtchingMaterial(0xFFFFFF,0.15,0.3,1,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(100,10),new THREE.Vector2(0,0),"./textures/Light_Gravel.png",new THREE.Vector2(50,50),2);
@@ -1213,9 +1213,16 @@ async function init()
 			FX.ReturnBufferGeometry(model.getObjectByName("Stripe"),        stript_material,    model, scene);
 			FX.ReturnBufferGeometry(model.getObjectByName("Hatch"),         null,               model, scene);
 			FX.ReturnBufferGeometry(model.getObjectByName("Sink"),         null,               model, scene);
-			FX.ReturnBufferGeometry(model.getObjectByName("Handle"),         null,               model, scene);
-			FX.ReturnBufferGeometry(model.getObjectByName("Cabinet"),         null,               model, scene);
-			FX.ReturnBufferGeometry(model.getObjectByName("Cockpit"),         null,               model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Handle"),null,model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Cabinet"),null,model, scene);
+			//FX.ReturnBufferGeometry(model.getObjectByName("Cockpit"),null,model, scene);
+			FX.ReturnBufferGeometry(model.getObjectByName("Light"),null,model, scene);
+			//FX.ReturnBufferGeometry(model.getObjectByName("PilotChair"),null,model, scene);
+			//FX.ReturnBufferGeometry(model.getObjectByName("Console"),null,model, scene);
+
+			model.getObjectByName("PilotChair").frustumCulled=false;
+			model.getObjectByName("Cockpit").frustumCulled=false;
+			model.getObjectByName("Console").frustumCulled=false;
 
 			shipScene.add(model);
 			yacht = model;
