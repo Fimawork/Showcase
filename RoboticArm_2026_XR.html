@@ -1,0 +1,356 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600;800&display=swap');
+			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
+
+			body {
+				margin: 0;
+				padding: 0; 
+				overflow: hidden;
+			}
+			
+			canvas {
+				width: 100%;
+   				height: 100%;
+			}
+
+            #threeContainer {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 2;
+				pointer-events: auto;
+			}
+
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+			  }
+			}
+		</script>
+	</head>
+	
+	<body>
+		<!-- Center 3D Area -->
+		<div id="threeContainer"></div>
+
+		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+		<!--<div class="web3d_icon"></div>-->
+
+		<script type="module">
+			import * as THREE from 'three';
+			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+			import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_functions.js';
+			import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_materials.js';
+			import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.54/fx_hud.js';
+			import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+			import { RoboticArm_2026 } from './models/RoboticArm_2026_slices.js';
+			import 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js';
+
+			let scene, camera, renderer, controls;
+			let threeContainer = document.getElementById("threeContainer");
+
+			let module_A = new THREE.Group();
+			let module_B = new THREE.Group();
+			let module_C = new THREE.Group();
+			let module_D = new THREE.Group();
+			let module_E = new THREE.Group();
+			let module_F = new THREE.Group();
+			let module_G = new THREE.Group();
+			let module_H = new THREE.Group();
+			let main_model = new THREE.Object3D();
+
+			let targetRotation_A=0;
+			let targetRotation_B=0;
+			let targetRotation_C=0;
+			let targetRotation_D=0;
+			let targetRotation_E=0;
+			let targetRotation_F=0;
+	
+			const CameraDefaultPos = new THREE.Vector3(2.707,1.323,5.281);
+			const ControlsTargetDefaultPos = new THREE.Vector3(-0.179,0.809,0.436);
+
+			init();
+			FXUI.InstLoadingEffect_Type_A(true);
+			RobotArmAnimation();
+
+			async function init() {
+				FX.SetupEnvironment("cloud");
+
+				scene = new THREE.Scene();
+				scene.background = null;
+
+				camera = new THREE.PerspectiveCamera(24, threeContainer.clientWidth / threeContainer.clientHeight, 0.001, 1000);
+				renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
+				renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+				renderer.setClearColor(0x000000, 0.0);
+				renderer.toneMapping = THREE.ACESFilmicToneMapping;
+				renderer.toneMappingExposure = 0.5;
+				threeContainer.appendChild(renderer.domElement);
+
+				await renderer.init();
+
+				const phone_cam_pos=new THREE.Vector3(2.778,1.612,4.181);
+				const phone_controls_pos=new THREE.Vector3(0.026,0.774,0.270);
+
+				camera.position.copy(CameraDefaultPos);
+
+				controls = new OrbitControls(camera, renderer.domElement);
+				controls.enablePan = false;
+				controls.panSpeed = 0.4;
+				controls.enableDamping = true;
+				controls.dampingFactor = 0.015;
+				controls.minDistance = 1;
+				controls.maxDistance = 500;
+				controls.target.copy(ControlsTargetDefaultPos);
+				controls.zoomSpeed = 0.5;
+				controls.autoRotate = false;
+
+				controls.maxPolarAngle = FX.ToThreeEulerAngle(95);
+				controls.minPolarAngle = FX.ToThreeEulerAngle(-90);
+				controls.update();
+
+				FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg', scene);
+				scene.environmentRotation.y = FX.ToThreeEulerAngle(-45); 
+				
+				const loader = new GLTFLoader();
+				loader.setDRACOLoader(FX.dracoLoader);
+				loader.parse(
+					FX.Base64ToArrayBuffer(RoboticArm_2026()),
+					'',
+					(gltf) => {
+						const model = gltf.scene;
+
+						model.position.set(0, 0, 0);
+						model.rotation.set(0, 0, 0);
+						model.scale.set(1, 1, 1);
+
+						const black_housing_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.75,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(600, 600),2);
+						const orange_material = FXM.InstMaterial(0xFF9500,0.105,0.36,0.086,1.4999999999999998,0.49999999999999983,false,1,true);
+						const metal_material = FXM.InstMaterial(0xDADBDD,0.25,0.75,1,2.3333333333333335,1,false,1,true);
+						const logo_material=FXM.InstMaterial(0x000000,1,0,0,2.3333333333333335,1,false,1,true);
+
+						ClearCoatEffect(orange_material,1.0,0.5);
+
+						model.traverse(function (object) {	
+
+							if (object.name === "axle_A") {
+								object.layers.set(1);
+								module_A.position.copy(FX.ReturnModelCenter(object));
+							}
+
+							if (object.name === "axle_B") {
+								object.layers.set(1);
+								module_B.position.copy(FX.ReturnModelCenter(object));
+							}
+
+							if (object.name === "axle_C") {
+								object.layers.set(1);
+								module_C.position.copy(FX.ReturnModelCenter(object));
+							}
+
+							if (object.name === "axle_D") {
+								object.layers.set(1);
+								module_D.position.copy(FX.ReturnModelCenter(object));
+							}
+
+							if (object.name === "axle_E") {
+								object.layers.set(1);
+								module_E.position.copy(FX.ReturnModelCenter(object));
+							}
+
+							if (object.name === "axle_F") {
+								object.layers.set(1);
+								module_F.position.copy(FX.ReturnModelCenter(object));
+							}
+
+							if (object.name === "axle_G") {
+								object.layers.set(1);
+								module_G.position.copy(FX.ReturnModelCenter(object));
+							}
+
+							if (object.name === "axle_H") {
+								object.layers.set(1);
+								module_H.position.copy(FX.ReturnModelCenter(object));
+							}
+
+							if (object.name.includes("Base")) {
+								FX.ReturnBufferGeometry(object, black_housing_material, main_model, scene);
+							}
+
+							if (object.name.includes("LowerArm")) {
+								FX.ReturnBufferGeometry(object, orange_material, module_A, scene);
+							}
+
+							if (object.name.includes("blackHousing")) {
+								FX.ReturnBufferGeometry(object, black_housing_material, null, scene);
+							}
+
+							if (object.name.includes("Screw")) {
+								FX.ReturnBufferGeometry(object, null, null, scene);
+							}
+
+							if (object.name.includes("MiddleArm")) {
+								FX.ReturnBufferGeometry(object, orange_material, module_B, scene);
+							}
+
+							if (object.name.includes("UpperArm")) {
+								FX.ReturnBufferGeometry(object, orange_material, module_C, scene);
+							}
+
+							if (object.name.includes("Hand")) {
+								FX.ReturnBufferGeometry(object, orange_material, null, scene);
+							}
+
+							if (object.name.includes("Head_01")) {
+								FX.ReturnBufferGeometry(object, orange_material, module_E, scene);
+							}
+							
+							if (object.name.includes("Head_02")) {
+								FX.ReturnBufferGeometry(object, metal_material, module_F, scene);
+							}
+							
+							if (object.name.includes("Support")) {
+								FX.ReturnBufferGeometry(object, orange_material, module_G, scene);
+							}
+
+							if (object.name.includes("Connector")) {
+								FX.ReturnBufferGeometry(object, orange_material, module_H, scene);
+							}
+
+							if (object.name.includes("logo")) {
+								FX.ReturnBufferGeometry(object, logo_material, null, scene);
+							}
+
+						});
+
+						module_E.attach(module_F);
+						module_D.attach(module_E);
+						module_C.attach(module_D);
+						module_B.attach(module_C);
+						module_A.attach(module_B);
+						main_model.attach(module_A);
+						module_A.attach(scene.getObjectByName("BufferGeometry_Screw"));
+						module_A.attach(scene.getObjectByName("BufferGeometry_blackHousing"));
+						module_D.attach(scene.getObjectByName("BufferGeometry_Hand"));
+						module_D.attach(scene.getObjectByName("BufferGeometry_logo"));
+
+						//scene.getObjectByName("BufferGeometry_logo").frustumCulled=false;
+
+						module_G.attach(module_H);
+						module_C.attach(module_G);
+
+						scene.add(main_model);
+
+						setTimeout(() => {
+							renderer.setAnimationLoop(animate);
+							FXUI.InstLoadingEffect_Type_A(false);
+						}, 1000);
+					},
+					(error) => {
+						console.error('Failed to load model:', error);
+					}
+				);
+
+				FX.InitWebGPUShadow(scene, {
+					shadow: { blur: 0.5, darkness: 0.6 },
+					plane: { color: '#ffffff', opacity: 1 }
+				});
+
+				window.addEventListener('resize', onWindowResize);  
+			}
+
+			function onWindowResize() {
+				camera.aspect = threeContainer.clientWidth / threeContainer.clientHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+			}
+
+			// Rotation Smooth LERP Animation Loop
+			function animate(timestamp) {
+				controls.update();
+
+				renderer.render(scene, camera);
+
+				SmoothUpdateRotation(module_A,targetRotation_A,"y",0.04);
+				SmoothUpdateRotation(module_B,targetRotation_B,"x",0.04);
+				SmoothUpdateRotation(module_C,targetRotation_C,"x",0.04);
+				SmoothUpdateRotation(module_D,targetRotation_D,"z",0.1);
+				SmoothUpdateRotation(module_E,targetRotation_E,"x",0.04);
+				SmoothUpdateRotation(module_F,targetRotation_F,"z",0.01);
+				SmoothUpdateRotation(module_G,-targetRotation_C,"x",0.04);
+				SmoothUpdateRotation(module_H,targetRotation_C,"x",0.04);
+
+				//影子工具
+				FX.UpdateWebGPUShadow(renderer, scene);
+			}
+
+			function SmoothUpdateRotation(target,targetDegree,axis,rpm)
+			{		
+				switch(axis)
+				{
+					case "x":target.rotation.x += (THREE.MathUtils.degToRad(targetDegree) - target.rotation.x) * rpm;break;
+					case "y":target.rotation.y += (THREE.MathUtils.degToRad(targetDegree) - target.rotation.y) * rpm;break;
+					case "z":target.rotation.z += (THREE.MathUtils.degToRad(targetDegree) - target.rotation.z) * rpm;break;
+				}
+			}
+
+			function RobotArmAnimation()
+			{
+		
+				targetRotation_A=ReturnRandomValue(90,-90);
+
+				targetRotation_B=ReturnRandomValue(30,-15);
+
+				targetRotation_C=ReturnRandomValue(30,-15);
+
+				targetRotation_D=ReturnRandomValue(60,-60);
+
+				targetRotation_E=ReturnRandomValue(90,-90);
+				targetRotation_F=ReturnRandomValue(180,-180);
+
+				setTimeout(() => { RobotArmAnimation();}, ReturnRandomValue(5000,500));//1000=1sec}
+
+			}
+
+			function ReturnRandomValue(max,min)
+			{
+				return Math.floor(Math.random() * (max - min + 1)) + min;
+			}
+
+			//僅支援MeshPhysicalMaterial材質
+			//高亮面反射clearcoat = 1.0, clearcoatRoughness = 0.05，
+			//半啞光保護漆：clearcoat = 0.5, clearcoatRoughness = 0.4
+			//關閉效果：clearcoat = 0.0
+			function ClearCoatEffect(targetMaterial,clearcoat_value,clearcoatRoughness_value)
+			{
+				targetMaterial.clearcoat= clearcoat_value;
+				targetMaterial.clearcoatRoughness=clearcoatRoughness_value;
+    			targetMaterial.needsUpdate = true;
+			}
+
+
+
+		</script>
+    </body>
+</html>
