@@ -3,37 +3,568 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable="no"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
 		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
 		<link rel="stylesheet" type="text/css" href="Main.css">
 		<style type="text/css">
-			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600;800&display=swap');
+			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap');
 			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
+
+			/* ─── Global Reset ─── */
+			*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+			:root {
+				--bg-base:       #EEF0F4;
+				--panel-bg:      rgba(255, 255, 255, 0.82);
+				--panel-border:  rgba(180, 188, 200, 0.7);
+				--panel-shadow:  0 2px 16px rgba(0,0,0,0.10), 0 0 0 1px rgba(180,188,200,0.4);
+				--header-bg:     rgba(245, 247, 250, 0.92);
+				--grid-line:     rgba(160,172,190,0.18);
+				--text-primary:  #1A1E26;
+				--text-muted:    #5A6478;
+				--text-label:    #8A95A8;
+				--accent-orange: #E8650A;
+				--accent-blue:   #1A6FA8;
+				--accent-green:  #1A8F5A;
+				--accent-red:    #C82020;
+				--accent-yellow: #C88000;
+				--stripe-light:  rgba(10, 169, 232, 0.1);
+				--stripe-dark:   rgba(10, 125, 232, 0.04);
+				--font-size:12px;
+			}
 
 			body {
 				margin: 0;
-				padding: 0; 
+				padding: 0;
 				overflow: hidden;
-			}
-			
-			canvas {
-				width: 100%;
-   				height: 100%;
+				background: var(--bg-base);
+				font-family: 'Inter', sans-serif;
 			}
 
-            #threeContainer {
+			canvas { width: 100%; height: 100%; }
+
+			#threeContainer {
 				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
+				top: 0; left: 0;
+				width: 100%; height: 100%;
 				z-index: 2;
 				pointer-events: auto;
 			}
 
+			/* ─── Grid Texture Background ─── */
+			.grid-bg {
+				position: fixed;
+				inset: 0;
+				z-index: 0;
+				background-image:
+					linear-gradient(var(--grid-line) 1px, transparent 1px),
+					linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+				background-size: 40px 40px;
+				pointer-events: none;
+			}
+
+			/* ─── UI Layer ─── */
+			#ui_layer {
+				position: fixed;
+				inset: 0;
+				z-index: 10;
+				pointer-events: none;
+				display: flex;
+				flex-direction: column;
+			}
+
+			/* ─── Header ─── */
+			#ui_header {
+				pointer-events: auto;
+				height: 52px;
+				background: var(--header-bg);
+				backdrop-filter: blur(16px);
+				border-bottom: 1.5px solid var(--panel-border);
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0 20px;
+				flex-shrink: 0;
+			}
+
+			.header-left {
+				display: flex;
+				align-items: center;
+				gap: 14px;
+			}
+
+			.header-brand {
+				font-family: 'Orbitron', monospace;
+				font-size: 18px;
+				font-weight: 700;
+				letter-spacing: 0.12em;
+				color: var(--text-primary);
+			}
+
+			.header-brand span {
+				color: var(--accent-orange);
+			}
+
+			.header-divider {
+				width: 1px;
+				height: 22px;
+				background: var(--panel-border);
+			}
+
+			.header-subtitle {
+				font-family: 'Share Tech Mono', monospace;
+				font-size: var(--font-size);
+				color: var(--text-muted);
+				letter-spacing: 0.08em;
+			}
+
+			.header-right {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+			}
+
+			/* Status Badge */
+			.status-badge {
+				display: flex;
+				align-items: center;
+				gap: 7px;
+				background: rgba(255,255,255,0.7);
+				border: 1px solid var(--panel-border);
+				border-radius: 20px;
+				padding: 4px 12px;
+			}
+
+			.status-dot {
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: var(--accent-green);
+				box-shadow: 0 0 6px var(--accent-green);
+				flex-shrink: 0;
+				transition: background 0.3s, box-shadow 0.3s;
+			}
+
+			.status-text {
+				font-family: 'Share Tech Mono', monospace;
+				font-size: var(--font-size);
+				letter-spacing: 0.1em;
+				color: var(--text-primary);
+			}
+
+			/* ─── Main Row ─── */
+			#ui_main {
+				flex: 1;
+				display: flex;
+				pointer-events: none;
+				overflow: hidden;
+				gap: 0;
+			}
+
+			/* ─── Panels ─── */
+			.side-panel {
+				width: 300px;
+				flex-shrink: 0;
+				pointer-events: auto;
+				padding: 15px;
+				display: flex;
+				flex-direction: column;
+				gap: 15px;
+				overflow-y: auto;
+				scrollbar-width: thin;
+				scrollbar-color: var(--panel-border) transparent;
+			}
+
+			.side-panel::-webkit-scrollbar { width: 4px; }
+			.side-panel::-webkit-scrollbar-track { background: transparent; }
+			.side-panel::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
+
+			.panel-card {
+				background: var(--panel-bg);
+				border: 1.5px solid var(--panel-border);
+				border-radius: 8px;
+				box-shadow: var(--panel-shadow);
+				backdrop-filter: blur(14px);
+				overflow: hidden;
+			}
+
+			.card-header {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 8px 12px;
+				border-bottom: 1px solid var(--panel-border);
+				background: rgba(240,242,246,0.6);
+			}
+
+			.card-header-icon {
+				width: 3px;
+				height: 14px;
+				border-radius: 2px;
+				background: var(--accent-orange);
+				flex-shrink: 0;
+			}
+
+			.card-title {
+				font-family: 'Orbitron', monospace;
+				font-size: var(--font-size);
+				font-weight: 700;
+				letter-spacing: 0.14em;
+				color: var(--text-muted);
+				text-transform: uppercase;
+			}
+
+			.card-body {
+				padding: 10px 12px;
+				display: flex;
+				flex-direction: column;
+				gap: 7px;
+			}
+
+			/* ─── Mode Toggle ─── */
+			.mode-toggle-row {
+				display: flex;
+				gap: 6px;
+			}
+
+			.mode-btn {
+				flex: 1;
+				height: 34px;
+				border: 1.5px solid var(--panel-border);
+				border-radius: 6px;
+				background: rgba(240,242,246,0.7);
+				color: var(--text-muted);
+				font-family: 'Orbitron', monospace;
+				font-size: var(--font-size);
+				font-weight: 700;
+				letter-spacing: 0.10em;
+				cursor: pointer;
+				transition: all 0.2s;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 5px;
+			}
+
+			.mode-btn::before {
+				content: '';
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: var(--text-label);
+				transition: background 0.2s;
+			}
+
+			.mode-btn.active {
+				background: var(--accent-orange);
+				border-color: var(--accent-orange);
+				color: #fff;
+				box-shadow: 0 2px 12px rgba(232,101,10,0.35);
+			}
+
+			.mode-btn.active::before { background: #fff; }
+
+			.mode-btn:hover:not(.active) {
+				border-color: var(--accent-orange);
+				color: var(--accent-orange);
+			}
+
+			/* ─── Preset Buttons ─── */
+			.preset-btn {
+				width: 100%;
+				height: 32px;
+				border: 1.5px solid var(--panel-border);
+				border-radius: 6px;
+				background: rgba(240,242,246,0.7);
+				color: var(--text-primary);
+				font-family: 'Orbitron', monospace;
+				font-size: 8.5px;
+				font-weight: 700;
+				letter-spacing: 0.10em;
+				cursor: pointer;
+				transition: all 0.18s;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 0 10px;
+			}
+
+			.preset-btn:hover {
+				border-color: var(--accent-blue);
+				background: rgba(26,111,168,0.08);
+				color: var(--accent-blue);
+			}
+
+			.preset-btn:active { transform: scale(0.97); }
+
+			.preset-icon {
+				width: 18px;
+				height: 18px;
+				border-radius: 4px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 10px;
+				flex-shrink: 0;
+			}
+
+			.preset-icon.home { background: rgba(26,143,90,0.15); color: var(--accent-green); }
+			.preset-icon.pick { background: rgba(26,111,168,0.15); color: var(--accent-blue); }
+			.preset-icon.cal  { background: rgba(200,128,0,0.15);  color: var(--accent-yellow); }
+
+			/* ─── Diagnostics ─── */
+			.diag-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+			}
+
+			.diag-label {
+				font-family: 'Share Tech Mono', monospace;
+				font-size: var(--font-size);
+				color: var(--text-muted);
+				letter-spacing: 0.05em;
+			}
+
+			.diag-value {
+				font-family: 'Orbitron', monospace;
+				font-size: 12px;
+				font-weight: 500;
+				color: var(--accent-blue);
+				letter-spacing: 0.06em;
+				white-space: pre-line;
+				text-align: right;
+				width: auto;
+				height: auto;
+			}
+
+			.diag-value.warn { color: var(--accent-yellow); }
+			.diag-value.ok   { color: var(--accent-green); }
+
+			.diag-bar-track {
+				width: 100%;
+				height: 3px;
+				background: rgba(180,188,200,0.3);
+				border-radius: 2px;
+				overflow: hidden;
+				margin-top: 2px;
+			}
+
+			.diag-bar-fill {
+				height: 100%;
+				border-radius: 2px;
+				background: var(--accent-green);
+				transition: width 0.5s ease, background 0.3s;
+			}
+
+			.diag-separator {
+				height: 1px;
+				background: var(--panel-border);
+				margin: 2px 0;
+			}
+
+			/* ─── Axis Sliders ─── */
+			.axis-row {
+				display: flex;
+				flex-direction: column;
+				gap: 3px;
+			}
+
+			.axis-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.axis-label {
+				font-family: 'Share Tech Mono', monospace;
+				font-size: var(--font-size);
+				color: var(--text-muted);
+				letter-spacing: 0.05em;
+			}
+
+			.axis-value {
+				font-family: 'Orbitron', monospace;
+				font-size: var(--font-size);
+				font-weight: 600;
+				color: var(--accent-blue);
+				min-width: 38px;
+				text-align: right;
+			}
+
+			/* Light-themed range slider */
+			input[type=range].axis-slider {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 100%;
+				height: 4px;
+				border-radius: 2px;
+				background: rgba(180,188,200,0.4);
+				outline: none;
+				cursor: pointer;
+				transition: opacity 0.2s;
+			}
+
+			input[type=range].axis-slider:disabled {
+				opacity: 0.3;
+				cursor: not-allowed;
+			}
+
+			input[type=range].axis-slider::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 13px;
+				height: 13px;
+				border-radius: 50%;
+				background: var(--accent-orange);
+				border: 2px solid #fff;
+				box-shadow: 0 1px 6px rgba(232,101,10,0.40);
+				cursor: pointer;
+				transition: box-shadow 0.2s;
+			}
+
+			input[type=range].axis-slider:not(:disabled)::-webkit-slider-thumb:hover {
+				box-shadow: 0 1px 12px rgba(232,101,10,0.65);
+			}
+
+			/* Speed slider */
+			input[type=range].speed-slider {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 100%;
+				height: 4px;
+				border-radius: 2px;
+				background: rgba(180,188,200,0.4);
+				outline: none;
+				cursor: pointer;
+			}
+
+			input[type=range].speed-slider::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 13px;
+				height: 13px;
+				border-radius: 50%;
+				background: var(--accent-blue);
+				border: 2px solid #fff;
+				box-shadow: 0 1px 6px rgba(26,111,168,0.40);
+				cursor: pointer;
+			}
+
+			/* ─── Speed Display ─── */
+			.speed-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.speed-label {
+				font-family: 'Share Tech Mono', monospace;
+				font-size: var(--font-size);
+				color: var(--text-muted);
+			}
+
+			.speed-value {
+				font-family: 'Orbitron', monospace;
+				font-size: 13px;
+				font-weight: 700;
+				color: var(--accent-blue);
+			}
+
+			/* ─── Console Log ─── */
+			#console_log {
+				font-family: 'Share Tech Mono', monospace;
+				font-size: 9px;
+				color: var(--text-muted);
+				line-height: 1.6;
+				max-height: 120px;
+				overflow-y: auto;
+				display: flex;
+				flex-direction: column;
+				gap: 1px;
+				scrollbar-width: thin;
+				scrollbar-color: var(--panel-border) transparent;
+			}
+
+			#console_log::-webkit-scrollbar { width: 3px; }
+			#console_log::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
+
+			#console_log div { padding: 1px 0; border-bottom: 1px solid rgba(180,188,200,0.12); }
+			#console_log div:last-child { color: var(--text-primary); }
+
+			/* ─── Bottom E-STOP Bar ─── */
+			#ui_footer {
+				pointer-events: auto;
+				height: 90px;
+				background: var(--header-bg);
+				backdrop-filter: blur(16px);
+				border-top: 1.5px solid var(--panel-border);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 20px;
+				flex-shrink: 0;
+				padding: 0 20px;
+			}
+
+			.footer-info {
+				font-family: 'Share Tech Mono', monospace;
+				font-size: 9px;
+				color: var(--text-label);
+				letter-spacing: 0.08em;
+				line-height: 1.5;
+				text-align: right;
+			}
+
+			#btn_AR {
+				height: 40px;
+				min-width: 210px;
+				border: 2.5px solid #60bee4;
+				border-radius: 6px;
+				background: #60bee4;
+				color: #fff;
+				font-family: 'Orbitron', monospace;
+				font-size: 18px;
+				font-weight: 900;
+				letter-spacing: 0.18em;
+				cursor: pointer;
+				box-shadow: 0 2px 16px rgba(10, 198, 255, 0.35);
+				transition: all 0.15s;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 8px;
+				
+			}
+
+			#btn_AR:hover {
+				box-shadow: 0 2px 28px rgba(10, 198, 255, 0.35);
+				transform: scale(1.02);
+			}
+
+			#btn_AR:active { transform: scale(0.98); }
+
+			.footer-hazard {
+				height: 40px;
+				width: 60px;
+				border-radius: 6px;
+				border: 1.5px solid rgba(10, 180, 232, 0.3);
+				background: repeating-linear-gradient(
+					-45deg,
+					var(--stripe-light) 0px, var(--stripe-light) 6px,
+					var(--stripe-dark) 6px, var(--stripe-dark) 12px
+				);
+				flex-shrink: 0;
+			}
+
+			/* ─── Center spacer ─── */
+			.center-space { flex: 1; pointer-events: none; }
+
+			/* ─── Scrollbar track ─── */
+			.side-panel { overflow-y: auto; }
 
 		</style>
 
@@ -48,16 +579,148 @@
 			}
 		</script>
 	</head>
-	
-	<body>
-		<!-- Center 3D Area -->
-		<div id="threeContainer"></div>
 
+	<body>
+		<!-- Grid Background Texture -->
+		<div class="grid-bg"></div>
+
+		<!-- 3D Canvas -->
+		<div id="threeContainer"></div>
 		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
-		<!--<div class="web3d_icon"></div>-->
+
+		<!-- ═══ UI OVERLAY ═══ -->
+		<div id="ui_layer" >
+
+			<!-- HEADER -->
+			<div id="ui_header">
+				<div class="header-left">
+					<div class="header-brand"><span>ROBOTIC ARM CONCEPT</span></div>
+					<div class="header-divider"></div>
+					<div class="header-subtitle">6-AXIS INDUSTRIAL MANIPULATOR · WEBGPU RENDERER</div>
+				</div>
+				<div class="header-right">
+					<div class="status-badge">
+						<div class="status-dot" id="status_dot"></div>
+						<div class="status-text" id="status_text">AUTO CYCLE ACTIVE</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- MAIN ROW -->
+			<div id="ui_main">
+
+				<!-- ── LEFT PANEL ── -->
+				<div class="side-panel">
+
+					<div class="panel-card">
+						<div class="card-header">
+							<div class="card-header-icon"></div>
+							<div class="card-title">Operation Mode</div>
+						</div>
+						<div class="card-body">
+							<div class="mode-toggle-row">
+								<button class="mode-btn active" id="btn_mode_auto">AUTO RUN</button>
+								<button class="mode-btn" id="btn_mode_manual">MANUAL</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Joint Axis Control -->
+					<div class="panel-card">
+						<div class="card-header">
+							<div class="card-header-icon" style="background:var(--accent-orange)"></div>
+							<div class="card-title">Joint Axis Control</div>
+						</div>
+						<div class="card-body">
+
+							<div class="axis-row">
+								<div class="axis-header">
+									<span class="axis-label">Axis 1 rot, range ±90 °</span>
+									<span class="axis-value" id="val_axis_1">0°</span>
+								</div>
+								<input type="range" class="axis-slider" id="slider_axis_1" min="-90" max="90" value="0" disabled>
+							</div>
+
+							<div class="axis-row">
+								<div class="axis-header">
+									<span class="axis-label">Axis 2 rot, range ±30 °</span>
+									<span class="axis-value" id="val_axis_2">0°</span>
+								</div>
+								<input type="range" class="axis-slider" id="slider_axis_2" min="-30" max="30" value="0" disabled>
+							</div>
+
+							<div class="axis-row">
+								<div class="axis-header">
+									<span class="axis-label">Axis 3 rot, range ±30 °</span>
+									<span class="axis-value" id="val_axis_3">0°</span>
+								</div>
+								<input type="range" class="axis-slider" id="slider_axis_3" min="-30" max="30" value="0" disabled>
+							</div>
+
+							<div class="axis-row">
+								<div class="axis-header">
+									<span class="axis-label">Axis 4 rot, range ±180 °</span>
+									<span class="axis-value" id="val_axis_4">0°</span>
+								</div>
+								<input type="range" class="axis-slider" id="slider_axis_4" min="-180" max="180" value="0" disabled>
+							</div>
+
+							<div class="axis-row">
+								<div class="axis-header">
+									<span class="axis-label">Axis 5 rot, range ±90 °</span>
+									<span class="axis-value" id="val_axis_5">0°</span>
+								</div>
+								<input type="range" class="axis-slider" id="slider_axis_5" min="-90" max="90" value="0" disabled>
+							</div>
+
+							<div class="axis-row">
+								<div class="axis-header">
+									<span class="axis-label">Axis 6 rot, range ±180 °</span>
+									<span class="axis-value" id="val_axis_6">0°</span>
+								</div>
+								<input type="range" class="axis-slider" id="slider_axis_6" min="-180" max="180" value="0" disabled>
+							</div>
+
+						</div>
+					</div>
+
+					<!-- Speed Override -->
+					<div class="panel-card">
+						<div class="card-header">
+							<div class="card-header-icon" style="background:var(--accent-blue)"></div>
+							<div class="card-title">Speed Override</div>
+						</div>
+						<div class="card-body">
+							<div class="speed-row">
+								<span class="speed-label">SPEED MULTIPLIER</span>
+								<span class="speed-value" id="val_speed_mult">1.0×</span>
+							</div>
+							<input type="range" class="speed-slider" id="slider_speed_mult" min="0.5" max="3.0" step="0.1" value="1.0">
+						</div>
+					</div>
+				</div>
+
+				<!-- Center 3D Space -->
+				<div class="center-space"></div>
+
+			</div>
+
+			<!-- FOOTER E-STOP -->
+			<div id="ui_footer">
+				<div class="footer-hazard"></div>
+				<button id="btn_AR">AR MODE</button>
+				<div class="footer-hazard"></div>
+				<div class="footer-info">
+					FIMAWORK ROBOTIC ARM XR-2026<br>
+					CLICK TO HALT ALL DRIVES
+				</div>
+			</div>
+
+		</div><!-- end ui_layer -->
 
 		<script type="module">
 			import * as THREE from 'three';
+			import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 			import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_functions.js';
 			import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_materials.js';
@@ -68,6 +731,7 @@
 
 			let scene, camera, renderer, controls;
 			let threeContainer = document.getElementById("threeContainer");
+			let labelRenderer;
 
 			let module_A = new THREE.Group();
 			let module_B = new THREE.Group();
@@ -79,19 +743,38 @@
 			let module_H = new THREE.Group();
 			let main_model = new THREE.Object3D();
 
-			let targetRotation_A=0;
-			let targetRotation_B=0;
-			let targetRotation_C=0;
-			let targetRotation_D=0;
-			let targetRotation_E=0;
-			let targetRotation_F=0;
-	
-			const CameraDefaultPos = new THREE.Vector3(2.707,1.323,5.281);
-			const ControlsTargetDefaultPos = new THREE.Vector3(-0.179,0.809,0.436);
+			let targetRotation_A = 0;
+			let targetRotation_B = 0;
+			let targetRotation_C = 0;
+			let targetRotation_D = 0;
+			let targetRotation_E = 0;
+			let targetRotation_F = 0;
+
+			const CameraDefaultPos = new THREE.Vector3(2.707, 1.323, 5.281);
+			const ControlsTargetDefaultPos = new THREE.Vector3(-0.179, 0.809, 0.436);
+
+			// ─── Control State ───
+			let isAutoMode    = true;
+			let isEStop       = false;
+			let speedMultiplier = 1.0;
+			let activeSequence = null;
+			let seqIndex = 0;
+			let seqTimer = null;
+			let cycleCount = 0;
+			let startTime = Date.now();
+
+			let labelTarget_J1=new THREE.Object3D();
+			let labelTarget_J2=new THREE.Object3D();
+			let labelTarget_J3=new THREE.Object3D();
+			let labelTarget_J4=new THREE.Object3D();
+			let labelTarget_J5=new THREE.Object3D();
+			let labelTarget_J6=new THREE.Object3D();
+
+
 
 			init();
-			FXUI.InstLoadingEffect_Type_A(true);
-			RobotArmAnimation();
+			FXUI.LoadingEffectManager("A",true);
+			RobotArmAutoLoop();
 
 			async function init() {
 				FX.SetupEnvironment("cloud");
@@ -102,20 +785,23 @@
 				camera = new THREE.PerspectiveCamera(24, threeContainer.clientWidth / threeContainer.clientHeight, 0.001, 1000);
 				renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
 				renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
-
 				renderer.setClearColor(0x000000, 0.0);
 				renderer.toneMapping = THREE.ACESFilmicToneMapping;
 				renderer.toneMappingExposure = 0.5;
 				threeContainer.appendChild(renderer.domElement);
 
-				await renderer.init();
+				//label
+				labelRenderer = new CSS2DRenderer();
+				labelRenderer.setSize( window.innerWidth , window.innerHeight );
+				labelRenderer.domElement.style.position = 'absolute';
+				labelRenderer.domElement.style.top = '0px';
+				threeContainer.appendChild( labelRenderer.domElement );
 
-				const phone_cam_pos=new THREE.Vector3(2.778,1.612,4.181);
-				const phone_controls_pos=new THREE.Vector3(0.026,0.774,0.270);
+				await renderer.init();
 
 				camera.position.copy(CameraDefaultPos);
 
-				controls = new OrbitControls(camera, renderer.domElement);
+				controls = new OrbitControls(camera, labelRenderer.domElement);
 				controls.enablePan = false;
 				controls.panSpeed = 0.4;
 				controls.enableDamping = true;
@@ -125,14 +811,16 @@
 				controls.target.copy(ControlsTargetDefaultPos);
 				controls.zoomSpeed = 0.5;
 				controls.autoRotate = false;
-
 				controls.maxPolarAngle = FX.ToThreeEulerAngle(95);
 				controls.minPolarAngle = FX.ToThreeEulerAngle(-90);
 				controls.update();
 
 				FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg', scene);
-				scene.environmentRotation.y = FX.ToThreeEulerAngle(-45); 
+				scene.environmentRotation.y = FX.ToThreeEulerAngle(-45);
+
+				//labelTarget
 				
+
 				const loader = new GLTFLoader();
 				loader.setDRACOLoader(FX.dracoLoader);
 				loader.parse(
@@ -140,108 +828,74 @@
 					'',
 					(gltf) => {
 						const model = gltf.scene;
-
 						model.position.set(0, 0, 0);
 						model.rotation.set(0, 0, 0);
 						model.scale.set(1, 1, 1);
 
-						const black_housing_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.75,false,1,'./textures/Gravel.png',new THREE.Vector2(100, 100),new THREE.Vector2(0, 0),'./textures/Gravel.png',new THREE.Vector2(600, 600),2);
-						const orange_material = FXM.InstMaterial(0xFF9500,0.105,0.36,0.086,1.4999999999999998,0.49999999999999983,false,1,true);
-						const metal_material = FXM.InstMaterial(0xDADBDD,0.25,0.75,1,2.3333333333333335,1,false,1,true);
-						const logo_material=FXM.InstMaterial(0x000000,1,0,0,2.3333333333333335,1,false,1,true);
+						const black_housing_material = FXM.InstEtchingMaterial(0x363636, 0.35, 0.5, 0.75, false, 1, './textures/Gravel.png', new THREE.Vector2(100, 100), new THREE.Vector2(0, 0), './textures/Gravel.png', new THREE.Vector2(600, 600), 2);
+						const orange_material   = FXM.InstMaterial(0xFF7300,0.105,0.36,0.086,1.4999999999999998,0.49999999999999983,false,1,true);
+						const metal_material    = FXM.InstMaterial(0xDADBDD, 0.25, 0.75, 1, 2.3333333333333335, 1, false, 1, true);
+						const logo_material     = FXM.InstMaterial(0x000000, 1, 0, 0, 2.3333333333333335, 1, false, 1, true);
+						ClearCoatEffect(orange_material, 1.0, 0.5);
 
-						ClearCoatEffect(orange_material,1.0,0.5);
-
-						model.traverse(function (object) {	
-
-							if (object.name === "axle_A") {
-								object.layers.set(1);
-								module_A.position.copy(FX.ReturnModelCenter(object));
+						model.traverse(function (object) {
+							if (object.name === "axle_A") 
+							{ 
+								object.layers.set(1); 
+								module_A.position.copy(FX.ReturnModelCenter(object)); 
+								labelTarget_J1.position.copy(FX.ReturnModelCenter(object));
 							}
 
-							if (object.name === "axle_B") {
-								object.layers.set(1);
-								module_B.position.copy(FX.ReturnModelCenter(object));
+							if (object.name === "axle_B") 
+							{ 
+								object.layers.set(1); 
+								module_B.position.copy(FX.ReturnModelCenter(object)); 
+								labelTarget_J2.position.copy(FX.ReturnModelCenter(object));
 							}
 
-							if (object.name === "axle_C") {
-								object.layers.set(1);
-								module_C.position.copy(FX.ReturnModelCenter(object));
+							if (object.name === "axle_C") 
+							{ 
+								object.layers.set(1); 
+								module_C.position.copy(FX.ReturnModelCenter(object)); 
+								labelTarget_J3.position.copy(FX.ReturnModelCenter(object));
 							}
 
-							if (object.name === "axle_D") {
-								object.layers.set(1);
-								module_D.position.copy(FX.ReturnModelCenter(object));
+							if (object.name === "axle_D") 
+							{ 
+								object.layers.set(1); 
+								module_D.position.copy(FX.ReturnModelCenter(object)); 
+								labelTarget_J4.position.copy(FX.ReturnModelCenter(object));
 							}
 
-							if (object.name === "axle_E") {
-								object.layers.set(1);
-								module_E.position.copy(FX.ReturnModelCenter(object));
+							if (object.name === "axle_E") 
+							{ 
+								object.layers.set(1); 
+								module_E.position.copy(FX.ReturnModelCenter(object)); 
+								labelTarget_J5.position.copy(FX.ReturnModelCenter(object));
 							}
 
-							if (object.name === "axle_F") {
-								object.layers.set(1);
-								module_F.position.copy(FX.ReturnModelCenter(object));
+							if (object.name === "axle_F") 
+							{ 
+								object.layers.set(1); 
+								module_F.position.copy(FX.ReturnModelCenter(object)); 
+								labelTarget_J6.position.copy(FX.ReturnModelCenter(object));
 							}
 
-							if (object.name === "axle_G") {
-								object.layers.set(1);
-								module_G.position.copy(FX.ReturnModelCenter(object));
-							}
+							if (object.name === "axle_G") { object.layers.set(1); module_G.position.copy(FX.ReturnModelCenter(object)); }
+							if (object.name === "axle_H") { object.layers.set(1); module_H.position.copy(FX.ReturnModelCenter(object)); }
 
-							if (object.name === "axle_H") {
-								object.layers.set(1);
-								module_H.position.copy(FX.ReturnModelCenter(object));
-							}
-
-							if (object.name.includes("Base")) {
-								FX.ReturnBufferGeometry(object, black_housing_material, main_model, scene);
-							}
-
-							if (object.name.includes("LowerArm")) {
-								FX.ReturnBufferGeometry(object, orange_material, module_A, scene);
-							}
-
-							if (object.name.includes("blackHousing")) {
-								FX.ReturnBufferGeometry(object, black_housing_material, null, scene);
-							}
-
-							if (object.name.includes("Screw")) {
-								FX.ReturnBufferGeometry(object, null, null, scene);
-							}
-
-							if (object.name.includes("MiddleArm")) {
-								FX.ReturnBufferGeometry(object, orange_material, module_B, scene);
-							}
-
-							if (object.name.includes("UpperArm")) {
-								FX.ReturnBufferGeometry(object, orange_material, module_C, scene);
-							}
-
-							if (object.name.includes("Hand")) {
-								FX.ReturnBufferGeometry(object, orange_material, null, scene);
-							}
-
-							if (object.name.includes("Head_01")) {
-								FX.ReturnBufferGeometry(object, orange_material, module_E, scene);
-							}
-							
-							if (object.name.includes("Head_02")) {
-								FX.ReturnBufferGeometry(object, metal_material, module_F, scene);
-							}
-							
-							if (object.name.includes("Support")) {
-								FX.ReturnBufferGeometry(object, orange_material, module_G, scene);
-							}
-
-							if (object.name.includes("Connector")) {
-								FX.ReturnBufferGeometry(object, orange_material, module_H, scene);
-							}
-
-							if (object.name.includes("logo")) {
-								FX.ReturnBufferGeometry(object, logo_material, null, scene);
-							}
-
+							if (object.name.includes("Base"))        FX.ReturnBufferGeometry(object, black_housing_material, main_model, scene);
+							if (object.name.includes("LowerArm"))    FX.ReturnBufferGeometry(object, orange_material, module_A, scene);
+							if (object.name.includes("blackHousing"))FX.ReturnBufferGeometry(object, black_housing_material, null, scene);
+							if (object.name.includes("Screw"))       FX.ReturnBufferGeometry(object, null, null, scene);
+							if (object.name.includes("MiddleArm"))   FX.ReturnBufferGeometry(object, orange_material, module_B, scene);
+							if (object.name.includes("UpperArm"))    FX.ReturnBufferGeometry(object, orange_material, module_C, scene);
+							if (object.name.includes("Hand"))        FX.ReturnBufferGeometry(object, orange_material, null, scene);
+							if (object.name.includes("Head_01"))     FX.ReturnBufferGeometry(object, orange_material, module_E, scene);
+							if (object.name.includes("Head_02"))     FX.ReturnBufferGeometry(object, metal_material, module_F, scene);
+							if (object.name.includes("Support"))     FX.ReturnBufferGeometry(object, orange_material, module_G, scene);
+							if (object.name.includes("Connector"))   FX.ReturnBufferGeometry(object, orange_material, module_H, scene);
+							if (object.name.includes("logo"))        FX.ReturnBufferGeometry(object, logo_material, null, scene);
 						});
 
 						module_E.attach(module_F);
@@ -254,103 +908,228 @@
 						module_A.attach(scene.getObjectByName("BufferGeometry_blackHousing"));
 						module_D.attach(scene.getObjectByName("BufferGeometry_Hand"));
 						module_D.attach(scene.getObjectByName("BufferGeometry_logo"));
-
-						//scene.getObjectByName("BufferGeometry_logo").frustumCulled=false;
-
 						module_G.attach(module_H);
 						module_C.attach(module_G);
-
 						scene.add(main_model);
+						
+
+						module_A.attach(labelTarget_J1);
+						module_B.attach(labelTarget_J2);
+						module_C.attach(labelTarget_J3);
+						module_D.attach(labelTarget_J4);
+						module_E.attach(labelTarget_J5);
+						module_F.attach(labelTarget_J6);
+
+						
 
 						setTimeout(() => {
 							renderer.setAnimationLoop(animate);
-							FXUI.InstLoadingEffect_Type_A(false);
+							FXUI.LoadingEffectManager("A",false);
+							//FX.Hierarchy(main_model,camera,scene,renderer,controls); 
 						}, 1000);
 					},
-					(error) => {
-						console.error('Failed to load model:', error);
-					}
+					(error) => { console.error('Failed to load model:', error); }
 				);
 
 				FX.InitWebGPUShadow(scene, {
 					shadow: { blur: 0.5, darkness: 0.6 },
-					plane: { color: '#ffffff', opacity: 1 }
+					plane:  { color: '#ffffff', opacity: 1 }
 				});
 
-				window.addEventListener('resize', onWindowResize);  
+				
+
+				const geometry = new THREE.BoxGeometry( 0.01, 0.01, 0.01 );
+				const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+				const cube = new THREE.Mesh( geometry, material );
+				cube.position.set(-0.2,1.5,2);
+				//main_model.attach( cube );
+
+				
+
+				//module_F.attach(labelTarget_J6);
+				InstSceneBtn("diag-value",labelTarget_J1,"rt_j1",new THREE.Vector2(-0.5,6));
+				InstSceneBtn("diag-value",labelTarget_J2,"rt_j2",new THREE.Vector2(1.8,0));
+				InstSceneBtn("diag-value",labelTarget_J3,"rt_j3",new THREE.Vector2(0,3.9));
+				InstSceneBtn("diag-value",labelTarget_J4,"rt_j4",new THREE.Vector2(0,-2));
+				InstSceneBtn("diag-value",labelTarget_J5,"rt_j5",new THREE.Vector2(0,4));
+				InstSceneBtn("diag-value",labelTarget_J6,"rt_j6",new THREE.Vector2(1.5,1));
+	
+
+				console.log(labelTarget_J6);
+
+				//FX.Hierarchy(main_model,camera,scene,renderer,controls); 
+
+
+
+
+
+				window.addEventListener('resize', onWindowResize);
 			}
 
 			function onWindowResize() {
 				camera.aspect = threeContainer.clientWidth / threeContainer.clientHeight;
 				camera.updateProjectionMatrix();
 				renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+				labelRenderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight );
 			}
 
-			// Rotation Smooth LERP Animation Loop
+			// ─── Render Loop ───
 			function animate(timestamp) {
 				controls.update();
-
 				renderer.render(scene, camera);
+				labelRenderer.render( scene, camera );
 
-				SmoothUpdateRotation(module_A,targetRotation_A,"y",0.04);
-				SmoothUpdateRotation(module_B,targetRotation_B,"x",0.04);
-				SmoothUpdateRotation(module_C,targetRotation_C,"x",0.04);
-				SmoothUpdateRotation(module_D,targetRotation_D,"z",0.1);
-				SmoothUpdateRotation(module_E,targetRotation_E,"x",0.04);
-				SmoothUpdateRotation(module_F,targetRotation_F,"z",0.01);
-				SmoothUpdateRotation(module_G,-targetRotation_C,"x",0.04);
-				SmoothUpdateRotation(module_H,targetRotation_C,"x",0.04);
+				SmoothUpdateRotation(module_A, targetRotation_A, "y", 0.04);
+				SmoothUpdateRotation(module_B, targetRotation_B, "x", 0.04);
+				SmoothUpdateRotation(module_C, targetRotation_C, "x", 0.04);
+				SmoothUpdateRotation(module_D, targetRotation_D, "z", 0.1);
+				SmoothUpdateRotation(module_E, targetRotation_E, "x", 0.04);
+				SmoothUpdateRotation(module_F, targetRotation_F, "z", 1);
+				SmoothUpdateRotation(module_G, -targetRotation_C, "x", 0.04);
+				SmoothUpdateRotation(module_H,  targetRotation_C, "x", 0.04);
 
-				//影子工具
 				FX.UpdateWebGPUShadow(renderer, scene);
+
+				// Update slider display values
+				document.getElementById("val_axis_1").textContent = Math.round(targetRotation_A) + "°";
+				document.getElementById("val_axis_2").textContent = Math.round(targetRotation_B) + "°";
+				document.getElementById("val_axis_3").textContent = Math.round(targetRotation_C) + "°";
+				document.getElementById("val_axis_4").textContent = Math.round(targetRotation_D) + "°";
+				document.getElementById("val_axis_5").textContent = Math.round(targetRotation_E) + "°";
+				document.getElementById("val_axis_6").textContent = Math.round(targetRotation_F) + "°";
+
+				// Realtime joint readout
+				document.getElementById("rt_j1").textContent = "Axis 1 rot"+"\n"+THREE.MathUtils.radToDeg(module_A.rotation.y).toFixed(0) + "°";
+				document.getElementById("rt_j2").textContent = "Axis 2 rot"+"\n"+THREE.MathUtils.radToDeg(module_B.rotation.x).toFixed(0) + "°";
+				document.getElementById("rt_j3").textContent = "Axis 3 rot"+"\n"+THREE.MathUtils.radToDeg(module_C.rotation.x).toFixed(0) + "°";
+				document.getElementById("rt_j4").textContent = "Axis 4 rot"+"\n"+THREE.MathUtils.radToDeg(module_D.rotation.z).toFixed(0) + "°";
+				document.getElementById("rt_j5").textContent = "Axis 5 rot"+"\n"+THREE.MathUtils.radToDeg(module_E.rotation.x).toFixed(0) + "°";
+				document.getElementById("rt_j6").textContent = "Axis 6 rot"+"\n"+THREE.MathUtils.radToDeg(module_F.rotation.z).toFixed(0) + "°";
 			}
 
-			function SmoothUpdateRotation(target,targetDegree,axis,rpm)
-			{		
-				switch(axis)
-				{
-					case "x":target.rotation.x += (THREE.MathUtils.degToRad(targetDegree) - target.rotation.x) * rpm;break;
-					case "y":target.rotation.y += (THREE.MathUtils.degToRad(targetDegree) - target.rotation.y) * rpm;break;
-					case "z":target.rotation.z += (THREE.MathUtils.degToRad(targetDegree) - target.rotation.z) * rpm;break;
+			// ─── LERP Rotation ───
+			function SmoothUpdateRotation(target, targetDegree, axis, rpm) {
+				switch (axis) {
+					case "x": target.rotation.x += (THREE.MathUtils.degToRad(targetDegree) - target.rotation.x) * rpm; break;
+					case "y": target.rotation.y += (THREE.MathUtils.degToRad(targetDegree) - target.rotation.y) * rpm; break;
+					case "z": target.rotation.z += (THREE.MathUtils.degToRad(targetDegree) - target.rotation.z) * rpm; break;
 				}
 			}
 
-			function RobotArmAnimation()
-			{
-		
-				targetRotation_A=ReturnRandomValue(90,-90);
+			// ─── Auto Loop (random motion) ───
+			function RobotArmAutoLoop() {
+				if (!isAutoMode || isEStop) return;
 
-				targetRotation_B=ReturnRandomValue(30,-15);
-
-				targetRotation_C=ReturnRandomValue(30,-15);
-
-				targetRotation_D=ReturnRandomValue(60,-60);
-
-				targetRotation_E=ReturnRandomValue(90,-90);
-				targetRotation_F=ReturnRandomValue(180,-180);
-
-				setTimeout(() => { RobotArmAnimation();}, ReturnRandomValue(5000,500));//1000=1sec}
-
+				if (activeSequence) {
+					// Play preset sequence
+					if (seqIndex < activeSequence.length) {
+						const step = activeSequence[seqIndex];
+						targetRotation_A = step.a;
+						targetRotation_B = step.b;
+						targetRotation_C = step.c;
+						targetRotation_D = step.d;
+						targetRotation_E = step.e;
+						targetRotation_F = step.f;
+						seqIndex++;
+						seqTimer = setTimeout(RobotArmAutoLoop, (step.duration || 2000) / speedMultiplier);
+					} else {
+						// Sequence complete → back to random auto
+						seqIndex = 0;
+						activeSequence = null;
+						cycleCount++;
+						document.getElementById("diag_cycle").textContent = cycleCount;
+						setStatus("AUTO CYCLE ACTIVE", "var(--accent-green)");
+						seqTimer = setTimeout(RobotArmAutoLoop, 1000 / speedMultiplier);
+					}
+				} else {
+					// Random motion
+					targetRotation_A = ReturnRandomValue(90, -90);
+					targetRotation_B = ReturnRandomValue(30, -15);
+					targetRotation_C = ReturnRandomValue(30, -15);
+					targetRotation_D = ReturnRandomValue(60, -60);
+					targetRotation_E = ReturnRandomValue(90, -90);
+					targetRotation_F = ReturnRandomValue(180, -180);
+					cycleCount++;
+					seqTimer = setTimeout(RobotArmAutoLoop, ReturnRandomValue(5000, 500) / speedMultiplier);
+				}
 			}
 
-			function ReturnRandomValue(max,min)
-			{
+			function ReturnRandomValue(max, min) {
 				return Math.floor(Math.random() * (max - min + 1)) + min;
 			}
 
-			//僅支援MeshPhysicalMaterial材質
-			//高亮面反射clearcoat = 1.0, clearcoatRoughness = 0.05，
-			//半啞光保護漆：clearcoat = 0.5, clearcoatRoughness = 0.4
-			//關閉效果：clearcoat = 0.0
-			function ClearCoatEffect(targetMaterial,clearcoat_value,clearcoatRoughness_value)
-			{
-				targetMaterial.clearcoat= clearcoat_value;
-				targetMaterial.clearcoatRoughness=clearcoatRoughness_value;
-    			targetMaterial.needsUpdate = true;
+			function logMessage(msg) {
+				const logBox = document.getElementById("console_log");
+				const item   = document.createElement("div");
+				const time   = new Date().toLocaleTimeString();
+				item.textContent = "[" + time + "] " + msg;
+				logBox.appendChild(item);
+				logBox.scrollTop = logBox.scrollHeight;
+				if (logBox.children.length > 40) logBox.removeChild(logBox.firstChild);
 			}
 
+			function setStatus(text, color) {
+				document.getElementById("status_text").textContent = text;
+				document.getElementById("status_dot").style.background  = color;
+				document.getElementById("status_dot").style.boxShadow   = "0 0 6px " + color;
+			}
 
+			function ClearCoatEffect(targetMaterial, clearcoat_value, clearcoatRoughness_value) {
+				targetMaterial.clearcoat = clearcoat_value;
+				targetMaterial.clearcoatRoughness = clearcoatRoughness_value;
+				targetMaterial.needsUpdate = true;
+			}
+
+			// ─── Mode Toggle ───
+			document.getElementById("btn_mode_auto").addEventListener("click", () => {
+				if (isEStop) return;
+				isAutoMode = true;
+				activeSequence = null;
+				document.getElementById("btn_mode_auto").classList.add("active");
+				document.getElementById("btn_mode_manual").classList.remove("active");
+				document.querySelectorAll(".axis-slider").forEach(el => el.disabled = true);
+				setStatus("AUTO CYCLE ACTIVE", "var(--accent-green)");
+				RobotArmAutoLoop();
+			});
+
+			document.getElementById("btn_mode_manual").addEventListener("click", () => {
+				if (isEStop) return;
+				isAutoMode = false;
+				if (seqTimer) clearTimeout(seqTimer);
+				document.getElementById("btn_mode_auto").classList.remove("active");
+				document.getElementById("btn_mode_manual").classList.add("active");
+				document.querySelectorAll(".axis-slider").forEach(el => el.disabled = false);
+				setStatus("MANUAL HOLD STATE", "var(--accent-blue)");
+			});
+
+			// ─── Speed Override ───
+			document.getElementById("slider_speed_mult").addEventListener("input", (e) => {
+				speedMultiplier = parseFloat(e.target.value);
+				document.getElementById("val_speed_mult").textContent = speedMultiplier.toFixed(1) + "×";
+			});
+
+			// ─── Axis Sliders ───
+			document.getElementById("slider_axis_1").addEventListener("input", (e) => { if (!isAutoMode && !isEStop) targetRotation_A = parseFloat(e.target.value); });
+			document.getElementById("slider_axis_2").addEventListener("input", (e) => { if (!isAutoMode && !isEStop) targetRotation_B = parseFloat(e.target.value); });
+			document.getElementById("slider_axis_3").addEventListener("input", (e) => { if (!isAutoMode && !isEStop) targetRotation_C = parseFloat(e.target.value); });
+			document.getElementById("slider_axis_4").addEventListener("input", (e) => { if (!isAutoMode && !isEStop) targetRotation_D = parseFloat(e.target.value); });
+			document.getElementById("slider_axis_5").addEventListener("input", (e) => { if (!isAutoMode && !isEStop) targetRotation_E = parseFloat(e.target.value); });
+			document.getElementById("slider_axis_6").addEventListener("input", (e) => { if (!isAutoMode && !isEStop) targetRotation_F = parseFloat(e.target.value); });
+
+			function InstSceneBtn(thisMainCSS,thisLabelTarget,thisID,offset)
+			{
+				const MainDiv = document.createElement( 'div' );
+				MainDiv.className = thisMainCSS;
+				MainDiv.textContent="---";
+				MainDiv.id = thisID;
+
+				const Label = new CSS2DObject( MainDiv );
+				Label.position.set( thisLabelTarget.position.x,thisLabelTarget.position.y,thisLabelTarget.position.z);
+				Label.center.set( offset.x, offset.y );
+				thisLabelTarget.attach( Label );
+				Label.layers.set( 0 );
+			}
 
 		</script>
-    </body>
+	</body>
 </html>
