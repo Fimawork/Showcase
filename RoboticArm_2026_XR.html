@@ -830,6 +830,36 @@
 				border-color: var(--accent-blue);
 			}
 
+			@media screen and (max-width:768px)/*手機*/
+			{
+				#ui_header
+				{
+					display: none;
+				}
+				#ui_main
+				{
+					display: none;
+				}
+
+				.footer-hazard
+				{
+					display: none;
+				}
+
+				#ui_footer
+				{
+					position: fixed;
+					bottom: 0%;
+				}
+
+				.fimawork_logo
+				{
+					position: fixed;
+					left: 6%;
+					top: 3%;
+				}
+			}
+
 		</style>
 
 		<script type="importmap">
@@ -1249,6 +1279,49 @@
 			let labelTarget_J6=new THREE.Object3D();
 
 
+			// XR Setup
+			const XRBtn = document.getElementById('btn_AR');
+			const USDZ_PATH = atob("Li9tb2RlbHMvUm9ib3RpY0FybV8yMDI2X1hSLnVzZHo=");
+			const GLB_PATH = atob("Li9tb2RlbHMvUm9ib3RpY0FybV8yMDI2X1hSLmdsYg==");
+
+			XRBtn.addEventListener('click', async () => {
+				await FX.LoadXRSceneEvent(GLB_PATH, USDZ_PATH, 'floor', XRBtn);
+				await TestXRRecorder();
+			});
+
+			async function TestXRRecorder() {
+				const GAS_URL = 'https://script.google.com/macros/s/AKfycbxK3AOGluqtjfJHxkOzoKnsgDnzTj7AQiiDjIRZOMWnNVtmD3bw0wTfEBNeXRRfe26A/exec';
+				try {
+					const ipResponse = await fetch('https://ipapi.co/json/');
+					const ipData = await ipResponse.json();
+					const country = ipData.country_name || '未知國家';
+					const city = ipData.city || '未知城市';
+
+					fetch(GAS_URL, {
+						method: 'POST',
+						mode: 'no-cors',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							action: '進行AR功能測試_Robotic Arm',
+							country: country,
+							city: city
+						})
+					});
+				} catch (err) {
+					fetch(GAS_URL, {
+						method: 'POST',
+						mode: 'no-cors',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							action: '進行AR功能測試_Robotic Arm',
+							country: '查詢失敗',
+							city: '查詢失敗'
+						})
+					});
+				}
+			}
+			
+
 
 			init();
 			FXUI.LoadingEffectManager("A",true);
@@ -1398,8 +1471,6 @@
 						module_E.attach(labelTarget_J5);
 						module_F.attach(labelTarget_J6);
 
-						
-
 						setTimeout(() => {
 							renderer.setAnimationLoop(animate);
 							FXUI.LoadingEffectManager("A",false);
@@ -1433,13 +1504,9 @@
 				InstSceneBtn("diag-value",labelTarget_J6,"rt_j6",new THREE.Vector2(1.5,1));
 	
 
-				console.log(labelTarget_J6);
+				console.log(main_model);
 
 				//FX.Hierarchy(main_model,camera,scene,renderer,controls); 
-
-
-
-
 
 				window.addEventListener('resize', onWindowResize);
 			}
