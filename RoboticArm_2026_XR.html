@@ -339,7 +339,14 @@
 				text-align: right;
 				width: auto;
 				height: auto;
+				padding: 5px 10px;
 			}
+
+			.diag-value:hover{
+				background: rgba(4, 200, 235, 0.4);
+				color: #fff;
+			}
+
 
 			.diag-value.warn { color: var(--accent-yellow); }
 			.diag-value.ok   { color: var(--accent-green); }
@@ -371,6 +378,11 @@
 				display: flex;
 				flex-direction: column;
 				gap: 9px;
+			}
+
+			.axis-row.active
+			{
+				background: rgba(4, 200, 235, 0.4);
 			}
 
 			.axis-header {
@@ -927,7 +939,7 @@
 						</div>
 						<div class="card-body">
 
-							<div class="axis-row">
+							<div class="axis-row" id="rt_j1_panel">
 								<div class="axis-header">
 									<span class="axis-label">Axis 1 rot, range ±90 °</span>
 									<span class="axis-value" id="val_axis_1">0°</span>
@@ -935,7 +947,7 @@
 								<input type="range" class="axis-slider" id="slider_axis_1" min="-90" max="90" value="0" disabled>
 							</div>
 
-							<div class="axis-row">
+							<div class="axis-row" id="rt_j2_panel">
 								<div class="axis-header">
 									<span class="axis-label">Axis 2 rot, range ±30 °</span>
 									<span class="axis-value" id="val_axis_2">0°</span>
@@ -943,7 +955,7 @@
 								<input type="range" class="axis-slider" id="slider_axis_2" min="-30" max="30" value="0" disabled>
 							</div>
 
-							<div class="axis-row">
+							<div class="axis-row" id="rt_j3_panel">
 								<div class="axis-header">
 									<span class="axis-label">Axis 3 rot, range ±30 °</span>
 									<span class="axis-value" id="val_axis_3">0°</span>
@@ -951,7 +963,7 @@
 								<input type="range" class="axis-slider" id="slider_axis_3" min="-30" max="30" value="0" disabled>
 							</div>
 
-							<div class="axis-row">
+							<div class="axis-row" id="rt_j4_panel">
 								<div class="axis-header">
 									<span class="axis-label">Axis 4 rot, range ±180 °</span>
 									<span class="axis-value" id="val_axis_4">0°</span>
@@ -959,7 +971,7 @@
 								<input type="range" class="axis-slider" id="slider_axis_4" min="-180" max="180" value="0" disabled>
 							</div>
 
-							<div class="axis-row">
+							<div class="axis-row" id="rt_j5_panel">
 								<div class="axis-header">
 									<span class="axis-label">Axis 5 rot, range ±90 °</span>
 									<span class="axis-value" id="val_axis_5">0°</span>
@@ -967,7 +979,7 @@
 								<input type="range" class="axis-slider" id="slider_axis_5" min="-90" max="90" value="0" disabled>
 							</div>
 
-							<div class="axis-row">
+							<div class="axis-row" id="rt_j6_panel">
 								<div class="axis-header">
 									<span class="axis-label">Axis 6 rot, range ±180 °</span>
 									<span class="axis-value" id="val_axis_6">0°</span>
@@ -1237,6 +1249,9 @@
 			import { RoboticArm_2026 } from './models/RoboticArm_2026_slices.js';
 			import 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js';
 
+			import { pass, uniform, time, oscSine, vec4 } from 'three/tsl';
+			import { outline } from 'three/addons/tsl/display/OutlineNode.js';
+
 			let scene, camera, renderer, controls;
 			let threeContainer = document.getElementById("threeContainer");
 			let labelRenderer;
@@ -1277,6 +1292,13 @@
 			let labelTarget_J4=new THREE.Object3D();
 			let labelTarget_J5=new THREE.Object3D();
 			let labelTarget_J6=new THREE.Object3D();
+
+			let renderPipeline, outlinePass;
+			let selectedObjects = [];
+
+			let Axle_A,Axle_B,Axle_C,Axle_D,Axle_E,Axle_F;
+
+			let isTagHover=false;
 
 
 			// XR Setup
@@ -1463,6 +1485,12 @@
 						module_C.attach(module_G);
 						scene.add(main_model);
 						
+						Axle_A=scene.getObjectByName("BufferGeometry_LowerArm");
+						Axle_B=scene.getObjectByName("BufferGeometry_MiddleArm");
+						Axle_C=scene.getObjectByName("BufferGeometry_UpperArm");
+						Axle_D=scene.getObjectByName("BufferGeometry_Hand");
+						Axle_E=scene.getObjectByName("BufferGeometry_Head_01");
+						Axle_F=scene.getObjectByName("BufferGeometry_Head_02");
 
 						module_A.attach(labelTarget_J1);
 						module_B.attach(labelTarget_J2);
@@ -1486,27 +1514,16 @@
 				});
 
 				
-
-				const geometry = new THREE.BoxGeometry( 0.01, 0.01, 0.01 );
-				const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-				const cube = new THREE.Mesh( geometry, material );
-				cube.position.set(-0.2,1.5,2);
-				//main_model.attach( cube );
-
-				
-
 				//module_F.attach(labelTarget_J6);
 				InstSceneBtn("diag-value",labelTarget_J1,"rt_j1",new THREE.Vector2(-0.5,6));
 				InstSceneBtn("diag-value",labelTarget_J2,"rt_j2",new THREE.Vector2(1.8,0));
 				InstSceneBtn("diag-value",labelTarget_J3,"rt_j3",new THREE.Vector2(0,3.9));
 				InstSceneBtn("diag-value",labelTarget_J4,"rt_j4",new THREE.Vector2(0,-2));
-				InstSceneBtn("diag-value",labelTarget_J5,"rt_j5",new THREE.Vector2(0,4));
-				InstSceneBtn("diag-value",labelTarget_J6,"rt_j6",new THREE.Vector2(1.5,1));
-	
-
-				console.log(main_model);
-
-				//FX.Hierarchy(main_model,camera,scene,renderer,controls); 
+				InstSceneBtn("diag-value",labelTarget_J5,"rt_j5",new THREE.Vector2(1,3));
+				InstSceneBtn("diag-value",labelTarget_J6,"rt_j6",new THREE.Vector2(1.5,0.5));
+				
+				//Outline
+				SetupOutlinePass({edgeStrength_value:5.0,thisScene:scene,thisCamera:camera,thisRenderer:renderer});
 
 				window.addEventListener('resize', onWindowResize);
 			}
@@ -1522,6 +1539,7 @@
 			function animate(timestamp) {
 				controls.update();
 				renderer.render(scene, camera);
+				renderPipeline.render();
 				labelRenderer.render( scene, camera );
 
 				SmoothUpdateRotation(module_A, targetRotation_A, "y", 0.04);
@@ -1532,7 +1550,7 @@
 				SmoothUpdateRotation(module_F, targetRotation_F, "z", 1);
 				SmoothUpdateRotation(module_G, -targetRotation_C, "x", 0.04);
 				SmoothUpdateRotation(module_H,  targetRotation_C, "x", 0.04);
-
+		
 				FX.UpdateWebGPUShadow(renderer, scene);
 
 				// Update slider display values
@@ -1673,6 +1691,88 @@
 				Label.center.set( offset.x, offset.y );
 				thisLabelTarget.attach( Label );
 				Label.layers.set( 0 );
+
+				function ReturnTagetAxle()
+				{
+					switch(thisID)
+					{
+						case "rt_j1":return Axle_A;
+						case "rt_j2":return Axle_B;
+						case "rt_j3":return Axle_C;
+						case "rt_j4":return Axle_D;
+						case "rt_j5":return Axle_E;
+						case "rt_j6":return Axle_F;
+					}
+				}
+
+				let panelID=thisID+"_panel";
+
+				MainDiv.addEventListener("pointerover", () => {
+					
+					SetOutlineEffect( ReturnTagetAxle() );
+					document.getElementById(panelID).classList.add("active");
+
+				});
+
+				MainDiv.addEventListener("pointerleave", () => {
+
+					SetOutlineEffect( null )
+					document.getElementById(panelID).classList.remove("active");
+
+				});
+			}
+
+			function SetupOutlinePass({edgeStrength_value=3.0,edgeGlow_value=0.5,edgeThickness_value=1.0,pulsePeriod_value=5,visibleEdgeColor_value=0x00dbff,hiddenEdgeColor_value=0x007a8e,thisScene=null,thisCamera=null,thisRenderer=null}= {}) 
+			{
+			    const edgeStrength = uniform( edgeStrength_value );
+				const edgeGlow = uniform( edgeGlow_value );
+				const edgeThickness = uniform( edgeThickness_value );
+				const pulsePeriod = uniform( pulsePeriod_value );
+				const visibleEdgeColor = uniform( new THREE.Color( visibleEdgeColor_value ) );
+				const hiddenEdgeColor = uniform( new THREE.Color( hiddenEdgeColor_value ) );
+			
+			    outlinePass = outline( thisScene, thisCamera, {
+					selectedObjects,
+					edgeGlow,
+					edgeThickness
+				});
+			
+				const { visibleEdge, hiddenEdge } = outlinePass;
+			
+				const period = time.div( pulsePeriod ).mul( 2 );
+				const osc = oscSine( period ).mul( .5 ).add( .5 ); // osc [ 0.5, 1.0 ]
+			
+				const outlineColor = visibleEdge.mul( visibleEdgeColor ).add( hiddenEdge.mul( hiddenEdgeColor ) ).mul( edgeStrength );
+				const outlinePulse = pulsePeriod.greaterThan( 0 ).select( outlineColor.mul( osc ), outlineColor );
+			
+			    const scenePass = pass( thisScene, thisCamera );
+			
+			    				// 2. 將 3D 模型顏色與 Outline 顏色相加
+			    const finalColor = scenePass.rgb.add( outlinePulse.rgb );
+			
+							// 3. 計算正確的 Alpha 通道（取 float 純量）：
+			    // 有模型 (scenePass.a) 或 有輪廓 (visibleEdge / hiddenEdge) 時顯示為 1，其餘背景區域為 0 (透明透出 CSS)
+			    const outlineAlpha = visibleEdge.r.add( hiddenEdge.r ).clamp( 0.0, 1.0 );
+			    const finalAlpha = scenePass.a.max( outlineAlpha );
+			
+			    // 輸出 
+			    renderPipeline = new THREE.RenderPipeline( thisRenderer );
+			    renderPipeline.outputNode = vec4( finalColor, finalAlpha );
+			}
+
+			function SetOutlineEffect( target ) 
+			{
+			    if(target)
+			    {
+			        selectedObjects = [];
+			        selectedObjects.push( target );
+			        outlinePass.selectedObjects=selectedObjects;
+			    }
+			
+			    else
+			    {
+			        outlinePass.selectedObjects = [];
+			    }
 			}
 
 		</script>
