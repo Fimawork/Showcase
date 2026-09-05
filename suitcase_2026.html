@@ -1,0 +1,407 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
+
+			body
+			{
+				margin: 0;
+				padding:0; 
+				background-color: #d6d6d6;
+				font-family: 'Inter', sans-serif;
+				overflow: hidden;
+			}
+			
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
+
+			#threeContainer {
+				position: absolute;
+				top: 0; left: 0;
+				width: 100%; height: 100%;
+				z-index: 6;
+			}
+
+		#btnContainer {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+			  }
+			}
+		</script>
+		
+
+	</head>
+	
+	<body>
+
+		<div id="threeContainer"></div> 
+
+		<!-- 觸發轉場的按鈕 -->
+<div id="btnContainer">
+    <button class="scene-btn" id="scene_A">香檳金 (Scene 1)</button>
+    <button class="scene-btn" id="scene_B">櫻花粉 (Scene 2)</button>
+    <button class="scene-btn" id="scene_C">天藍色 (Scene 3)</button>
+</div>
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_materials.js';
+import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_hud.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { suitcase_2026 } from './models/suitcase_2026_slices.js';
+import 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js';
+import { Inspector } from 'three/addons/inspector/Inspector.js';
+
+//transition工具
+import { uniform, pass } from 'three/tsl';
+import { transition } from 'three/addons/tsl/display/TransitionNode.js';
+import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js';
+
+
+let renderPipeline, transitionPass;
+let transition_textureNode;
+
+// 轉場控制 Node (使用 uniform 才能被 GSAP 平滑控制)
+const progressNode = uniform(0.0);
+const thresholdNode = uniform(0.1);
+const useTextureNode = uniform(1);
+
+let camera, renderer, stats, mixer;
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+let scene, scene_2,scene_3;
+
+// 宣告場景與 Pass
+let passA, passB, passC;
+
+let isTransitioning = false; // 防連點開關
+let currentIndex = 0;        // 記錄當前顯示的場景 (0, 1, 2)
+
+const timer = new THREE.Timer();
+
+const modelPosition=new THREE.Vector3(0,0,0);
+const modelRotation=new THREE.Vector3(0,0,0);
+const modeScale=1;
+
+const CameraDefaultPos=new THREE.Vector3(0.00,0.635,-2.8);
+const ControlsTargetDefaultPos=new THREE.Vector3(0,0.39,0.6);
+
+let main_model= new THREE.Object3D();
+let second_model= new THREE.Object3D();
+let third_model= new THREE.Object3D();
+
+// 2. 用於控制當前與目標 Pass 的動態 Uniform 索引 (0: passA, 1: passB, 2: passC)
+const activeAIndex = uniform(0);
+const activeBIndex = uniform(1);
+
+let dynamicPassA;
+let dynamicPassB;
+
+
+init();
+//FX.Camera_Inspector(camera,controls);
+FXUI.InstLoadingEffect_Type_A(true);
+
+async function init()
+{
+	FX.SetupEnvironment("cloud");
+
+  	scene = new THREE.Scene();
+	scene_2= new THREE.Scene();
+	scene_3= new THREE.Scene();
+	scene.background = null;
+	scene_2.background = null;
+	scene_3.background = null;
+
+  	camera = new THREE.PerspectiveCamera( 30, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 100 );//非全螢幕比例設定
+  	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 1.0;
+  	threeContainer.appendChild( renderer.domElement );
+
+	// 建立對應的 PassNode
+	passA = pass(scene, camera);
+	passB = pass(scene_2, camera);
+	passC = pass(scene_3, camera);
+
+	// TSL 動態選擇 Pass
+    dynamicPassA = activeAIndex.equal(0).select(
+        passA,
+        activeAIndex.equal(1).select(passB, passC)
+    );
+
+    dynamicPassB = activeBIndex.equal(0).select(
+        passA,
+        activeBIndex.equal(1).select(passB, passC)
+    );
+	
+	// 初始化轉場貼圖 Node
+    const loader = new THREE.TextureLoader();
+    const transition_texture = loader.load('./textures/transition2.png');
+    transition_textureNode = new THREE.TextureNode( transition_texture );
+
+	renderPipeline = new THREE.RenderPipeline( renderer );
+
+	transitionPass = transition(
+        dynamicPassA,
+        dynamicPassB,
+        transition_textureNode,
+        progressNode,
+        thresholdNode,
+        useTextureNode
+    );
+	
+	// 將 outputNode 永久鎖定在 transitionPass
+    renderPipeline.outputNode = transitionPass;
+	progressNode.value = 0.0;
+	activeAIndex.value = 0; // 初始場景 0
+    activeBIndex.value = 0; // 靜止時與 A 保持一致
+
+	// 1. 先等待 Renderer 初始化完成
+	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
+
+  	camera.position.copy(CameraDefaultPos);
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+	controls = new OrbitControls( camera, renderer.domElement);
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.015;
+  	controls.maxDistance = 500;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+	controls.autoRotate=false;
+	controls.autoRotateSpeed=0.3;
+
+	controls.maxPolarAngle=FX.ToThreeEulerAngle(95);
+	controls.minPolarAngle=FX.ToThreeEulerAngle(-90);
+  	controls.update();
+
+  	///hdri 環境光源
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_2);
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_3);
+	scene.environmentRotation.y = FX.ToThreeEulerAngle(90); 
+	scene.environmentRotation.x = FX.ToThreeEulerAngle(30); 
+	scene_2.environmentRotation.y = FX.ToThreeEulerAngle(90); 
+	scene_2.environmentRotation.x = FX.ToThreeEulerAngle(30); 
+	scene_3.environmentRotation.y = FX.ToThreeEulerAngle(90); 
+	scene_3.environmentRotation.x = FX.ToThreeEulerAngle(30); 
+	
+	const loader_sucase = new GLTFLoader();
+    loader_sucase.setDRACOLoader(FX.dracoLoader);
+	loader_sucase.parse(
+    FX.Base64ToArrayBuffer(suitcase_2026()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+
+		model.position.set(0,0,0);
+		model.rotation.set(0,0, 0);
+		model.scale.set(modeScale,modeScale,modeScale);
+
+		const champagne_housing_material=FXM.InstEtchingMaterial(0xEEEBD3,0.3,0.5,0.3000000000000002,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+
+		const pink_housing_material=FXM.InstEtchingMaterial(0xFE90BC,0.3,0.5,0.3000000000000002,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+
+		const blue_housing_material=FXM.InstEtchingMaterial(0xdbf7ff,0.3,0.5,0.3000000000000002,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+
+		const casterMount_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.7500000000000001,false,1,"./textures/Gravel.png",new THREE.Vector2(100,100),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+
+		model.traverse( function ( object ) {	
+                  
+            if(object.name.includes("housing"))
+            {
+              FX.ReturnBufferGeometry(object,champagne_housing_material,main_model,scene);
+            }
+
+			if(object.name.includes("rubber"))
+            {
+              FX.ReturnBufferGeometry(object,null,main_model,scene);
+            }
+
+			if(object.name.includes("padding"))
+            {
+              FX.ReturnBufferGeometry(object,casterMount_material,main_model,scene);
+            }
+
+        });
+
+		main_model.add(model);
+		scene.add(main_model);
+		second_model=main_model.clone();
+		third_model=main_model.clone();
+
+		second_model.traverse( function ( object ) {	
+                  
+            if(object.name.includes("BufferGeometry_housing"))
+            {
+              FX.ReturnBufferGeometry(object,pink_housing_material,second_model,scene);
+            }
+
+        });
+
+		third_model.traverse( function ( object ) {	
+                  
+            if(object.name.includes("BufferGeometry_housing"))
+            {
+              FX.ReturnBufferGeometry(object,blue_housing_material,third_model,scene);
+            }
+
+        });
+
+		scene_2.add(second_model);
+		scene_3.add(third_model);
+
+		setTimeout(() => {
+			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
+			renderer.setAnimationLoop( animate );
+			FXUI.InstLoadingEffect_Type_A(false);
+			//FX.Hierarchy(main_model,camera,scene,renderer,controls); 
+		}, 1000);
+
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+	
+    document.getElementById("scene_A").addEventListener('click', () => {
+
+        transitionToScene(0);
+    
+	});
+
+	document.getElementById("scene_B").addEventListener('click', () => {
+
+        transitionToScene(1);
+    
+	});
+
+	document.getElementById("scene_C").addEventListener('click', () => {
+
+        transitionToScene(2);
+    
+	});
+
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.updateProjectionMatrix();
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+}
+
+function animate(timestamp) 
+{
+  	controls.update();
+
+    renderPipeline.render();
+
+  	// 自動更新時間（用來計算移動速度、旋轉等）
+    timer.update( timestamp );
+	const delta = timer.getDelta();
+
+	if ( mixer ) mixer.update( delta );
+}
+
+function transitionToScene(targetIndex) {
+    if (isTransitioning || targetIndex === currentIndex) return; // 避免動畫過程重複觸發
+    isTransitioning = true;
+
+	gsap.killTweensOf(
+        progressNode
+    );
+
+	// 鎖定起點與目標 Uniform
+    activeAIndex.value = currentIndex;
+    activeBIndex.value = targetIndex;
+	 
+	// TransitionNode 的方向是反的
+    // progress = 1 → A（原本）
+    // progress = 0 → B（目標）
+	progressNode.value = 1.0;
+
+	renderPipeline.render();
+
+    gsap.to(progressNode, {
+        value: 0.0,
+        duration: 1.5,
+        ease: 'power2.inOut',
+        onComplete: () => {
+            // 轉場完成：更新當前場景索引
+            currentIndex = targetIndex;
+			activeAIndex.value = targetIndex;
+
+			progressNode.value = 0.0;
+			isTransitioning = false;
+
+            console.log(`轉場成功！目前顯示 Scene ${currentIndex + 1}`);
+        }
+    });
+}
+
+		</script>
+    </body>
+
+</html>
