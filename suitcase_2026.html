@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 	<head>
 		<meta charset="utf-8">
 		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
@@ -9,25 +9,71 @@
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
 		<link rel="stylesheet" type="text/css" href="Main.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,600;0,700;0,900;1,300&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 		<style type="text/css">
-			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
 
-			body
-			{
-				margin: 0;
-				padding:0; 
-				background-color: #d6d6d6;
-				font-family: 'Inter', sans-serif;
-				overflow: hidden;
-			}
-			
-			canvas
-			{
-				width: 100%;
-   				height: 100%;
+			/* ─────────────────────────────────────────────
+			   CSS VARIABLES — Light luxury palette
+			───────────────────────────────────────────── */
+			:root {
+				--bg:            #EBEBEB;
+				--bg-2:          #F3F1EE;
+				--surface:       rgba(255,255,255,0.72);
+				--surface-strong: rgba(255,255,255,0.92);
+				--border:        rgba(0,0,0,0.08);
+				--text-primary:  #1A1A1A;
+				--text-secondary:#666666;
+				--text-muted:    #999999;
+				--accent:        #C8A96E;
+				--accent-dim:    rgba(200,169,110,0.18);
+				--shadow-soft:   0 4px 24px rgba(0,0,0,0.07);
+				--shadow-card:   0 8px 40px rgba(0,0,0,0.10);
+				--radius-lg:     20px;
+				--radius-md:     12px;
+				--radius-sm:     8px;
+				--transition:    0.3s cubic-bezier(0.4,0,0.2,1);
 			}
 
+			/* ─────────────────────────────────────────────
+			   BASE
+			───────────────────────────────────────────── */
+			*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+			body {
+				background-color: var(--bg);
+				font-family: 'Inter', sans-serif;
+				color: var(--text-primary);
+				overflow: hidden;
+				height: 100vh; width: 100vw;
+			}
+
+			canvas { width: 100%; height: 100%; }
+
+			/* ─────────────────────────────────────────────
+			   BACKGROUND SUBTLE DECORATION
+			───────────────────────────────────────────── */
+			.bg-noise {
+				position: fixed;
+				inset: 0;
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+				pointer-events: none;
+				z-index: 0;
+			}
+
+			.bg-gradient {
+				position: fixed;
+				inset: 0;
+				background: radial-gradient(ellipse 80% 60% at 60% 50%, rgba(255,255,255,0.55) 0%, transparent 70%);
+				pointer-events: none;
+				z-index: 0;
+			}
+
+			/* ─────────────────────────────────────────────
+			   THREE.JS CONTAINER
+			───────────────────────────────────────────── */
 			#threeContainer {
 				position: absolute;
 				top: 0; left: 0;
@@ -35,30 +81,475 @@
 				z-index: 6;
 			}
 
-		#btnContainer {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-        }
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(8px);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        button:hover {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(1.05);
-        }
+			/* ─────────────────────────────────────────────
+			   UI LAYER (above three.js)
+			───────────────────────────────────────────── */
+			.ui-layer {
+				position: fixed;
+				inset: 0;
+				z-index: 20;
+				pointer-events: none;
+			}
 
+			/* ─────────────────────────────────────────────
+			   TOP HEADER
+			───────────────────────────────────────────── */
+			.top-header {
+				position: absolute;
+				top: 0; left: 0; right: 0;
+				height: 64px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0 32px;
+				background: linear-gradient(180deg, rgba(235,235,235,0.96) 0%, rgba(235,235,235,0.0) 100%);
+				pointer-events: auto;
+			}
+
+			.brand-mark {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.brand-icon {
+				width: 32px; height: 32px;
+				background: var(--text-primary);
+				border-radius: 6px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.brand-icon svg {
+				width: 18px; height: 18px;
+				fill: white;
+			}
+
+			.brand-name {
+				font-size: 13px;
+				font-weight: 700;
+				letter-spacing: 0.16em;
+				text-transform: uppercase;
+				color: var(--text-primary);
+			}
+
+			.header-right {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+
+			.header-tag {
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.2em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				padding: 5px 12px;
+				border: 1px solid var(--border);
+				border-radius: 20px;
+				background: var(--surface);
+			}
+
+			/* ─────────────────────────────────────────────
+			   LEFT PRODUCT INFO PANEL
+			───────────────────────────────────────────── */
+			.product-panel {
+				position: absolute;
+				left: 36px;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 268px;
+				pointer-events: auto;
+				display: flex;
+				flex-direction: column;
+				gap: 0;
+				padding: 28px 24px;
+				background: var(--surface-strong);
+				border: 1px solid var(--border);
+				border-radius: var(--radius-lg);
+				backdrop-filter: blur(16px);
+				box-shadow: var(--shadow-card);
+			}
+
+			.product-category {
+				font-size: 10px;
+				font-weight: 700;
+				letter-spacing: 0.3em;
+				text-transform: uppercase;
+				color: var(--accent);
+				margin-bottom: 10px;
+			}
+
+			.product-name {
+				font-family: 'Playfair Display', serif;
+				font-size: clamp(24px, 2.2vw, 32px);
+				font-weight: 700;
+				line-height: 1.15;
+				color: var(--text-primary);
+				margin-bottom: 6px;
+			}
+
+			.product-subtitle {
+				font-size: 12px;
+				font-weight: 400;
+				color: var(--text-muted);
+				letter-spacing: 0.04em;
+				margin-bottom: 18px;
+				min-height: 18px;
+				transition: opacity 0.25s;
+			}
+
+			.product-divider {
+				width: 36px;
+				height: 2px;
+				background: var(--accent);
+				border-radius: 2px;
+				margin-bottom: 18px;
+			}
+
+			.product-desc {
+				font-size: 12px;
+				line-height: 1.8;
+				color: var(--text-secondary);
+				margin-bottom: 22px;
+			}
+
+			.spec-list {
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+				margin-bottom: 22px;
+			}
+
+			.spec-item {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 7px 12px;
+				background: rgba(0,0,0,0.03);
+				border: 1px solid rgba(0,0,0,0.05);
+				border-radius: var(--radius-sm);
+			}
+
+			.spec-label {
+				font-size: 10px;
+				font-weight: 600;
+				color: var(--text-muted);
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+			}
+
+			.spec-value {
+				font-size: 11px;
+				font-weight: 700;
+				color: var(--text-primary);
+			}
+
+			/* Price */
+			.price-row {
+				display: flex;
+				align-items: baseline;
+				gap: 6px;
+				margin-bottom: 18px;
+			}
+
+			.price-currency {
+				font-size: 14px;
+				font-weight: 600;
+				color: var(--text-secondary);
+			}
+
+			.price-amount {
+				font-family: 'Playfair Display', serif;
+				font-size: 30px;
+				font-weight: 700;
+				color: var(--text-primary);
+				line-height: 1;
+			}
+
+			/* CTA Buttons */
+			.cta-group {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			.btn-primary {
+				padding: 13px 20px;
+				background: var(--text-primary);
+				color: #fff;
+				border: none;
+				border-radius: var(--radius-sm);
+				font-family: 'Inter', sans-serif;
+				font-size: 11px;
+				font-weight: 700;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				cursor: pointer;
+				transition: var(--transition);
+			}
+
+			.btn-primary:hover {
+				background: #333;
+				transform: translateY(-2px);
+				box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+			}
+
+			.btn-secondary {
+				padding: 12px 20px;
+				background: transparent;
+				color: var(--text-primary);
+				border: 1px solid var(--border);
+				border-radius: var(--radius-sm);
+				font-family: 'Inter', sans-serif;
+				font-size: 11px;
+				font-weight: 600;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				cursor: pointer;
+				transition: var(--transition);
+			}
+
+			.btn-secondary:hover {
+				border-color: #aaa;
+				background: rgba(255,255,255,0.6);
+				transform: translateY(-1px);
+			}
+
+			/* ─────────────────────────────────────────────
+			   BOTTOM COLOR SELECTOR
+			───────────────────────────────────────────── */
+			#btnContainer {
+				position: fixed;
+				bottom: 32px;
+				left: 50%;
+				transform: translateX(-50%);
+				z-index: 100;
+				pointer-events: auto;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.color-name-display {
+				font-size: 12px;
+				font-weight: 700;
+				letter-spacing: 0.12em;
+				color: var(--text-primary);
+				text-align: center;
+				min-height: 18px;
+				transition: opacity 0.25s;
+			}
+
+			.color-selector-label {
+				font-size: 9px;
+				font-weight: 700;
+				letter-spacing: 0.25em;
+				text-transform: uppercase;
+				color: var(--text-muted);
+				text-align: center;
+			}
+
+			.color-selector-row {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 12px 18px;
+				background: var(--surface-strong);
+				border: 1px solid var(--border);
+				border-radius: 60px;
+				backdrop-filter: blur(16px);
+				box-shadow: var(--shadow-card);
+			}
+
+			/* ── Color ball buttons ── */
+			.scene-btn {
+				position: relative;
+				width: 34px; height: 34px;
+				border-radius: 50%;
+				border: none;
+				cursor: pointer;
+				transition: var(--transition);
+				padding: 0;
+				outline: none;
+				flex-shrink: 0;
+				box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+			}
+
+			/* Active ring via ::before */
+			.scene-btn::before {
+				content: '';
+				position: absolute;
+				inset: -4px;
+				border-radius: 50%;
+				border: 2.5px solid transparent;
+				transition: var(--transition);
+				pointer-events: none;
+			}
+
+			.scene-btn:hover {
+				transform: scale(1.18);
+				box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+			}
+
+			.scene-btn:hover::before {
+				border-color: rgba(0,0,0,0.22);
+			}
+
+			.scene-btn.active {
+				transform: scale(1.15);
+			}
+
+			.scene-btn.active::before {
+				border-color: var(--text-primary);
+			}
+
+			/* Tooltip */
+			.scene-btn::after {
+				content: attr(data-label);
+				position: absolute;
+				bottom: calc(100% + 10px);
+				left: 50%;
+				transform: translateX(-50%) translateY(4px);
+				background: rgba(26,26,26,0.88);
+				color: #fff;
+				font-size: 10px;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				white-space: nowrap;
+				padding: 4px 8px;
+				border-radius: 4px;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.18s, transform 0.18s;
+			}
+
+			.scene-btn:hover::after {
+				opacity: 1;
+				transform: translateX(-50%) translateY(0);
+			}
+
+			/* Individual color fills */
+			#scene_01 { background: linear-gradient(135deg, #EEEBD3, #d4c98a); }
+			#scene_02 { background: linear-gradient(135deg, #FE90BC, #f06fa0); }
+			#scene_03 { background: linear-gradient(135deg, #dbf7ff, #a8e8f8); }
+			#scene_04 { background: linear-gradient(135deg, #484747, #2a2a2a); }
+			#scene_05 { background: linear-gradient(135deg, #F3B4F1, #d88cd5); }
+			#scene_06 { background: linear-gradient(135deg, #FF8566, #e05c3a); }
+			#scene_07 {
+				background: linear-gradient(135deg, #F5F4EF, #e0e0da);
+				box-shadow: 0 2px 8px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(0,0,0,0.07);
+			}
+			#scene_08 { background: linear-gradient(135deg, #4B5A86, #2d3960); }
+
+			/* ─────────────────────────────────────────────
+			   RIGHT FEATURE STRIP
+			───────────────────────────────────────────── */
+			.right-strip {
+				position: absolute;
+				right: 36px;
+				top: 50%;
+				transform: translateY(-50%);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 16px;
+				pointer-events: auto;
+			}
+
+			.strip-label {
+				font-size: 10px;
+				font-weight: 700;
+				letter-spacing: 0.25em;
+				color: var(--text-muted);
+				text-transform: uppercase;
+				writing-mode: vertical-rl;
+				text-orientation: mixed;
+				transform: rotate(180deg);
+			}
+
+			.strip-divider {
+				width: 1px;
+				height: 48px;
+				background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.12), transparent);
+			}
+
+			.feature-badge {
+				padding: 10px 12px;
+				background: var(--surface-strong);
+				border: 1px solid var(--border);
+				border-radius: var(--radius-md);
+				backdrop-filter: blur(12px);
+				box-shadow: var(--shadow-soft);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 4px;
+				width: 68px;
+				cursor: default;
+				transition: var(--transition);
+			}
+
+			.feature-badge:hover {
+				transform: translateX(-3px);
+				box-shadow: var(--shadow-card);
+			}
+
+			.badge-icon {
+				font-size: 18px;
+				line-height: 1;
+			}
+
+			.badge-text {
+				font-size: 9px;
+				font-weight: 700;
+				color: var(--text-secondary);
+				text-align: center;
+				text-transform: uppercase;
+				letter-spacing: 0.06em;
+				line-height: 1.3;
+			}
+
+			/* ─────────────────────────────────────────────
+			   ENTRANCE ANIMATIONS
+			───────────────────────────────────────────── */
+			@keyframes fadeInUp {
+				from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+				to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+			}
+
+			@keyframes fadeInLeft {
+				from { opacity: 0; transform: translateY(-50%) translateX(-20px); }
+				to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+			}
+
+			@keyframes fadeInRight {
+				from { opacity: 0; transform: translateY(-50%) translateX(20px); }
+				to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+			}
+
+			@keyframes fadeInDown {
+				from { opacity: 0; transform: translateY(-12px); }
+				to   { opacity: 1; transform: translateY(0); }
+			}
+
+			.top-header    { animation: fadeInDown  0.7s 0.3s ease-out both; }
+			.product-panel { animation: fadeInLeft  0.8s 0.5s ease-out both; }
+			.right-strip   { animation: fadeInRight 0.8s 0.5s ease-out both; }
+			#btnContainer  { animation: fadeInUp    0.7s 0.6s ease-out both; }
+
+			/* ─────────────────────────────────────────────
+			   RESPONSIVE
+			───────────────────────────────────────────── */
+			@media (max-width: 768px) {
+				.product-panel { display: none; }
+				.right-strip   { display: none; }
+				.header-tag    { display: none; }
+				.top-header    { padding: 0 18px; }
+			}
 		</style>
 
 		<script type="importmap">
@@ -72,28 +563,115 @@
 			}
 		</script>
 		
-
 	</head>
 	
 	<body>
 
-		<div id="threeContainer"></div> 
+		<!-- Subtle background decorations (behind 3D canvas) -->
+		<div class="bg-noise"></div>
+		<div class="bg-gradient"></div>
 
-		<!-- 觸發轉場的按鈕 -->
-<div id="btnContainer">
-    <button class="scene-btn" id="scene_01">香檳金 (Scene 1)</button>
-    <button class="scene-btn" id="scene_02">櫻花粉 (Scene 2)</button>
-    <button class="scene-btn" id="scene_03">天藍色 (Scene 3)</button>
-	<button class="scene-btn" id="scene_04">黑色 (Scene 4)</button>
-    <button class="scene-btn" id="scene_05">紫色 (Scene 5)</button>
-    <button class="scene-btn" id="scene_06">橘色 (Scene 6)</button>
-	<button class="scene-btn" id="scene_07">白色 (Scene 7)</button>
-    <button class="scene-btn" id="scene_08">海軍藍 (Scene 8)</button>
-</div>
+		<!-- Three.js Canvas -->
+		<div id="threeContainer"></div>
+
+		<!-- UI Layer — above canvas -->
+		<div class="ui-layer">
+
+			<!-- TOP HEADER -->
+			<header class="top-header">
+				<div class="brand-mark">
+					<div class="brand-icon">
+						<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path d="M10 2 L4 6 L4 14 L10 18 L16 14 L16 6 Z"/>
+						</svg>
+					</div>
+					<span class="brand-name">Fimawork</span>
+				</div>
+				<div class="header-right">
+					<span class="header-tag">Collection 2026</span>
+					<span class="header-tag">3D Showcase</span>
+				</div>
+			</header>
+
+			<!-- LEFT PRODUCT INFO PANEL -->
+			<div class="product-panel">
+				<p class="product-category">Premium Luggage</p>
+				<h1 class="product-name">Voyager<br>Series X</h1>
+				<p class="product-subtitle" id="colorSubtitle">Champagne Gold</p>
+				<div class="product-divider"></div>
+				<p class="product-desc">Built around an aerospace-grade aluminum alloy frame, the Voyager Series X features a multi-layer etched shell finish. Every piece is hand-tuned to deliver an uncompromising travel experience for the modern explorer.</p>
+
+				<div class="spec-list">
+					<div class="spec-item">
+						<span class="spec-label">Capacity</span>
+						<span class="spec-value">95 L</span>
+					</div>
+					<div class="spec-item">
+						<span class="spec-label">Weight</span>
+						<span class="spec-value">3.2 kg</span>
+					</div>
+					<div class="spec-item">
+						<span class="spec-label">Shell</span>
+						<span class="spec-value">PC + ABS</span>
+					</div>
+					<div class="spec-item">
+						<span class="spec-label">Wheels</span>
+						<span class="spec-value">Dual Silent</span>
+					</div>
+				</div>
+
+				<div class="price-row">
+					<span class="price-currency">NT$</span>
+					<span class="price-amount">12,800</span>
+				</div>
+
+				<div class="cta-group">
+					<button class="btn-primary">Buy Now</button>
+					<button class="btn-secondary">Add to Wishlist</button>
+				</div>
+			</div>
+
+			<!-- RIGHT FEATURE STRIP -->
+			<div class="right-strip">
+				<span class="strip-label">Features</span>
+				<div class="strip-divider"></div>
+				<div class="feature-badge">
+					<span class="badge-icon">🔒</span>
+					<span class="badge-text">TSA<br>Lock</span>
+				</div>
+				<div class="feature-badge">
+					<span class="badge-icon">💧</span>
+					<span class="badge-text">Water<br>Repellent</span>
+				</div>
+				<div class="feature-badge">
+					<span class="badge-icon">✈️</span>
+					<span class="badge-text">Cabin<br>Size</span>
+				</div>
+				<div class="strip-divider"></div>
+				<span class="strip-label">2026</span>
+			</div>
+
+		</div><!-- end .ui-layer -->
+
+		<!-- COLOR SELECTOR — fixed bottom center -->
+		<div id="btnContainer">
+			<div class="color-name-display" id="colorNameDisplay">Champagne Gold</div>
+			<div class="color-selector-label">Choose Color</div>
+			<div class="color-selector-row">
+				<button class="scene-btn active" id="scene_01" data-label="Champagne Gold" data-subtitle="Champagne Gold"></button>
+				<button class="scene-btn" id="scene_02" data-label="Sakura Pink" data-subtitle="Sakura Pink"></button>
+				<button class="scene-btn" id="scene_03" data-label="Sky Blue" data-subtitle="Sky Blue"></button>
+				<button class="scene-btn" id="scene_04" data-label="Midnight Black" data-subtitle="Midnight Black"></button>
+				<button class="scene-btn" id="scene_05" data-label="Lavender Purple" data-subtitle="Lavender Purple"></button>
+				<button class="scene-btn" id="scene_06" data-label="Sunset Orange" data-subtitle="Sunset Orange"></button>
+				<button class="scene-btn" id="scene_07" data-label="Pearl White" data-subtitle="Pearl White"></button>
+				<button class="scene-btn" id="scene_08" data-label="Navy Blue" data-subtitle="Navy Blue"></button>
+			</div>
+		</div>
+
 		<script type="module">
 
 import * as THREE from 'three';
-
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_functions.js';
 import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.54/fx_materials.js';
@@ -106,7 +684,7 @@ import { suitcase_2026 } from './models/suitcase_2026_slices.js';
 import 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js';
 import { Inspector } from 'three/addons/inspector/Inspector.js';
 
-//transition工具
+// Transition tools
 import { uniform, pass } from 'three/tsl';
 import { transition } from 'three/addons/tsl/display/TransitionNode.js';
 import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js';
@@ -115,7 +693,6 @@ import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js';
 let renderPipeline, transitionPass;
 let transition_textureNode;
 
-// 轉場控制 Node (使用 uniform 才能被 GSAP 平滑控制)
 const progressNode = uniform(0.0);
 const thresholdNode = uniform(0.1);
 const useTextureNode = uniform(1);
@@ -125,280 +702,219 @@ let controls;
 let threeContainer = document.getElementById("threeContainer");
 let scene, scene_next;
 
-let isTransitioning = false; // 防連點開關
-let currentIndex = 0;        // 記錄當前顯示的場景 (0, 1, 2)
+let isTransitioning = false;
+let currentIndex = 0;
 
 const timer = new THREE.Timer();
 
-const modelPosition=new THREE.Vector3(0,0,0);
-const modelRotation=new THREE.Vector3(0,0,0);
-const modeScale=1;
+const modeScale = 1;
+const CameraDefaultPos = new THREE.Vector3(0.000,0.595,-2.241);
+const ControlsTargetDefaultPos = new THREE.Vector3(0.000,0.390,0.600);
 
-const CameraDefaultPos=new THREE.Vector3(0.00,0.635,-2.8);
-const ControlsTargetDefaultPos=new THREE.Vector3(0,0.39,0.6);
-
-let main_model= new THREE.Object3D();
-let model_next= new THREE.Object3D();
+let main_model = new THREE.Object3D();
+let model_next  = new THREE.Object3D();
 
 let housingMesh_current, housingMesh_next;
-let materials = [];// 儲存 8 種外殼材質
+let materials = [];
 
 
 init();
-//FX.Camera_Inspector(camera,controls);
 FXUI.InstLoadingEffect_Type_A(true);
 
 async function init()
 {
 	FX.SetupEnvironment("cloud");
 
-  	scene = new THREE.Scene();
-	scene_next= new THREE.Scene();
+	scene      = new THREE.Scene();
+	scene_next = new THREE.Scene();
 
-	scene.background = null;
+	scene.background      = null;
 	scene_next.background = null;
 
-  	camera = new THREE.PerspectiveCamera( 30, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 100 );//非全螢幕比例設定
-  	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
-  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+	camera   = new THREE.PerspectiveCamera(30, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 100);
+	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
+	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+	renderer.setClearColor(0x000000, 0.0);
+	renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+	renderer.toneMappingExposure = 1.0;
+	threeContainer.appendChild(renderer.domElement);
 
-  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
-  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  	renderer.toneMappingExposure = 1.0;
-  	threeContainer.appendChild( renderer.domElement );
-	renderer.inspector = new Inspector();
-
-	// 建立對應的 PassNode
 	const pass_current = pass(scene, camera);
-	const pass_next = pass(scene_next, camera);
+	const pass_next    = pass(scene_next, camera);
 
-	// 初始化轉場貼圖 Node
-    const loader = new THREE.TextureLoader();
-    const transition_texture = loader.load('./textures/transition6.png');
-    transition_textureNode = new THREE.TextureNode( transition_texture );
+	const loader = new THREE.TextureLoader();
+	const transition_texture = loader.load('./textures/transition6.png');
+	transition_textureNode   = new THREE.TextureNode(transition_texture);
 
-	renderPipeline = new THREE.RenderPipeline( renderer );
+	renderPipeline = new THREE.RenderPipeline(renderer);
 
 	transitionPass = transition(
-        pass_current,
-        pass_next,
-        transition_textureNode,
-        progressNode,
-        thresholdNode,
-        useTextureNode
-    );
-	
-	// 將 outputNode 永久鎖定在 transitionPass
-    renderPipeline.outputNode = transitionPass;
-	progressNode.value = 1.0;
-
-	// 1. 先等待 Renderer 初始化完成
-	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
-
-  	camera.position.copy(CameraDefaultPos);
-  
-  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
-	controls = new OrbitControls( camera, renderer.domElement);
-  	controls.enablePan = true;//右鍵平移效果
-  	controls.panSpeed = 0.4;
-  	controls.enableDamping = true;
-  	controls.dampingFactor =0.015;
-  	controls.maxDistance = 500;
-  	controls.target.copy( ControlsTargetDefaultPos );
-  	controls.zoomSpeed=0.5;
-	controls.autoRotate=false;
-	controls.autoRotateSpeed=0.3;
-
-	controls.maxPolarAngle=FX.ToThreeEulerAngle(95);
-	controls.minPolarAngle=FX.ToThreeEulerAngle(-90);
-  	controls.update();
-
-  	///hdri 環境光源
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_next);
-
-	scene.environmentRotation.y = FX.ToThreeEulerAngle(90); 
-	scene.environmentRotation.x = FX.ToThreeEulerAngle(30); 
-	scene_next.environmentRotation.y = FX.ToThreeEulerAngle(90); 
-	scene_next.environmentRotation.x = FX.ToThreeEulerAngle(30); 
- 
-	const loader_sucase = new GLTFLoader();
-    loader_sucase.setDRACOLoader(FX.dracoLoader);
-	loader_sucase.parse(
-    FX.Base64ToArrayBuffer(suitcase_2026()),
-    '',
-    (gltf) => {
-        
-		const model = gltf.scene;
-
-		model.position.set(0,0,0);
-		model.rotation.set(0,0, 0);
-		model.scale.set(modeScale,modeScale,modeScale);
-
-		const champagne_housing_material=FXM.InstEtchingMaterial(0xEEEBD3,0.3,0.5,0.3000000000000002,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
-
-		const pink_housing_material=FXM.InstEtchingMaterial(0xFE90BC,0.3,0.5,0.3000000000000002,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
-
-		const blue_housing_material=FXM.InstEtchingMaterial(0xdbf7ff,0.3,0.5,0.3000000000000002,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
-
-		const black_housing_material=FXM.InstEtchingMaterial(0x484747,0.278,0.5,0.3000000000000002,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
-
-		const purple_housing_material=FXM.InstEtchingMaterial(0xF3B4F1,0.5,0.22,0.3000000000000002,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
-
-		const orange_housing_material=FXM.InstEtchingMaterial(0xFF8566,0.509,0.634,0.3000000000000002,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
-
-		const white_housing_material=FXM.InstEtchingMaterial(0xF5F4EF,0.5,0.307,0.3000000000000002,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
-
-		const blueNavy_housing_material=FXM.InstEtchingMaterial(0x4B5A86,0.413,0.432,0.6820000000000002,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
-
-		const casterMount_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.7500000000000001,false,1,"./textures/Gravel.png",new THREE.Vector2(100,100),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
-
-		materials = [
-			champagne_housing_material,
-			pink_housing_material,
-			blue_housing_material,
-			black_housing_material,
-			purple_housing_material,
-			orange_housing_material,
-			white_housing_material,
-			blueNavy_housing_material
-		]
-
-		model.traverse( function ( object ) {	
-                  
-            if(object.name.includes("housing"))
-            {
-              FX.ReturnBufferGeometry(object,champagne_housing_material,main_model,scene);
-            }
-
-			if(object.name.includes("rubber"))
-            {
-              FX.ReturnBufferGeometry(object,null,main_model,scene);
-            }
-
-			if(object.name.includes("padding"))
-            {
-              FX.ReturnBufferGeometry(object,casterMount_material,main_model,scene);
-            }
-
-        });
-
-		main_model.add(model);
-		scene.add(main_model);
-		model_next=main_model.clone();
-
-		main_model.traverse( function ( object ) {	
-                  
-			if(object.name==="BufferGeometry_housing")
-			{	
-				housingMesh_current=object;
-			}
-
-        });
-
-		model_next.traverse( function ( object ) {	
-                  
-            if(object.name==="BufferGeometry_housing")
-            {
-              object.material=pink_housing_material;
-
-			  housingMesh_next=object;
-
-            }
-
-        });
-
-		scene_next.add(model_next);
-
-		setTimeout(() => {
-			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
-			renderer.setAnimationLoop( animate );
-			FXUI.InstLoadingEffect_Type_A(false);
-			//FX.Hierarchy(main_model,camera,scene,renderer,controls); 
-		}, 1000);
-
-    },
-    (error) => {
-        console.error('Failed to load model:', error);
-    }
+		pass_current,
+		pass_next,
+		transition_textureNode,
+		progressNode,
+		thresholdNode,
+		useTextureNode
 	);
 
-	///EventListener
-  	window.addEventListener( 'resize', onWindowResize );  
+	renderPipeline.outputNode = transitionPass;
+	progressNode.value = 1.0;
 
-	
-    document.getElementById("scene_01").addEventListener('click', () => {transitionToScene(0);});
+	await renderer.init();
 
-	document.getElementById("scene_02").addEventListener('click', () => {transitionToScene(1);});
+	camera.position.copy(CameraDefaultPos);
 
-	document.getElementById("scene_03").addEventListener('click', () => {transitionToScene(2);});
+	controls = new OrbitControls(camera, renderer.domElement);
+	controls.enablePan      = true;
+	controls.panSpeed       = 0.4;
+	controls.enableDamping  = true;
+	controls.dampingFactor  = 0.015;
+	controls.maxDistance    = 500;
+	controls.target.copy(ControlsTargetDefaultPos);
+	controls.zoomSpeed      = 0.5;
+	controls.autoRotate     = false;
+	controls.autoRotateSpeed = 0.3;
+	controls.maxPolarAngle  = FX.ToThreeEulerAngle(95);
+	controls.minPolarAngle  = FX.ToThreeEulerAngle(-90);
+	controls.update();
 
-	document.getElementById("scene_04").addEventListener('click', () => {transitionToScene(3);});
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg', scene);
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg', scene_next);
 
-	document.getElementById("scene_05").addEventListener('click', () => {transitionToScene(4);});
+	scene.environmentRotation.y      = FX.ToThreeEulerAngle(90);
+	scene.environmentRotation.x      = FX.ToThreeEulerAngle(30);
+	scene_next.environmentRotation.y = FX.ToThreeEulerAngle(90);
+	scene_next.environmentRotation.x = FX.ToThreeEulerAngle(30);
 
-	document.getElementById("scene_06").addEventListener('click', () => {transitionToScene(5);});
+	const loader_sucase = new GLTFLoader();
+	loader_sucase.setDRACOLoader(FX.dracoLoader);
+	loader_sucase.parse(
+		FX.Base64ToArrayBuffer(suitcase_2026()),
+		'',
+		(gltf) => {
 
-	document.getElementById("scene_07").addEventListener('click', () => {transitionToScene(6);});
+			const model = gltf.scene;
+			model.position.set(0, 0, 0);
+			model.rotation.set(0, 0, 0);
+			model.scale.set(modeScale, modeScale, modeScale);
 
-	document.getElementById("scene_08").addEventListener('click', () => {transitionToScene(7);});
+			const champagne_housing_material = FXM.InstEtchingMaterial(0xEEEBD3,0.3,0.5,0.3,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+			const pink_housing_material      = FXM.InstEtchingMaterial(0xFE90BC,0.3,0.5,0.3,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+			const blue_housing_material      = FXM.InstEtchingMaterial(0xdbf7ff,0.3,0.5,0.3,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+			const black_housing_material     = FXM.InstEtchingMaterial(0x484747,0.278,0.5,0.3,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+			const purple_housing_material    = FXM.InstEtchingMaterial(0xF3B4F1,0.5,0.22,0.3,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+			const orange_housing_material    = FXM.InstEtchingMaterial(0xFF8566,0.509,0.634,0.3,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+			const white_housing_material     = FXM.InstEtchingMaterial(0xF5F4EF,0.5,0.307,0.3,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+			const blueNavy_housing_material  = FXM.InstEtchingMaterial(0x4B5A86,0.413,0.432,0.682,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+			const casterMount_material       = FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.75,false,1,"./textures/Gravel.png",new THREE.Vector2(100,100),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
 
+			materials = [
+				champagne_housing_material,
+				pink_housing_material,
+				blue_housing_material,
+				black_housing_material,
+				purple_housing_material,
+				orange_housing_material,
+				white_housing_material,
+				blueNavy_housing_material
+			];
 
+			model.traverse(function (object) {
+				if (object.name.includes("housing")) FX.ReturnBufferGeometry(object, champagne_housing_material, main_model, scene);
+				if (object.name.includes("rubber"))  FX.ReturnBufferGeometry(object, null, main_model, scene);
+				if (object.name.includes("padding")) FX.ReturnBufferGeometry(object, casterMount_material, main_model, scene);
+			});
+
+			main_model.add(model);
+			scene.add(main_model);
+			model_next = main_model.clone();
+
+			main_model.traverse(function (object) {
+				if (object.name === "BufferGeometry_housing") housingMesh_current = object;
+			});
+
+			model_next.traverse(function (object) {
+				if (object.name === "BufferGeometry_housing") {
+					object.material  = pink_housing_material;
+					housingMesh_next = object;
+				}
+			});
+
+			scene_next.add(model_next);
+
+			setTimeout(() => {
+				renderer.setAnimationLoop(animate);
+				FXUI.InstLoadingEffect_Type_A(false);
+				//FX.Hierarchy(main_model,camera,scene,renderer,controls) 
+			}, 1000);
+		},
+		(error) => { console.error('Failed to load model:', error); }
+	);
+
+	window.addEventListener('resize', onWindowResize);
+
+	// ── Color ball UI interaction ──
+	const colorNameDisplay = document.getElementById('colorNameDisplay');
+	const colorSubtitle    = document.getElementById('colorSubtitle');
+
+	document.querySelectorAll('.scene-btn').forEach((btn, index) => {
+		btn.addEventListener('click', () => {
+			// Active state
+			document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
+			btn.classList.add('active');
+
+			// Update labels
+			colorNameDisplay.textContent = btn.getAttribute('data-label');
+			colorSubtitle.style.opacity  = '0';
+			setTimeout(() => {
+				colorSubtitle.textContent   = btn.getAttribute('data-subtitle');
+				colorSubtitle.style.opacity = '1';
+			}, 180);
+
+			// Trigger 3D transition
+			transitionToScene(index);
+		});
+	});
 }
 
-
-function onWindowResize() 
+function onWindowResize()
 {
-    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.aspect = threeContainer.clientWidth / threeContainer.clientHeight;
 	camera.updateProjectionMatrix();
-    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
 }
 
-function animate(timestamp) 
+function animate(timestamp)
 {
-  	controls.update();
-
-    renderPipeline.render();
-
-  	// 自動更新時間（用來計算移動速度、旋轉等）
-    timer.update( timestamp );
+	controls.update();
+	renderPipeline.render();
+	timer.update(timestamp);
 	const delta = timer.getDelta();
-
-	if ( mixer ) mixer.update( delta );
+	if (mixer) mixer.update(delta);
 }
 
 function transitionToScene(targetIndex) {
-    if (isTransitioning || targetIndex === currentIndex) return; // 避免動畫過程重複觸發
-    isTransitioning = true;
+	if (isTransitioning || targetIndex === currentIndex) return;
+	isTransitioning = true;
 
-	gsap.killTweensOf(
-        progressNode
-    );
+	gsap.killTweensOf(progressNode);
 
-	// TransitionNode 的方向是反的
-    // progress = 1 → A（原本）
-    // progress = 0 → B（目標）
-
-	housingMesh_next.material=materials[targetIndex];
-	
+	housingMesh_next.material = materials[targetIndex];
 	progressNode.value = 1.0;
-
 	renderPipeline.render();
 
-    gsap.to(progressNode, {
-        value: 0.0,
-        duration: 1.5,
-        ease: 'power2.inOut',
-        onComplete: () => {
-            // 轉場完成：更新當前場景索引
-            currentIndex = targetIndex;
-			housingMesh_current.material=materials[targetIndex];
+	gsap.to(progressNode, {
+		value: 0.0,
+		duration: 1.5,
+		ease: 'power2.inOut',
+		onComplete: () => {
+			currentIndex = targetIndex;
+			housingMesh_current.material = materials[targetIndex];
 			progressNode.value = 0.0;
 			isTransitioning = false;
-
-            console.log(`轉場成功！目前顯示 Scene ${currentIndex + 1}`);
-        }
-    });
+			console.log(`轉場成功！目前顯示 Scene ${currentIndex + 1}`);
+		}
+	});
 }
 
 		</script>
