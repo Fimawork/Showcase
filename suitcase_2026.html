@@ -123,10 +123,7 @@ const useTextureNode = uniform(1);
 let camera, renderer, stats, mixer;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
-let scene, scene_02, scene_03, scene_04, scene_05 , scene_06 ,scene_07 , scene_08;
-
-// 宣告場景與 Pass
-let pass_01, pass_02, pass_03, pass_04, pass_05, pass_06, pass_07, pass_08;
+let scene, scene_next;
 
 let isTransitioning = false; // 防連點開關
 let currentIndex = 0;        // 記錄當前顯示的場景 (0, 1, 2)
@@ -141,20 +138,10 @@ const CameraDefaultPos=new THREE.Vector3(0.00,0.635,-2.8);
 const ControlsTargetDefaultPos=new THREE.Vector3(0,0.39,0.6);
 
 let main_model= new THREE.Object3D();
-let model_02= new THREE.Object3D();
-let model_03= new THREE.Object3D();
-let model_04= new THREE.Object3D();
-let model_05= new THREE.Object3D();
-let model_06= new THREE.Object3D();
-let model_07= new THREE.Object3D();
-let model_08= new THREE.Object3D();
+let model_next= new THREE.Object3D();
 
-// 2. 用於控制當前與目標 Pass 的動態 Uniform 索引 (0: pass_01, 1: pass_02, 2: pass_03)
-const activeIndex_current = uniform(0);
-const activeIndex_next = uniform(1);
-
-let dynamicPassCurrent;
-let dynamicPassNext;
+let housingMesh_current, housingMesh_next;
+let materials = [];// 儲存 8 種外殼材質
 
 
 init();
@@ -166,23 +153,10 @@ async function init()
 	FX.SetupEnvironment("cloud");
 
   	scene = new THREE.Scene();
-	scene_02= new THREE.Scene();
-	scene_03= new THREE.Scene();
-	scene_04= new THREE.Scene();
-	scene_05= new THREE.Scene();
-	scene_06= new THREE.Scene();
-	scene_07= new THREE.Scene();
-	scene_08= new THREE.Scene();
+	scene_next= new THREE.Scene();
 
 	scene.background = null;
-	scene_02.background = null;
-	scene_03.background = null;
-	scene_04.background = null;
-	scene_05.background = null;
-	scene_06.background = null;
-	scene_07.background = null;
-	scene_08.background = null;
-
+	scene_next.background = null;
 
   	camera = new THREE.PerspectiveCamera( 30, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 100 );//非全螢幕比例設定
   	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
@@ -192,51 +166,22 @@ async function init()
   	renderer.toneMapping = THREE.ACESFilmicToneMapping;
   	renderer.toneMappingExposure = 1.0;
   	threeContainer.appendChild( renderer.domElement );
+	renderer.inspector = new Inspector();
 
 	// 建立對應的 PassNode
-	pass_01 = pass(scene, camera);
-	pass_02 = pass(scene_02, camera);
-	pass_03 = pass(scene_03, camera);
-	pass_04 = pass(scene_04, camera);
-	pass_05 = pass(scene_05, camera);
-	pass_06 = pass(scene_06, camera);
-	pass_07 = pass(scene_07, camera);
-	pass_08 = pass(scene_08, camera);
+	const pass_current = pass(scene, camera);
+	const pass_next = pass(scene_next, camera);
 
-	// 1. 將所有的 Pass 存入陣列 (Index 分別為 0 ~ 7)
-	const allPasses = [
-	    pass_01, pass_02, pass_03, pass_04, 
-	    pass_05, pass_06, pass_07, pass_08
-	];
-
-	//2. 建立動態選擇邏輯的工具函式
-	function buildDynamicPass(indexUniform, passes) {
-    	let resultNode = passes[passes.length - 1]; // 預設值 (最後一個 Pass)
-		
-    	// 從倒數第二個倒著組裝 select
-    	for (let i = passes.length - 2; i >= 0; i--) {
-    	    resultNode = indexUniform.equal(i).select(passes[i], resultNode);
-    	}
-	
-    	return resultNode;
-	}
-
-	// TSL 動態選擇 Pass
-    dynamicPassCurrent = buildDynamicPass(activeIndex_current, allPasses);
-
-    dynamicPassNext = buildDynamicPass(activeIndex_next, allPasses);
-	
-	
 	// 初始化轉場貼圖 Node
     const loader = new THREE.TextureLoader();
-    const transition_texture = loader.load('./textures/transition2.png');
+    const transition_texture = loader.load('./textures/transition6.png');
     transition_textureNode = new THREE.TextureNode( transition_texture );
 
 	renderPipeline = new THREE.RenderPipeline( renderer );
 
 	transitionPass = transition(
-        dynamicPassCurrent,
-        dynamicPassNext,
+        pass_current,
+        pass_next,
         transition_textureNode,
         progressNode,
         thresholdNode,
@@ -245,9 +190,7 @@ async function init()
 	
 	// 將 outputNode 永久鎖定在 transitionPass
     renderPipeline.outputNode = transitionPass;
-	progressNode.value = 0.0;
-	activeIndex_current.value = 0; // 初始場景 0
-    activeIndex_next.value = 0; // 靜止時與 A 保持一致
+	progressNode.value = 1.0;
 
 	// 1. 先等待 Renderer 初始化完成
 	await renderer.init(); // 記得 r184 一定要加上這行非同步初始化！
@@ -272,31 +215,13 @@ async function init()
 
   	///hdri 環境光源
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_02);
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_03);
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_04);
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_05);
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_06);
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_07);
-	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_08);
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene_next);
 
 	scene.environmentRotation.y = FX.ToThreeEulerAngle(90); 
 	scene.environmentRotation.x = FX.ToThreeEulerAngle(30); 
-	scene_02.environmentRotation.y = FX.ToThreeEulerAngle(90); 
-	scene_02.environmentRotation.x = FX.ToThreeEulerAngle(30); 
-	scene_03.environmentRotation.y = FX.ToThreeEulerAngle(90); 
-	scene_03.environmentRotation.x = FX.ToThreeEulerAngle(30);
-	scene_04.environmentRotation.y = FX.ToThreeEulerAngle(90); 
-	scene_04.environmentRotation.x = FX.ToThreeEulerAngle(30); 
-	scene_05.environmentRotation.y = FX.ToThreeEulerAngle(90); 
-	scene_05.environmentRotation.x = FX.ToThreeEulerAngle(30); 
-	scene_06.environmentRotation.y = FX.ToThreeEulerAngle(90); 
-	scene_06.environmentRotation.x = FX.ToThreeEulerAngle(30); 
-	scene_07.environmentRotation.y = FX.ToThreeEulerAngle(90); 
-	scene_07.environmentRotation.x = FX.ToThreeEulerAngle(30); 
-	scene_08.environmentRotation.y = FX.ToThreeEulerAngle(90); 
-	scene_08.environmentRotation.x = FX.ToThreeEulerAngle(30);  
-	
+	scene_next.environmentRotation.y = FX.ToThreeEulerAngle(90); 
+	scene_next.environmentRotation.x = FX.ToThreeEulerAngle(30); 
+ 
 	const loader_sucase = new GLTFLoader();
     loader_sucase.setDRACOLoader(FX.dracoLoader);
 	loader_sucase.parse(
@@ -328,6 +253,17 @@ async function init()
 
 		const casterMount_material=FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.7500000000000001,false,1,"./textures/Gravel.png",new THREE.Vector2(100,100),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
 
+		materials = [
+			champagne_housing_material,
+			pink_housing_material,
+			blue_housing_material,
+			black_housing_material,
+			purple_housing_material,
+			orange_housing_material,
+			white_housing_material,
+			blueNavy_housing_material
+		]
+
 		model.traverse( function ( object ) {	
                   
             if(object.name.includes("housing"))
@@ -349,84 +285,30 @@ async function init()
 
 		main_model.add(model);
 		scene.add(main_model);
-		model_02=main_model.clone();
-		model_03=main_model.clone();
-		model_04=main_model.clone();
-		model_05=main_model.clone();
-		model_06=main_model.clone();
-		model_07=main_model.clone();
-		model_08=main_model.clone();
+		model_next=main_model.clone();
 
-		model_02.traverse( function ( object ) {	
+		main_model.traverse( function ( object ) {	
                   
-            if(object.name.includes("BufferGeometry_housing"))
+			if(object.name==="BufferGeometry_housing")
+			{	
+				housingMesh_current=object;
+			}
+
+        });
+
+		model_next.traverse( function ( object ) {	
+                  
+            if(object.name==="BufferGeometry_housing")
             {
-              FX.ReturnBufferGeometry(object,pink_housing_material,model_02,scene);
+              object.material=pink_housing_material;
+
+			  housingMesh_next=object;
+
             }
 
         });
 
-		model_03.traverse( function ( object ) {	
-                  
-            if(object.name.includes("BufferGeometry_housing"))
-            {
-              FX.ReturnBufferGeometry(object,blue_housing_material,model_03,scene);
-            }
-
-        });
-
-		model_04.traverse( function ( object ) {	
-                  
-            if(object.name.includes("BufferGeometry_housing"))
-            {
-              FX.ReturnBufferGeometry(object,black_housing_material,model_04,scene);
-            }
-
-        });
-
-		model_05.traverse( function ( object ) {	
-                  
-            if(object.name.includes("BufferGeometry_housing"))
-            {
-              FX.ReturnBufferGeometry(object,purple_housing_material,model_05,scene);
-            }
-
-        });
-
-		model_06.traverse( function ( object ) {	
-                  
-            if(object.name.includes("BufferGeometry_housing"))
-            {
-              FX.ReturnBufferGeometry(object,orange_housing_material,model_06,scene);
-            }
-
-        });
-
-		model_07.traverse( function ( object ) {	
-                  
-            if(object.name.includes("BufferGeometry_housing"))
-            {
-              FX.ReturnBufferGeometry(object,white_housing_material,model_07,scene);
-            }
-
-        });
-
-		model_08.traverse( function ( object ) {	
-                  
-            if(object.name.includes("BufferGeometry_housing"))
-            {
-              FX.ReturnBufferGeometry(object,blueNavy_housing_material,model_08,scene);
-            }
-
-        });
-
-		scene_02.add(model_02);
-		scene_03.add(model_03);
-		scene_04.add(model_04);
-		scene_05.add(model_05);
-		scene_06.add(model_06);
-		scene_07.add(model_07);
-		scene_08.add(model_08);
+		scene_next.add(model_next);
 
 		setTimeout(() => {
 			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
@@ -493,13 +375,12 @@ function transitionToScene(targetIndex) {
         progressNode
     );
 
-	// 鎖定起點與目標 Uniform
-    activeIndex_current.value = currentIndex;
-    activeIndex_next.value = targetIndex;
-	 
 	// TransitionNode 的方向是反的
     // progress = 1 → A（原本）
     // progress = 0 → B（目標）
+
+	housingMesh_next.material=materials[targetIndex];
+	
 	progressNode.value = 1.0;
 
 	renderPipeline.render();
@@ -511,8 +392,7 @@ function transitionToScene(targetIndex) {
         onComplete: () => {
             // 轉場完成：更新當前場景索引
             currentIndex = targetIndex;
-			activeIndex_current.value = targetIndex;
-
+			housingMesh_current.material=materials[targetIndex];
 			progressNode.value = 0.0;
 			isTransitioning = false;
 
