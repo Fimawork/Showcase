@@ -110,6 +110,7 @@
 				display: flex;
 				align-items: center;
 				gap: 10px;
+				cursor: pointer;
 			}
 
 			.brand-icon {
@@ -579,7 +580,7 @@
 
 			<!-- TOP HEADER -->
 			<header class="top-header">
-				<div class="brand-mark">
+				<div class="brand-mark" onclick="parent.open('https://fimawork.tw/')">
 					<div class="brand-icon">
 						<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
 							<path d="M10 2 L4 6 L4 14 L10 18 L16 14 L16 6 Z"/>
@@ -807,6 +808,8 @@ async function init()
 			const white_housing_material     = FXM.InstEtchingMaterial(0xF5F4EF,0.5,0.307,0.3,false,1,"./textures/Light_Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
 			const blueNavy_housing_material  = FXM.InstEtchingMaterial(0x4B5A86,0.413,0.432,0.682,false,1,"./textures/Gravel.png",new THREE.Vector2(0,0),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
 			const casterMount_material       = FXM.InstEtchingMaterial(0x363636,0.35,0.5,0.75,false,1,"./textures/Gravel.png",new THREE.Vector2(100,100),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(300,300),6);
+			const locker_material=FXM.InstMaterial(0xA8ACA0,0.3,0.9,0,1.5,0.5,false,1,true);
+			const tube_material=FXM.InstMaterial(0xA6A0A0,0.3,0.731,0,1.5,0.5,false,1,true);
 
 			materials = [
 				champagne_housing_material,
@@ -823,6 +826,13 @@ async function init()
 				if (object.name.includes("housing")) FX.ReturnBufferGeometry(object, champagne_housing_material, main_model, scene);
 				if (object.name.includes("rubber"))  FX.ReturnBufferGeometry(object, null, main_model, scene);
 				if (object.name.includes("padding")) FX.ReturnBufferGeometry(object, casterMount_material, main_model, scene);
+				if (object.name.includes("handle")) FX.ReturnBufferGeometry(object, null, main_model, scene);
+				if (object.name.includes("Rivet")) FX.ReturnBufferGeometry(object, null, main_model, scene);
+				if (object.name.includes("Locker")) FX.ReturnBufferGeometry(object, locker_material, main_model, scene);
+				if (object.name.includes("tube")) FX.ReturnBufferGeometry(object, tube_material, main_model, scene);
+				if (object.name.includes("screw")) FX.ReturnBufferGeometry(object, null, main_model, scene);
+				if (object.name.includes("wheel")) FX.ReturnBufferGeometry(object, null, main_model, scene);
+				if (object.name.includes("caster")) FX.ReturnBufferGeometry(object, null, main_model, scene);
 			});
 
 			main_model.add(model);
