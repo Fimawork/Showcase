@@ -1,0 +1,832 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
+		<meta name="viewport" content="width=device-width", initial-scale="1.0", maximum-scale="1.0", user-scalable="no"/>
+		<meta name="description" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。"/>
+		<meta name="keywords" content="設計工作室,3D網頁設計,3D Website Design"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
+		<link rel="stylesheet" type="text/css" href="Main.css">
+		<style type="text/css">
+			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
+
+			body
+			{
+				margin: 0;
+				padding:0; 
+			}
+			
+			canvas
+			{
+				width: 100%;
+   				height: 100%;
+			}
+
+			.sample_background
+			{
+				position: absolute;
+				left: 0%;
+				width: 100%;
+				height: 100%;
+				background-image: url('https://images.pexels.com/photos/7130546/pexels-photo-7130546.jpeg?_gl=1*ji9vc8*_ga*OTg5MDA4NDUyLjE3NTcxMzgwNzc.*_ga_8JE65Q40S6*czE3NTgzNDU0NDQkbzQkZzEkdDE3NTgzNDU1MDkkajU5JGwwJGgw');
+				background-repeat:no-repeat;
+				background-size: 100% 100%; 
+				opacity: 0.5;
+			}
+
+			#banner
+			{
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				width: 90%;
+				height: 90%;
+
+				/*background: rgba(0, 0, 0, 0.05);
+    			backdrop-filter: blur(15px);
+    			-webkit-backdrop-filter: blur(15px);
+				border-radius: 30px;
+				border: 1px solid rgba(255, 255, 255, 0.5);
+				box-shadow: 0 4px 30px rgba(0, 0, 0, 0.18);*/
+				background-image: url('https://images.pexels.com/photos/7130546/pexels-photo-7130546.jpeg?_gl=1*ji9vc8*_ga*OTg5MDA4NDUyLjE3NTcxMzgwNzc.*_ga_8JE65Q40S6*czE3NTgzNDU0NDQkbzQkZzEkdDE3NTgzNDU1MDkkajU5JGwwJGgw');
+				border-radius: 30px;
+				border: 1px solid rgba(255, 255, 255, 0.5);
+
+				transform: translate(-50%,-50%);
+				/*background-color: #c2ced1;*/
+			}
+
+
+			#threeContainer
+			{
+				position: absolute;
+				top: 0%;
+				left: 0%;
+				width: 100%;
+				height: 100%;
+			}
+
+			.mainTitle
+			{
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				font-family: "Roboto", sans-serif;
+				color: rgba(255,255,255,1);
+				font-size: 60px;
+				transform: translate(-50%,-50%);
+				white-space: nowrap;
+				user-select: none;/*限制文字被選擇*/
+				pointer-events: none;
+			}
+
+			.subTitle
+			{
+				position: absolute;
+				top: 60%;
+				left: 50%;
+				padding: 0.75% 1% 0.75% 1%;
+				background-color: rgba(255,255,255,0.75);
+				font-family: "Roboto", sans-serif;
+				color: rgba(60,60,60,1);
+				font-size: 18px;
+				transform: translate(-50%,-50%);
+				white-space: nowrap;
+				user-select: none;
+			}
+
+			.btn_panel
+			{
+				position: absolute;
+				top: 93%;
+				left: 50%;
+				height: 12px;
+				display: flex;
+				justify-content: center;
+				transform: translate(-50%,-50%);
+			}
+			
+			.btn
+			{
+				margin-left: 6px;
+				margin-right: 6px;
+				height: 100%;
+				aspect-ratio: 1/1;
+				border-style: solid;
+				border-width: 1px;		
+				border-radius: 50% 50%;
+				border-color: rgba(255, 255, 255,1);
+				background-color: rgba(210, 210, 210, 0.3);
+			}
+
+			.fimawork_logo
+			{
+				position:absolute;
+				left: 50%;
+				top: 50%;
+				height: 9%;
+				aspect-ratio: 192/33;
+				background-image: url(./images/fimawork_logo_C_white.png);
+				background-size: 100% 100%;
+				opacity: 1;
+				z-index: 99;
+				user-select: none;
+				pointer-events: none;
+				transform: translate(-50%,-50%);
+			}
+
+			@media (hover: hover) 
+			{
+			  	.subTitle
+			  	{
+					cursor: pointer;
+			  	}
+
+			  	.subTitle:hover
+				{
+					background-color: rgba(255,255,255,0.3);
+				}
+
+				.btn
+				{
+					cursor: pointer;
+				}
+			}
+
+			@media screen and (max-width:1400px)/*平板(橫向)*/
+			{
+				.mainTitle
+				{
+					font-size: 60px;
+				}
+
+				.subTitle
+				{
+					font-size: 30px;
+				}
+
+
+				.subTitle:active
+				{
+					background-color: rgba(255,255,255,0.3);
+				}
+			}
+
+			@media screen and (max-width:1024px)/*平板(直向)ipad pro*/
+			{
+				.mainTitle
+				{
+					font-size: 60px;
+				}
+
+				.subTitle
+				{
+					font-size: 30px;
+				}
+
+				.fimawork_logo
+				{
+					height: 9%;
+				}
+
+			}
+
+			@media screen and (max-width:896px)/*手機iphone 12 pro*/
+			{
+				.mainTitle
+				{
+					font-size: 40px;
+				}
+
+				.subTitle
+				{
+					font-size: 15px;
+				}
+
+				
+				#banner
+				{
+					height: 90%;
+					border-radius: 18px;
+				}
+
+				.btn_panel
+				{
+					height: 10px;
+				}
+
+				.fimawork_logo
+				{
+					height: 5.4%;
+				}
+			}
+
+			@media screen and (max-width:768px)/*手機*/
+			{
+				.mainTitle
+				{
+					font-size: 24px;
+				}
+
+				.subTitle
+				{
+					font-size: 12px;
+				}
+
+				#banner
+				{
+					height: 90%;
+					aspect-ratio: 1/1;
+				}
+			}
+
+			@media screen and (max-width:420px)/*手機，直*/
+			{
+
+				#banner
+				{
+					height: 50%;
+					aspect-ratio: 1/1;
+				}
+			}
+
+			@media screen and (max-width:393px)/*手機，直*/
+			{
+				.mainTitle
+				{
+					font-size: 18px;
+				}
+
+				.subTitle
+				{
+					font-size: 10px;
+				}
+
+				#banner
+				{
+					height: 50%;
+					aspect-ratio: 1/1;
+				}
+			}
+
+		</style>
+
+		<script type="importmap">
+			{
+			  "imports": {
+			    "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.webgpu.js",
+			    "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.tsl.js",
+			    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"
+			  }
+			}
+		</script>
+
+	</head>
+	
+	<body>
+		<div class="sample_background"></div>
+		<div id="banner">
+			<div id="threeContainer"></div>
+			<div class="mainTitle"></div>
+				<div class="subTitle" onclick="parent.open('https://fimawork.tw/')">SEE MORE DEMO</div>
+				<div class="btn_panel">
+					<div class="btn" id="btn_0"></div>
+					<div class="btn" id="btn_1"></div>
+					<div class="btn" id="btn_2"></div>
+					<div class="btn" id="btn_3"></div>
+					<div class="btn" id="btn_4"></div>
+					<div class="btn" id="btn_5"></div>
+				</div>
+		</div>
+		<div class="fimawork_logo"></div>
+		<script type="module">
+
+import * as THREE from 'three';
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.55/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.55/fx_materials.js';
+import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.55/fx_hud.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
+import { FC001_128_A_2026 } from './models/FC001_128_A_2026_slices.js';
+import { Pull_128_20250921_20260908 } from './models/Pull_128_20250921_20260908_slices.js';
+import { FC005_128_A_20260908 } from './models/FC005_128_A_20260908_slices.js';
+import { FC003_20260908 } from './models/FC003_20260908_slices.js';
+import { Pull_128_20220715_20260908 } from './models/Pull_128_20220715_20260908_slices.js';
+import { Knob_20250921_20260908 } from './models/Knob_20250921_20260908_slices.js';
+
+let scene, camera, renderer, stats, mixer;
+let controls;
+let threeContainer = document.getElementById("threeContainer");
+let _loadingUI = document.getElementById("loadingUI");
+
+let _btn_0 = document.getElementById("btn_0");
+let _btn_1 = document.getElementById("btn_1");
+let _btn_2 = document.getElementById("btn_2");
+let _btn_3 = document.getElementById("btn_3");
+let _btn_4 = document.getElementById("btn_4");
+let _btn_5 = document.getElementById("btn_5");
+
+let _banner = document.getElementById("banner");
+
+const timer = new THREE.Timer();
+
+const CameraDefaultPos=new THREE.Vector3(66,12,-12);
+const ControlsTargetDefaultPos=new THREE.Vector3(60,0,0);
+
+const modelPosition=new THREE.Vector3(60,0,0);
+const modelRotation=new THREE.Vector3(0,Math.PI, 0);
+const modeScale=0.12;
+
+let carouselManu = new THREE.Group();
+
+let item_01 = new THREE.Object3D();
+let item_02 = new THREE.Object3D();
+let item_03 = new THREE.Object3D();
+let item_04 = new THREE.Object3D();
+let item_05 = new THREE.Object3D();
+let item_06 = new THREE.Object3D();
+
+let item_list=[];
+let btn_list=[];
+let item_index=0;
+
+const item_num=6;
+const divisionAngle = 2*Math.PI/item_num;//2*Math.PI為360度
+
+let rotationTarget = new THREE.Object3D();
+const quaternion_rotationTarget = new THREE.Quaternion();
+const quaternion_carouselManu = new THREE.Quaternion();
+
+let isRotateOn=false;
+const normal_rpm=0.015;
+let rpm=0.015;//變數，按鍵選單時可提高轉速
+
+let idleTime=0;
+const hold_time=6;
+
+init();
+FXUI.InstLoadingEffect_Type_B(true);
+
+async function init()
+{
+	FX.SetupEnvironment("cloud");
+
+  	scene = new THREE.Scene();
+
+  	camera = new THREE.PerspectiveCamera( 45, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
+  	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
+  	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
+
+  	renderer.setClearColor(0x000000, 0.0);//需加入這一條，否則看不到CSS的底圖
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 1.0;
+  	//document.body.appendChild( renderer.domElement );
+  	threeContainer.appendChild( renderer.domElement );
+
+	await renderer.init();
+
+  	camera.position.copy(CameraDefaultPos);
+  
+  	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
+  	controls = new OrbitControls( camera, renderer.domElement );
+  	controls.enablePan = true;//右鍵平移效果
+  	controls.panSpeed = 0.4;
+  	controls.enableDamping = true;
+  	controls.dampingFactor =0.05;
+  	controls.maxDistance = 30;
+	controls.minDistance = 12;
+  	controls.target.copy( ControlsTargetDefaultPos );
+  	controls.zoomSpeed=0.5;
+  	controls.update();
+
+  	///hdri 環境光源
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/brown_photostudio_02_1k.jpg', scene);
+
+	carouselManu.add(item_01).add(item_02).add(item_03).add(item_04).add(item_05).add(item_06);
+	//item_01.rotation.y=divisionAngle*6;
+	//item_02.rotation.y=divisionAngle*5;
+	//item_03.rotation.y=divisionAngle*4;
+	//item_04.rotation.y=divisionAngle*3;
+	//item_05.rotation.y=divisionAngle*2;
+	//item_06.rotation.y=divisionAngle*1;
+	scene.add(carouselManu);
+
+	FX.posData[0]={ camera_pos:CameraDefaultPos, controlsTarget_pos:ControlsTargetDefaultPos};
+
+	///fc_001 
+	const loader_fc_001 = new GLTFLoader();
+    loader_fc_001.setDRACOLoader(FX.dracoLoader);
+	loader_fc_001.parse(
+    FX.Base64ToArrayBuffer(FC001_128_A_2026()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+		model.position.copy(modelPosition);
+		model.rotation.copy(modelRotation);
+		model.scale.set(modeScale,modeScale,modeScale);
+
+		const black_material=FXM.InstMaterial(0x404040,0.403,0.894,0,1.5,0.5,false,1,true);
+
+		const material_bottomEdge = FXM.InstEtchingMaterial(0xffc500, 0.4, 1, 0.75, false, 1, "./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg", new THREE.Vector2(1.2, 0.5), new THREE.Vector2(0, 0), './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg', new THREE.Vector2(0,0), 0);
+
+		const material_body = FXM.InstEtchingMaterial(0xcc991b, 0.4, 1, 0.75, false, 1, "./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg", new THREE.Vector2(5, 1), new THREE.Vector2(0, 0), './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg', new THREE.Vector2(0,0), 0);
+
+		const material_body_2 = FXM.InstEtchingMaterial(0xcc991b, 0.4, 1, 0.75, false, 1, "./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg", new THREE.Vector2(0.5, 0.5), new THREE.Vector2(0, 0), './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg', new THREE.Vector2(0,0), 0);
+
+		const material_body_3 = FXM.InstEtchingMaterial(0xcc991b, 0.4, 1, 0.75, false, 1, "./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg", new THREE.Vector2(0.5, 2.5), new THREE.Vector2(0, 0), './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg', new THREE.Vector2(0,0), 0);
+
+		const material_body_4 = FXM.InstEtchingMaterial(0xcc991b, 0.4, 1, 0.75, false, 1, "./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg", new THREE.Vector2(2.5, 0.5), new THREE.Vector2(0, 0), './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg', new THREE.Vector2(0,0), 0);
+
+		model.traverse(function (object) {	
+			if (object.name.includes("FC001-128-B_Black")) {FX.ReturnBufferGeometry(object, black_material, item_01, scene);}
+			if (object.name.includes("FC001-128-B_Body")) {FX.ReturnBufferGeometry(object,material_body, item_01, scene);}
+			if (object.name.includes("FC001-128-B_Edge")) {FX.ReturnBufferGeometry(object, null, item_01, scene);}
+			if (object.name.includes("FC001-128-B_2")) {FX.ReturnBufferGeometry(object, material_body_2, item_01, scene);}
+			if (object.name.includes("FC001-128-B_3")) {FX.ReturnBufferGeometry(object, material_body_3, item_01, scene);}
+			if (object.name.includes("FC001-128-B_BottomEdge_B")) {FX.ReturnBufferGeometry(object, material_bottomEdge, item_01, scene);}
+			if (object.name.includes("FC001-128-B_BottomEdge_A")) {FX.ReturnBufferGeometry(object, material_bottomEdge, item_01, scene);}
+			if (object.name.includes("FC001-128-B_4")) {FX.ReturnBufferGeometry(object, material_body_4, item_01, scene);}
+		});
+
+		setTimeout(() => {item_01.rotation.y=divisionAngle*6;}, 100);
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	///pull_128_20250921 
+	const loader_pull_128_a = new GLTFLoader();
+    loader_pull_128_a.setDRACOLoader(FX.dracoLoader);
+	loader_pull_128_a.parse(
+    FX.Base64ToArrayBuffer(Pull_128_20250921_20260908()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+		model.position.copy(modelPosition);
+		model.rotation.copy(modelRotation);
+		model.scale.set(modeScale,modeScale,modeScale);
+
+		const gold_material=FXM.InstMaterial(0xD2CBA3,0.15,1,0,1.5,0.5,false,1,true);
+		const black_material=FXM.InstMaterial(0x4D4D4D,0.2156629,1,0,1.5,0.5,false,1,true);
+
+		FXM.ClearCoatEffect(black_material,1,0.05);
+
+		model.traverse(function (object) {	
+			if (object.name.includes("gold")) {FX.ReturnBufferGeometry(object, gold_material, item_02, scene);}
+			if (object.name.includes("black")) {FX.ReturnBufferGeometry(object,black_material, item_02, scene);}
+		});
+
+		setTimeout(() => {item_02.rotation.y=divisionAngle*5;}, 200);
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	///fc005_128_a
+	const loader_fc_005_a = new GLTFLoader();
+    loader_fc_005_a.setDRACOLoader(FX.dracoLoader);
+	loader_fc_005_a.parse(
+    FX.Base64ToArrayBuffer(FC005_128_A_20260908()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+		model.position.copy(modelPosition);
+		model.rotation.y=FX.ToThreeEulerAngle(180);
+		model.scale.set(modeScale*0.8,modeScale*0.8,modeScale*0.8);
+
+		const black_material=FXM.InstMaterial(0x404040,0.403,0.894,0,1.5,0.5,false,1,true);
+		FXM.ClearCoatEffect(black_material,0.5,0.4);
+
+		const nickel_material=FXM.InstMaterial(0xDBD1AD,0,1,0,1.5,0.5,false,1,true);
+
+		model.traverse(function (object) {	
+			if (object.name.includes("FC005_128_A_nickel")) {FX.ReturnBufferGeometry(object, nickel_material, item_03, scene);}
+			if (object.name.includes("FC005_128_A_pc")) {FX.ReturnBufferGeometry(object,null, item_03, scene);}
+			if (object.name.includes("FC005_128_A_black")) {FX.ReturnBufferGeometry(object,black_material, item_03, scene);}
+		});
+
+		setTimeout(() => {item_03.rotation.y=divisionAngle*4;}, 300);
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	///fc003
+	const loader_fc_003 = new GLTFLoader();
+    loader_fc_003.setDRACOLoader(FX.dracoLoader);
+	loader_fc_003.parse(
+    FX.Base64ToArrayBuffer(FC003_20260908()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+		model.position.copy(modelPosition);
+		model.rotation.y=FX.ToThreeEulerAngle(180);
+		model.scale.set(modeScale,modeScale,modeScale);
+
+		model.traverse(function (object) {	
+			if (object.name.includes("FC003-128-A")) {FX.ReturnBufferGeometry(object, null, item_04, scene);}
+			if (object.name.includes("FC003-160-A")) {FX.ReturnBufferGeometry(object,null, item_04, scene);}
+			if (object.name.includes("FC003-Knob")) {FX.ReturnBufferGeometry(object,null, item_04, scene);}
+		});
+
+		setTimeout(() => {item_04.rotation.y=divisionAngle*3;}, 400);
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	///Pull_128_20220715
+	const loader_Pull_128_20220715_20260908 = new GLTFLoader();
+    loader_Pull_128_20220715_20260908.setDRACOLoader(FX.dracoLoader);
+	loader_Pull_128_20220715_20260908.parse(
+    FX.Base64ToArrayBuffer(Pull_128_20220715_20260908()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+		model.position.copy(modelPosition);
+		model.rotation.y=FX.ToThreeEulerAngle(180);
+		model.scale.set(modeScale,modeScale,modeScale);
+
+		const material_top = FXM.InstEtchingMaterial(0xBABABA,0.5,0.75,0,false,1,"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(4.5,3),new THREE.Vector2(0,0),"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(3,2),0);
+
+		const material_body = FXM.InstEtchingMaterial(0xBABABA,0.45,1,0.7500000000000001,false,1,"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(1,5),new THREE.Vector2(0,0),"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(1,1),0);
+
+		model.traverse(function (object) {	
+			if (object.name.includes("Shell_Top")) {FX.ReturnBufferGeometry(object, material_top, item_05, scene);}
+			if (object.name.includes("Shell_Body")) {FX.ReturnBufferGeometry(object,material_body, item_05, scene);}
+			if (object.name.includes("Shell_Pattern_Right")) {FX.ReturnBufferGeometry(object,null, item_05, scene);}
+			if (object.name.includes("Shell_Pattern_Left")) {FX.ReturnBufferGeometry(object,null, item_05, scene);}
+			if (object.name.includes("Edge")) {FX.ReturnBufferGeometry(object,null, item_05, scene);}
+		});
+
+		setTimeout(() => {item_05.rotation.y=divisionAngle*2;}, 500);
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	///Knob_20250921_20260908
+	const loader_Knob_20250921_20260908 = new GLTFLoader();
+    loader_Knob_20250921_20260908.setDRACOLoader(FX.dracoLoader);
+	loader_Knob_20250921_20260908.parse(
+    FX.Base64ToArrayBuffer(Knob_20250921_20260908()),
+    '',
+    (gltf) => {
+        
+		const model = gltf.scene;
+		model.position.copy(modelPosition);
+		model.rotation.y=FX.ToThreeEulerAngle(180);
+		model.scale.set(modeScale*1.2,modeScale*1.2,modeScale*1.2);
+
+		const black_material=FXM.InstMaterial(0x000000,1,0,0,1.5,0.5,false,1,true);
+		const A_material = FXM.InstEtchingMaterial(0xDB9C43,0.3,1,0.7500000000000001,false,1,"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(1,5),new THREE.Vector2(0,0),"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(1,1),0);
+
+		const B_material = FXM.InstEtchingMaterial(0xF6EF9F,0.3,1,0.7500000000000001,false,1,"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(1,5),new THREE.Vector2(0,0),"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(1,1),0);
+
+		const C_material = FXM.InstEtchingMaterial(0xBABABA,0.45,1,0.7500000000000001,false,1,"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(1,5),new THREE.Vector2(0,0),"./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg",new THREE.Vector2(1,1),0);
+
+		model.traverse(function (object) {	
+			if (object.name.includes("Knob_A")) {FX.ReturnBufferGeometry(object,A_material, item_06, scene);}
+			if (object.name.includes("Knob_B")) {FX.ReturnBufferGeometry(object,B_material, item_06, scene);}
+			if (object.name.includes("Knob_C")) {FX.ReturnBufferGeometry(object,C_material, item_06, scene);}
+			if (object.name.includes("black")) {FX.ReturnBufferGeometry(object,black_material, item_06, scene);}
+		});
+
+		setTimeout(() => {item_06.rotation.y=divisionAngle*1;}, 600);
+		setTimeout(() => {SetupItemGroup();}, 650);
+		setTimeout(() => {renderer.setAnimationLoop(animate);FXUI.InstLoadingEffect_Type_B(false);}, 700);
+    },
+    (error) => {
+        console.error('Failed to load model:', error);
+    }
+	);
+
+	///EventListener
+  	window.addEventListener( 'resize', onWindowResize );  
+
+  		window.addEventListener("pointerdown", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+	window.addEventListener( 'pointermove', function(e) {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+  	window.addEventListener("wheel", (event) => {
+		
+		idleTime=0;
+		controls.autoRotate=false;
+		
+	});
+
+	_btn_0.addEventListener('click', function(e) {FocusToItem(0)});
+	_btn_1.addEventListener('click', function(e) {FocusToItem(1)});
+	_btn_2.addEventListener('click', function(e) {FocusToItem(2)});
+	_btn_3.addEventListener('click', function(e) {FocusToItem(3)});
+	_btn_4.addEventListener('click', function(e) {FocusToItem(4)});
+	_btn_5.addEventListener('click', function(e) {FocusToItem(5)});
+
+
+	FX.UpdateShadowSpcaceSize( 150, 100, 50);
+
+	
+	//影子工具
+	FX.InitWebGPUShadow(scene, {
+     shadow: { blur: 0.5, darkness: 0.25 },
+     plane: { color: '#ffffff', opacity: 0.1 }	 
+	});
+
+}
+
+
+function onWindowResize() 
+{
+    camera.aspect = threeContainer.clientWidth/threeContainer.clientHeight;//非全螢幕比例設定
+	camera.updateProjectionMatrix();
+    renderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight);
+}
+
+function animate(timestamp) 
+{
+  	controls.update();
+  	renderer.render( scene, camera );
+
+	//影子工具
+	FX.UpdateWebGPUShadow(renderer, scene);
+
+	UpdateRotationManu();
+
+	// 自動更新時間（用來計算移動速度、旋轉等）
+    timer.update( timestamp );
+	const delta = timer.getDelta();
+
+	if(!isRotateOn)
+	{
+		idleTime+=delta;
+
+		if(idleTime>hold_time)
+		{
+			idleTime=0;
+
+			ManuRotate();
+		}
+	}
+	
+}
+
+function UpdateRotationManu()
+{
+	
+	quaternion_rotationTarget.setFromEuler(rotationTarget.rotation);
+
+	if(quaternion_carouselManu.angleTo(quaternion_rotationTarget)>0.01)
+    {
+		quaternion_carouselManu.slerp(quaternion_rotationTarget,rpm);
+		isRotateOn=true;
+    } 
+
+	else
+	{
+		isRotateOn=false;
+		rpm=normal_rpm;//回復正常轉速
+	}
+
+	carouselManu.rotation.setFromQuaternion(quaternion_carouselManu);   
+}
+
+function ManuRotate()
+{
+	try 
+  	{
+		FX.CameraManager_Type_B(0,camera,controls,window,1000)
+		rotationTarget.rotation.y+=divisionAngle;
+		item_index++;
+
+		if(item_index>item_num-1)
+		{
+			item_index=0;
+			rotationTarget.rotation.y=0;
+		}
+
+		setTimeout(() => {ShowItem();}, 1000);//1000=1sec}
+
+		ShowItem(item_index);
+	}
+
+	catch (error) 
+  	{
+  	  	console.log(`發生錯誤.${error}`);
+  	}
+
+	finally
+	{
+		ShowItem(item_index);
+	}
+}
+
+function ShowItem(index)
+{
+	try 
+  	{
+		item_list[index].visible=true;
+		//UI按鍵
+		btn_list[index].style.backgroundColor="rgba(255, 255, 255, 1)";
+
+		for(let i=0;i<item_list.length;i++)
+		{
+			if(i!=index)
+			{
+				setTimeout(() => {item_list[i].visible=false;}, 1000);//1000=1sec}
+				btn_list[i].style.backgroundColor="rgba(210,210,210,0.3)";
+			}
+		}
+	}
+
+	catch (error) 
+  	{
+  	  	console.log(`發生錯誤.${error}`);
+  	}
+}
+
+function SetupItemGroup()
+{
+	//3D
+	item_list.push(item_01);
+	item_list.push(item_02);
+	item_list.push(item_03);
+	item_list.push(item_04);
+	item_list.push(item_05);
+	item_list.push(item_06);
+
+	item_01.visible=true;
+	item_02.visible=false;
+	item_03.visible=false;
+	item_04.visible=false;
+	item_05.visible=false;
+	item_06.visible=false;
+
+	//UI按鍵
+	btn_list.push(_btn_0);
+	btn_list.push(_btn_1);
+	btn_list.push(_btn_2);
+	btn_list.push(_btn_3);
+	btn_list.push(_btn_4);
+	btn_list.push(_btn_5);
+
+	//預設第一項active
+	_btn_0.style.backgroundColor="rgba(255, 253, 253, 1)";
+}
+
+///輪播進度按鍵
+function FocusToItem(i)
+{
+	try 
+  	{
+		if(!isRotateOn)
+		{
+			ShowItem(i);
+
+			item_index=i;
+
+			FX.CameraManager_Type_B(0,camera,controls,window,1000)
+
+			rpm=0.08;//使用較高的轉速
+
+			rotationTarget.rotation.y=divisionAngle*i;
+
+			idleTime=0;
+		}
+	}
+
+	catch (error) 
+  	{
+  	  	console.log(`發生錯誤.${error}`);
+  	}
+}
+
+
+		</script>
+    </body>
+
+</html>
