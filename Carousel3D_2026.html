@@ -367,7 +367,7 @@ const normal_rpm=0.015;
 let rpm=0.015;//變數，按鍵選單時可提高轉速
 
 let idleTime=0;
-const hold_time=6;
+const hold_time=4.5;
 
 init();
 FXUI.InstLoadingEffect_Type_B(true);
@@ -610,6 +610,10 @@ async function init()
 		setTimeout(() => {item_06.rotation.y=divisionAngle*1;}, 600);
 		setTimeout(() => {SetupItemGroup();}, 650);
 		setTimeout(() => {renderer.setAnimationLoop(animate);FXUI.InstLoadingEffect_Type_B(false);}, 700);
+		setTimeout(() => {SceneFadeInEffect(5);}, 800);
+
+
+		
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -656,7 +660,6 @@ async function init()
      shadow: { blur: 0.5, darkness: 0.25 },
      plane: { color: '#ffffff', opacity: 0.1 }	 
 	});
-
 }
 
 
@@ -824,6 +827,20 @@ function FocusToItem(i)
   	  	console.log(`發生錯誤.${error}`);
   	}
 }
+
+async function SceneFadeInEffect(t)
+{
+	let count = t*100;
+
+	const timerID=setInterval(()=>{
+		threeContainer.style.cssText = `filter: blur(${count*0.1/t}px);`;
+		count--;
+		if(count<=0)
+		{
+			clearInterval(timerID);
+		}
+	})
+} 
 
 
 		</script>
