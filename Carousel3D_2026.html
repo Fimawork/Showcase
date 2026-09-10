@@ -16,6 +16,7 @@
 			{
 				margin: 0;
 				padding:0; 
+				overflow: hidden;
 			}
 			
 			canvas
@@ -43,19 +44,11 @@
 				left: 50%;
 				width: 90%;
 				height: 90%;
-
-				/*background: rgba(0, 0, 0, 0.05);
-    			backdrop-filter: blur(15px);
-    			-webkit-backdrop-filter: blur(15px);
-				border-radius: 30px;
-				border: 1px solid rgba(255, 255, 255, 0.5);
-				box-shadow: 0 4px 30px rgba(0, 0, 0, 0.18);*/
 				background-image: url('https://images.pexels.com/photos/7130546/pexels-photo-7130546.jpeg?_gl=1*ji9vc8*_ga*OTg5MDA4NDUyLjE3NTcxMzgwNzc.*_ga_8JE65Q40S6*czE3NTgzNDU0NDQkbzQkZzEkdDE3NTgzNDU1MDkkajU5JGwwJGgw');
 				border-radius: 30px;
 				border: 1px solid rgba(255, 255, 255, 0.5);
-
 				transform: translate(-50%,-50%);
-				/*background-color: #c2ced1;*/
+				overflow: hidden;
 			}
 
 
@@ -85,40 +78,39 @@
 			.subTitle
 			{
 				position: absolute;
-				top: 60%;
-				left: 50%;
-				padding: 0.75% 1% 0.75% 1%;
-				background-color: rgba(255,255,255,0.75);
-				font-family: "Roboto", sans-serif;
-				color: rgba(60,60,60,1);
-				font-size: 18px;
-				transform: translate(-50%,-50%);
-				white-space: nowrap;
-				user-select: none;
+        		top: 60%;
+        		left: 50%;
+        		padding: 8px 16px;
+        		background-color: rgba(255,255,255,0.75);
+        		font-family: "Roboto", sans-serif;
+        		color: rgba(60,60,60,1);
+        		font-size: 18px;
+        		transform: translate(-50%, -50%);
+        		white-space: nowrap;
+        		user-select: none;
+        		transition: background-color 0.2s ease;
 			}
 
 			.btn_panel
 			{
 				position: absolute;
-				top: 93%;
-				left: 50%;
-				height: 12px;
-				display: flex;
-				justify-content: center;
-				transform: translate(-50%,-50%);
+        		bottom: 5%;
+        		left: 50%;
+        		height: 12px;
+        		display: flex;
+        		justify-content: center;
+        		transform: translateX(-50%);
 			}
 			
 			.btn
 			{
-				margin-left: 6px;
-				margin-right: 6px;
-				height: 100%;
-				aspect-ratio: 1/1;
-				border-style: solid;
-				border-width: 1px;		
-				border-radius: 50% 50%;
-				border-color: rgba(255, 255, 255,1);
-				background-color: rgba(210, 210, 210, 0.3);
+				margin: 0 6px;
+       			height: 100%;
+       			aspect-ratio: 1/1;
+       			border: 1px solid rgba(255, 255, 255, 1);
+       			border-radius: 50%;
+       			background-color: rgba(210, 210, 210, 0.3);
+       			transition: background-color 0.3s ease;
 			}
 
 			.fimawork_logo
@@ -129,147 +121,24 @@
 				height: 9%;
 				aspect-ratio: 192/33;
 				background-image: url(./images/fimawork_logo_C_white.png);
-				background-size: 100% 100%;
-				opacity: 1;
+				background-size: contain;
+				background-repeat: no-repeat;
 				z-index: 99;
 				user-select: none;
 				pointer-events: none;
 				transform: translate(-50%,-50%);
 			}
 
-			@media (hover: hover) 
-			{
-			  	.subTitle
-			  	{
-					cursor: pointer;
-			  	}
-
-			  	.subTitle:hover
-				{
-					background-color: rgba(255,255,255,0.3);
-				}
-
-				.btn
-				{
-					cursor: pointer;
-				}
-			}
-
-			@media screen and (max-width:1400px)/*平板(橫向)*/
-			{
-				.mainTitle
-				{
-					font-size: 60px;
-				}
-
-				.subTitle
-				{
-					font-size: 30px;
-				}
-
-
-				.subTitle:active
-				{
-					background-color: rgba(255,255,255,0.3);
-				}
-			}
-
-			@media screen and (max-width:1024px)/*平板(直向)ipad pro*/
-			{
-				.mainTitle
-				{
-					font-size: 60px;
-				}
-
-				.subTitle
-				{
-					font-size: 30px;
-				}
-
-				.fimawork_logo
-				{
-					height: 9%;
-				}
-
-			}
-
-			@media screen and (max-width:896px)/*手機iphone 12 pro*/
-			{
-				.mainTitle
-				{
-					font-size: 40px;
-				}
-
-				.subTitle
-				{
-					font-size: 15px;
-				}
-
-				
-				#banner
-				{
-					height: 90%;
-					border-radius: 18px;
-				}
-
-				.btn_panel
-				{
-					height: 10px;
-				}
-
-				.fimawork_logo
-				{
-					height: 5.4%;
-				}
-			}
-
-			@media screen and (max-width:768px)/*手機*/
-			{
-				.mainTitle
-				{
-					font-size: 24px;
-				}
-
-				.subTitle
-				{
-					font-size: 12px;
-				}
-
-				#banner
-				{
-					height: 90%;
-					aspect-ratio: 1/1;
-				}
-			}
-
-			@media screen and (max-width:420px)/*手機，直*/
-			{
-
-				#banner
-				{
-					height: 50%;
-					aspect-ratio: 1/1;
-				}
-			}
-
-			@media screen and (max-width:393px)/*手機，直*/
-			{
-				.mainTitle
-				{
-					font-size: 18px;
-				}
-
-				.subTitle
-				{
-					font-size: 10px;
-				}
-
-				#banner
-				{
-					height: 50%;
-					aspect-ratio: 1/1;
-				}
-			}
+			@media (hover: hover) {
+        		.subTitle:hover { cursor: pointer; background-color: rgba(255,255,255,0.3); }
+        		.btn:hover { cursor: pointer; }
+    		}
+		
+    		@media screen and (max-width: 896px) {
+    		    .mainTitle { font-size: 36px; }
+    		    .subTitle { font-size: 14px; }
+    		    #banner { border-radius: 18px; }
+    		}
 
 		</style>
 
@@ -408,12 +277,6 @@ async function init()
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/brown_photostudio_02_1k.jpg', scene);
 
 	carouselManu.add(item_01).add(item_02).add(item_03).add(item_04).add(item_05).add(item_06);
-	//item_01.rotation.y=divisionAngle*6;
-	//item_02.rotation.y=divisionAngle*5;
-	//item_03.rotation.y=divisionAngle*4;
-	//item_04.rotation.y=divisionAngle*3;
-	//item_05.rotation.y=divisionAngle*2;
-	//item_06.rotation.y=divisionAngle*1;
 	scene.add(carouselManu);
 
 	FX.posData[0]={ camera_pos:CameraDefaultPos, controlsTarget_pos:ControlsTargetDefaultPos};
@@ -610,7 +473,7 @@ async function init()
 		setTimeout(() => {item_06.rotation.y=divisionAngle*1;}, 600);
 		setTimeout(() => {SetupItemGroup();}, 650);
 		setTimeout(() => {renderer.setAnimationLoop(animate);FXUI.InstLoadingEffect_Type_B(false);}, 700);
-		setTimeout(() => {SceneFadeInEffect(5);}, 800);
+		setTimeout(() => {SceneFadeInEffect(threeContainer,3.6);}, 800);
 
 
 		
@@ -720,56 +583,23 @@ function UpdateRotationManu()
 
 function ManuRotate()
 {
-	try 
-  	{
-		FX.CameraManager_Type_B(0,camera,controls,window,1000)
-		rotationTarget.rotation.y+=divisionAngle;
-		item_index++;
-
-		if(item_index>item_num-1)
-		{
-			item_index=0;
-			rotationTarget.rotation.y=0;
-		}
-
-		setTimeout(() => {ShowItem();}, 1000);//1000=1sec}
-
-		ShowItem(item_index);
-	}
-
-	catch (error) 
-  	{
-  	  	console.log(`發生錯誤.${error}`);
-  	}
-
-	finally
-	{
-		ShowItem(item_index);
-	}
+	FX.CameraManager_Type_B(0, camera, controls, window, 1000);
+    rotationTarget.rotation.y += divisionAngle;
+    item_index = (item_index + 1) % item_num;
+    ShowItem(item_index);
 }
 
 function ShowItem(index)
 {
-	try 
-  	{
-		item_list[index].visible=true;
-		//UI按鍵
-		btn_list[index].style.backgroundColor="rgba(255, 255, 255, 1)";
-
-		for(let i=0;i<item_list.length;i++)
-		{
-			if(i!=index)
-			{
-				setTimeout(() => {item_list[i].visible=false;}, 1000);//1000=1sec}
-				btn_list[i].style.backgroundColor="rgba(210,210,210,0.3)";
-			}
-		}
-	}
-
-	catch (error) 
-  	{
-  	  	console.log(`發生錯誤.${error}`);
-  	}
+	item_list.forEach((item, idx) => {
+        if (idx === index) {
+            item.visible = true;
+            if (btn_list[idx]) btn_list[idx].style.backgroundColor = "rgba(255, 255, 255, 1)";
+        } else {
+            setTimeout(() => { if (item_index !== idx) item.visible = false; }, 1000);
+            if (btn_list[idx]) btn_list[idx].style.backgroundColor = "rgba(210, 210, 210, 0.3)";
+        }
+    });
 }
 
 function SetupItemGroup()
@@ -804,42 +634,42 @@ function SetupItemGroup()
 ///輪播進度按鍵
 function FocusToItem(i)
 {
-	try 
-  	{
-		if(!isRotateOn)
-		{
-			ShowItem(i);
-
-			item_index=i;
-
-			FX.CameraManager_Type_B(0,camera,controls,window,1000)
-
-			rpm=0.08;//使用較高的轉速
-
-			rotationTarget.rotation.y=divisionAngle*i;
-
-			idleTime=0;
-		}
-	}
-
-	catch (error) 
-  	{
-  	  	console.log(`發生錯誤.${error}`);
-  	}
+	if (!isRotateOn) {
+        ShowItem(i);
+        item_index = i;
+        FX.CameraManager_Type_B(0, camera, controls, window, 1000);
+        rpm = 0.08;
+        rotationTarget.rotation.y = divisionAngle * i;
+        idleTime = 0;
+    }
 }
 
-async function SceneFadeInEffect(t)
+function SceneFadeInEffect(targetElement, duration = 0.5)
 {
-	let count = t*100;
+	if (!targetElement) return;
 
-	const timerID=setInterval(()=>{
-		threeContainer.style.cssText = `filter: blur(${count*0.1/t}px);`;
-		count--;
-		if(count<=0)
-		{
-			clearInterval(timerID);
-		}
-	})
+    const startBlur = 6; // 初始模糊像素 (px)
+    const startTime = performance.now();
+    const durationMs = duration * 1000;
+
+    function updateBlur(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / durationMs, 1);
+        
+        // 使用 Ease-Out 緩和曲線，讓解模過程更自然
+        const easeOut = 1 - Math.pow(1 - progress, 2);
+        const currentBlur = (startBlur * (1 - easeOut)).toFixed(2);
+
+        if (progress < 1) {
+            targetElement.style.filter = `blur(${currentBlur}px)`;
+            requestAnimationFrame(updateBlur);
+        } else {
+            // 結束時徹底清除 filter 屬性，釋放 GPU 負擔
+            targetElement.style.filter = '';
+        }
+    }
+
+    requestAnimationFrame(updateBlur);
 } 
 
 
