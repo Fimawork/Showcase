@@ -188,6 +188,11 @@ import { FC003_20260908 } from './models/FC003_20260908_slices.js';
 import { Pull_128_20220715_20260908 } from './models/Pull_128_20220715_20260908_slices.js';
 import { Knob_20250921_20260908 } from './models/Knob_20250921_20260908_slices.js';
 
+import { mix, pass, renderOutput, smoothstep, uniform, vec3 } from 'three/tsl';
+			import { boxBlur } from 'three/addons/tsl/display/boxBlur.js';
+			import { fxaa } from 'three/addons/tsl/display/FXAANode.js';
+import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js';
+
 let scene, camera, renderer, stats, mixer;
 let controls;
 let threeContainer = document.getElementById("threeContainer");
@@ -238,8 +243,11 @@ let rpm=0.015;//變數，按鍵選單時可提高轉速
 let idleTime=0;
 const hold_time=4.5;
 
+let renderPipeline;
+const focusPointView = uniform( vec3() );
+
 init();
-//FXUI.InstLoadingEffect_Type_B(true);
+FXUI.InstLoadingEffect_Type_B(true);
 
 async function init()
 {
@@ -472,8 +480,8 @@ async function init()
 
 		setTimeout(() => {item_06.rotation.y=divisionAngle*1;}, 600);
 		setTimeout(() => {SetupItemGroup();}, 650);
-		setTimeout(() => {renderer.setAnimationLoop(animate);SceneFadeIn(threeContainer,0.5);}, 700);
-	
+		setTimeout(() => {renderer.setAnimationLoop(animate);FXUI.InstLoadingEffect_Type_B(false);}, 700); 
+		setTimeout(() => {SceneFadeInEffect(renderer, 3);}, 700);
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -533,7 +541,9 @@ function onWindowResize()
 function animate(timestamp) 
 {
   	controls.update();
-  	renderer.render( scene, camera );
+  	//renderer.render( scene, camera );
+
+	renderPipeline.render();
 
 	//影子工具
 	FX.UpdateWebGPUShadow(renderer, scene);
@@ -641,21 +651,63 @@ function FocusToItem(i)
     }
 }
 
-const targetId = "fx_loading_effect";
-
-function SceneFadeIn(targetElement,s) 
+function SceneFadeInEffect(thisRenderer, thisDuration = 5) 
 {
-	setTimeout(() => {targetElement.style.cssText = `filter: blur(6px);`;}, s*1000);
-	setTimeout(() => {targetElement.style.cssText = `filter: blur(5px);`;}, s*2000);
-	setTimeout(() => {targetElement.style.cssText = `filter: blur(4px);`;}, s*3000);
-	setTimeout(() => {targetElement.style.cssText = `filter: blur(3px);`;}, s*4000);
-	setTimeout(() => {targetElement.style.cssText = `filter: blur(2px);`;}, s*5000);
-	setTimeout(() => {targetElement.style.cssText = `filter: blur(1px);`;}, s*6000);
-	setTimeout(() => {targetElement.style.cssText = `filter: blur(0px);`;}, s*7000);
-	setTimeout(() => {targetElement.style.filter = '';}, s*8000);
+    
+	const effectController = {
+		focusDistance: uniform( 500 ),
+		focalLength: uniform( 200 ),
+		bokehScale: uniform( 10 )
+	};
+
+	// post processing
+
+	renderPipeline = new THREE.RenderPipeline( thisRenderer );
+	renderPipeline.outputColorTransform = false;
+
+	// DOF uniforms
+
+	let blurSize = uniform( 2 ); // determines the kernel size of the blur
+	let blurSpread = uniform( 4 ); // determines how far the blur is spread
+	const minDistance = uniform( 0 ); // all positions at or below minDistance will be completely in focus.
+	const maxDistance = uniform( 0 ); // all positions at or beyond maxDistance will be completely out of focus.
+
+	// beauty and blur/out-of-focus pass
+
+	const scenePass = pass( scene, camera );
+			
+	const scenePassColor = scenePass.getTextureNode().toInspector( 'Color' );
+	const scenePassViewZ = scenePass.getViewZNode();
+	const scenePassBlurred = boxBlur( scenePassColor, { size: blurSize, separation: blurSpread } );
+
+	// simple DOF from https://lettier.github.io/3d-game-shaders-for-beginners/depth-of-field.html
+
+	const blur = smoothstep( minDistance, maxDistance, scenePassViewZ.sub( focusPointView.z ).abs() );
+	const dofPass = mix( scenePassColor, scenePassBlurred, blur );
+
+	const outputPass = renderOutput( dofPass );
+	const fxaaPass = fxaa( outputPass );
+
+	renderPipeline.outputNode = fxaaPass;
+
+	gsap.to(blurSize, {
+		value: 0.0,
+		duration: thisDuration,
+		ease: 'power2.inOut',
+		onComplete: () => {
+			blurSize = 0.0;
+		}
+	});
+
+	gsap.to(blurSpread, {
+		value: 0.0,
+		duration: thisDuration,
+		ease: 'power2.inOut',
+		onComplete: () => {
+			blurSpread = 0.0;
+		}
+	});
 }
-
-
 		</script>
     </body>
 
