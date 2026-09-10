@@ -239,7 +239,7 @@ let idleTime=0;
 const hold_time=4.5;
 
 init();
-FXUI.InstLoadingEffect_Type_B(true);
+//FXUI.InstLoadingEffect_Type_B(true);
 
 async function init()
 {
@@ -472,11 +472,8 @@ async function init()
 
 		setTimeout(() => {item_06.rotation.y=divisionAngle*1;}, 600);
 		setTimeout(() => {SetupItemGroup();}, 650);
-		setTimeout(() => {renderer.setAnimationLoop(animate);FXUI.InstLoadingEffect_Type_B(false);}, 700);
-		//setTimeout(() => {SceneFadeInEffect(threeContainer,3.6);}, 800);
-
-
-		
+		setTimeout(() => {renderer.setAnimationLoop(animate);SceneFadeIn(threeContainer,0.5);}, 700);
+	
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -644,33 +641,19 @@ function FocusToItem(i)
     }
 }
 
-function SceneFadeInEffect(targetElement, duration = 0.5)
+const targetId = "fx_loading_effect";
+
+function SceneFadeIn(targetElement,s) 
 {
-	if (!targetElement) return;
-
-    const startBlur = 6; // 初始模糊像素 (px)
-    const startTime = performance.now();
-    const durationMs = duration * 1000;
-
-    function updateBlur(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / durationMs, 1);
-        
-        // 使用 Ease-Out 緩和曲線，讓解模過程更自然
-        const easeOut = 1 - Math.pow(1 - progress, 2);
-        const currentBlur = (startBlur * (1 - easeOut)).toFixed(2);
-
-        if (progress < 1) {
-            targetElement.style.filter = `blur(${currentBlur}px)`;
-            requestAnimationFrame(updateBlur);
-        } else {
-            // 結束時徹底清除 filter 屬性，釋放 GPU 負擔
-            targetElement.style.filter = '';
-        }
-    }
-
-    requestAnimationFrame(updateBlur);
-} 
+	setTimeout(() => {targetElement.style.cssText = `filter: blur(6px);`;}, s*1000);
+	setTimeout(() => {targetElement.style.cssText = `filter: blur(5px);`;}, s*2000);
+	setTimeout(() => {targetElement.style.cssText = `filter: blur(4px);`;}, s*3000);
+	setTimeout(() => {targetElement.style.cssText = `filter: blur(3px);`;}, s*4000);
+	setTimeout(() => {targetElement.style.cssText = `filter: blur(2px);`;}, s*5000);
+	setTimeout(() => {targetElement.style.cssText = `filter: blur(1px);`;}, s*6000);
+	setTimeout(() => {targetElement.style.cssText = `filter: blur(0px);`;}, s*7000);
+	setTimeout(() => {targetElement.style.filter = '';}, s*8000);
+}
 
 
 		</script>
