@@ -47,10 +47,6 @@
 				background-image: url('https://images.pexels.com/photos/7130546/pexels-photo-7130546.jpeg?_gl=1*ji9vc8*_ga*OTg5MDA4NDUyLjE3NTcxMzgwNzc.*_ga_8JE65Q40S6*czE3NTgzNDU0NDQkbzQkZzEkdDE3NTgzNDU1MDkkajU5JGwwJGgw');
 				border-radius: clamp(14px, 2vw, 28px);
 				border: 1px solid rgba(255,255,255,0.22);
-				box-shadow:
-					0 0 0 1px rgba(212,168,67,0.12),
-					0 24px 80px rgba(0,0,0,0.45),
-					inset 0 1px 0 rgba(255,255,255,0.12);
 				transform: translate(-50%,-50%);
 				overflow: hidden;
 			}
@@ -135,11 +131,121 @@
         		.btn:hover { cursor: pointer; }
     		}
 		
-    		@media screen and (max-width: 896px) {
-    		    .mainTitle { font-size: 36px; }
-    		    .subTitle { font-size: 14px; }
-    		    #banner { border-radius: 18px; }
-    		}
+    			@media screen and (max-width:1400px)/*平板(橫向)*/
+			{
+				.mainTitle
+				{
+					font-size: 60px;
+				}
+
+				.subTitle
+				{
+					font-size: 30px;
+				}
+
+
+				.subTitle:active
+				{
+					background-color: rgba(255,255,255,0.3);
+				}
+			}
+
+			@media screen and (max-width:1024px)/*平板(直向)ipad pro*/
+			{
+				.mainTitle
+				{
+					font-size: 60px;
+				}
+
+				.subTitle
+				{
+					font-size: 30px;
+				}
+
+				.fimawork_logo
+				{
+					height: 9%;
+				}
+
+			}
+
+			@media screen and (max-width:896px)/*手機iphone 12 pro*/
+			{
+				.mainTitle
+				{
+					font-size: 40px;
+				}
+
+				.subTitle
+				{
+					font-size: 15px;
+				}
+
+				
+				#banner
+				{
+					height: 90%;
+					border-radius: 18px;
+				}
+
+				.btn_panel
+				{
+					height: 10px;
+				}
+
+				.fimawork_logo
+				{
+					height: 5.4%;
+				}
+			}
+
+			@media screen and (max-width:768px)/*手機*/
+			{
+				.mainTitle
+				{
+					font-size: 24px;
+				}
+
+				.subTitle
+				{
+					font-size: 12px;
+				}
+
+				#banner
+				{
+					height: 90%;
+					aspect-ratio: 1/1;
+				}
+			}
+
+			@media screen and (max-width:420px)/*手機，直*/
+			{
+
+				#banner
+				{
+					height: 50%;
+					aspect-ratio: 1/1;
+				}
+			}
+
+			@media screen and (max-width:393px)/*手機，直*/
+			{
+				.mainTitle
+				{
+					font-size: 18px;
+				}
+
+				.subTitle
+				{
+					font-size: 10px;
+				}
+
+				#banner
+				{
+					height: 50%;
+					aspect-ratio: 1/1;
+				}
+			}
 
 		</style>
 
@@ -245,10 +351,11 @@ let idleTime=0;
 const hold_time=4.5;
 
 let renderPipeline;
-const focusPointView = uniform( vec3() );
+
 
 init();
 FXUI.InstLoadingEffect_Type_B(true);
+//SceneFadeInEffect(renderer, 7);
 
 async function init()
 {
@@ -258,7 +365,7 @@ async function init()
 
 	let newFOV=threeContainer.clientWidth / threeContainer.clientHeight<1.5?70:45;
 
-  	camera = new THREE.PerspectiveCamera( newFOV, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000 );//非全螢幕比例設定
+  	camera = new THREE.PerspectiveCamera( newFOV, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 50 );//非全螢幕比例設定
   	renderer = new THREE.WebGPURenderer({ antialias: true, alpha: true });
   	renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight);
 
@@ -286,6 +393,7 @@ async function init()
 
   	///hdri 環境光源
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/brown_photostudio_02_1k.jpg', scene);
+	scene.environmentRotation.y  = FX.ToThreeEulerAngle(-90);
 
 	carouselManu.add(item_01).add(item_02).add(item_03).add(item_04).add(item_05).add(item_06);
 	scene.add(carouselManu);
@@ -318,17 +426,17 @@ async function init()
 		const material_body_4 = FXM.InstEtchingMaterial(0xcc991b, 0.4, 1, 0.75, false, 1, "./textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg", new THREE.Vector2(2.5, 0.5), new THREE.Vector2(0, 0), './textures/yan-ots-UuBR5kbvt4Y-unsplash.jpg', new THREE.Vector2(0,0), 0);
 
 		model.traverse(function (object) {	
-			if (object.name.includes("FC001-128-B_Black")) {FX.ReturnBufferGeometry(object, black_material, item_01, scene);}
-			if (object.name.includes("FC001-128-B_Body")) {FX.ReturnBufferGeometry(object,material_body, item_01, scene);}
-			if (object.name.includes("FC001-128-B_Edge")) {FX.ReturnBufferGeometry(object, null, item_01, scene);}
-			if (object.name.includes("FC001-128-B_2")) {FX.ReturnBufferGeometry(object, material_body_2, item_01, scene);}
-			if (object.name.includes("FC001-128-B_3")) {FX.ReturnBufferGeometry(object, material_body_3, item_01, scene);}
-			if (object.name.includes("FC001-128-B_BottomEdge_B")) {FX.ReturnBufferGeometry(object, material_bottomEdge, item_01, scene);}
-			if (object.name.includes("FC001-128-B_BottomEdge_A")) {FX.ReturnBufferGeometry(object, material_bottomEdge, item_01, scene);}
-			if (object.name.includes("FC001-128-B_4")) {FX.ReturnBufferGeometry(object, material_body_4, item_01, scene);}
+			if (object.name.includes("FC001-128-B_Black")) {FX.ReturnBufferGeometry(object, black_material, item_03, scene);}
+			if (object.name.includes("FC001-128-B_Body")) {FX.ReturnBufferGeometry(object,material_body, item_03, scene);}
+			if (object.name.includes("FC001-128-B_Edge")) {FX.ReturnBufferGeometry(object, null, item_03, scene);}
+			if (object.name.includes("FC001-128-B_2")) {FX.ReturnBufferGeometry(object, material_body_2, item_03, scene);}
+			if (object.name.includes("FC001-128-B_3")) {FX.ReturnBufferGeometry(object, material_body_3, item_03, scene);}
+			if (object.name.includes("FC001-128-B_BottomEdge_B")) {FX.ReturnBufferGeometry(object, material_bottomEdge, item_03, scene);}
+			if (object.name.includes("FC001-128-B_BottomEdge_A")) {FX.ReturnBufferGeometry(object, material_bottomEdge, item_03, scene);}
+			if (object.name.includes("FC001-128-B_4")) {FX.ReturnBufferGeometry(object, material_body_4, item_03, scene);}
 		});
 
-		setTimeout(() => {item_01.rotation.y=divisionAngle*6;}, 100);
+		setTimeout(() => {item_03.rotation.y=divisionAngle*4;}, 100);
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -354,11 +462,11 @@ async function init()
 		FXM.ClearCoatEffect(black_material,1,0.05);
 
 		model.traverse(function (object) {	
-			if (object.name.includes("gold")) {FX.ReturnBufferGeometry(object, gold_material, item_02, scene);}
-			if (object.name.includes("black")) {FX.ReturnBufferGeometry(object,black_material, item_02, scene);}
+			if (object.name.includes("gold")) {FX.ReturnBufferGeometry(object, gold_material, item_01, scene);}
+			if (object.name.includes("black")) {FX.ReturnBufferGeometry(object,black_material, item_01, scene);}
 		});
 
-		setTimeout(() => {item_02.rotation.y=divisionAngle*5;}, 200);
+		setTimeout(() => {item_01.rotation.y=divisionAngle*6;}, 200);
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -384,12 +492,12 @@ async function init()
 		const nickel_material=FXM.InstMaterial(0xDBD1AD,0,1,0,1.5,0.5,false,1,true);
 
 		model.traverse(function (object) {	
-			if (object.name.includes("FC005_128_A_nickel")) {FX.ReturnBufferGeometry(object, nickel_material, item_03, scene);}
-			if (object.name.includes("FC005_128_A_pc")) {FX.ReturnBufferGeometry(object,null, item_03, scene);}
-			if (object.name.includes("FC005_128_A_black")) {FX.ReturnBufferGeometry(object,black_material, item_03, scene);}
+			if (object.name.includes("FC005_128_A_nickel")) {FX.ReturnBufferGeometry(object, nickel_material, item_02, scene);}
+			if (object.name.includes("FC005_128_A_pc")) {FX.ReturnBufferGeometry(object,null, item_02, scene);}
+			if (object.name.includes("FC005_128_A_black")) {FX.ReturnBufferGeometry(object,black_material, item_02, scene);}
 		});
 
-		setTimeout(() => {item_03.rotation.y=divisionAngle*4;}, 300);
+		setTimeout(() => {item_02.rotation.y=divisionAngle*5;}, 300);
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -483,8 +591,8 @@ async function init()
 
 		setTimeout(() => {item_06.rotation.y=divisionAngle*1;}, 600);
 		setTimeout(() => {SetupItemGroup();}, 650);
-		setTimeout(() => {renderer.setAnimationLoop(animate);FXUI.InstLoadingEffect_Type_B(false);}, 700); 
-		setTimeout(() => {SceneFadeInEffect(renderer, 3);}, 700);
+		setTimeout(() => {carouselManu.position.x=25;FXUI.InstLoadingEffect_Type_B(false);}, 700); //模型生成位置不在中間，等材質更新完成-->x=0
+		setTimeout(() => {renderer.setAnimationLoop(animate);}, 800);
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -522,9 +630,9 @@ async function init()
 	_btn_4.addEventListener('click', function(e) {FocusToItem(4)});
 	_btn_5.addEventListener('click', function(e) {FocusToItem(5)});
 
-
 	FX.UpdateShadowSpcaceSize( 150, 100, 50);
 
+	//carouselManu.position.x=25;//模型生成位置不在中間，等材質更新完成-->x=0
 	
 	//影子工具
 	FX.InitWebGPUShadow(scene, {
@@ -544,9 +652,9 @@ function onWindowResize()
 function animate(timestamp) 
 {
   	controls.update();
-  	//renderer.render( scene, camera );
+  	renderer.render( scene, camera );
 
-	renderPipeline.render();
+	//renderPipeline.render();
 
 	//影子工具
 	FX.UpdateWebGPUShadow(renderer, scene);
@@ -567,6 +675,20 @@ function animate(timestamp)
 
 			ManuRotate();
 		}
+	}
+
+	if(Math.abs(carouselManu.position.x)>5)idleTime=0;
+		
+
+	
+	if(Math.abs(carouselManu.position.x)>0.01)//絕對值
+	{
+		carouselManu.position.x = THREE.MathUtils.lerp(carouselManu.position.x,0,0.025);
+	}
+
+	else
+	{
+		carouselManu.position.x=0;
 	}
 	
 }
@@ -672,8 +794,10 @@ function SceneFadeInEffect(thisRenderer, thisDuration = 5)
 
 	let blurSize = uniform( 2 ); // determines the kernel size of the blur
 	let blurSpread = uniform( 4 ); // determines how far the blur is spread
-	const minDistance = uniform( 0 ); // all positions at or below minDistance will be completely in focus.
-	const maxDistance = uniform( 0 ); // all positions at or beyond maxDistance will be completely out of focus.
+	let minDistance = uniform( 0 ); // all positions at or below minDistance will be completely in focus.
+	let maxDistance = uniform( 5 ); // all positions at or beyond maxDistance will be completely out of focus.
+
+	const focusPointView = uniform( vec3() );
 
 	// beauty and blur/out-of-focus pass
 
@@ -708,6 +832,24 @@ function SceneFadeInEffect(thisRenderer, thisDuration = 5)
 		ease: 'power2.inOut',
 		onComplete: () => {
 			blurSpread = 0.0;
+		}
+	});
+
+	gsap.to(minDistance, {
+		value: 3.0,
+		duration: thisDuration,
+		ease: 'power2.inOut',
+		onComplete: () => {
+			minDistance = 3.0;
+		}
+	});
+
+	gsap.to(maxDistance, {
+		value: 5.0,
+		duration: thisDuration,
+		ease: 'power2.inOut',
+		onComplete: () => {
+			maxDistance = 5.0;
 		}
 	});
 }
