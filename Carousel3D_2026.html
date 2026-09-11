@@ -394,6 +394,7 @@ async function init()
   	///hdri 環境光源
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/brown_photostudio_02_1k.jpg', scene);
 	scene.environmentRotation.y  = FX.ToThreeEulerAngle(-90);
+	scene.environmentRotation.x  = FX.ToThreeEulerAngle(45);
 
 	carouselManu.add(item_01).add(item_02).add(item_03).add(item_04).add(item_05).add(item_06);
 	scene.add(carouselManu);
@@ -853,6 +854,7 @@ function SceneFadeInEffect(thisRenderer, thisDuration = 5)
 		}
 	});
 }
+
 		</script>
     </body>
 
