@@ -592,7 +592,7 @@ async function init()
 		setTimeout(() => {item_06.rotation.y=divisionAngle*1;}, 600);
 		setTimeout(() => {SetupItemGroup();}, 650);
 		setTimeout(() => {carouselManu.position.x=25;FXUI.InstLoadingEffect_Type_B(false);}, 700); //模型生成位置不在中間，等材質更新完成-->x=0
-		setTimeout(() => {renderer.setAnimationLoop(animate);SceneFocusInEffect(scene,camera,3);}, 800);
+		setTimeout(() => {renderer.setAnimationLoop(animate);SceneFocusInEffect(scene,camera,renderer,3);}, 800);
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -776,7 +776,7 @@ function FocusToItem(i)
     }
 }
 
-function SceneFocusInEffect(thisScene,thisCamera,thisDuration = 5)
+function SceneFocusInEffect(thisScene,thisCamera,thisRenderer,thisDuration = 5)
 {
     
 	// --- 1. TSL Uniforms 動態控制參數 ---
@@ -810,7 +810,7 @@ const dofPass = mix(sceneColor, sceneBlurred, finalBlurFactor);
 const outputPass = renderOutput(dofPass);
 const fxaaPass = fxaa(outputPass);
 
-renderPipeline = new THREE.RenderPipeline(renderer);
+renderPipeline = new THREE.RenderPipeline(thisRenderer);
 renderPipeline.outputNode = fxaaPass;
 
 // --- 5. GSAP 電影級動畫調校 ---
@@ -834,7 +834,13 @@ gsap.to(focusRange, {
 gsap.to(transitionProgress, {
     value: 0.0,
     duration: thisDuration,
-    ease: "power2.inOut"
+    ease: "power2.inOut",
+	onComplete: () => {
+        // 動畫結束：繞過模糊與後處理，直接輸出原生高解析度畫面
+        const cleanOutput = renderOutput(sceneColor);
+        renderPipeline.outputNode = cleanOutput;
+        renderPipeline.needsUpdate = true; // 強制更新管道
+    }
 });
 }
 
