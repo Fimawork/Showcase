@@ -351,6 +351,7 @@ let idleTime=0;
 const hold_time=4.5;
 
 let renderPipeline;
+let isPostProcessingActive = true;
 
 
 init();
@@ -652,9 +653,14 @@ function onWindowResize()
 function animate(timestamp) 
 {
   	controls.update();
-  	//renderer.render( scene, camera );
 
-	renderPipeline.render();
+  	if (isPostProcessingActive && renderPipeline) {
+        // 轉場進行中：使用 WebGPU 景深後處理 Pipeline
+        renderPipeline.render();
+    } else {
+        // 轉場結束後：直接呼叫原生 Renderer 繪製 (獲得 100% 無瑕原生畫質)
+        renderer.render(scene, camera);
+    }
 
 	//影子工具
 	FX.UpdateWebGPUShadow(renderer, scene);
@@ -836,10 +842,17 @@ gsap.to(transitionProgress, {
     duration: thisDuration,
     ease: "power2.inOut",
 	onComplete: () => {
-        // 動畫結束：繞過模糊與後處理，直接輸出原生高解析度畫面
-        const cleanOutput = renderOutput(sceneColor);
-        renderPipeline.outputNode = cleanOutput;
-        renderPipeline.needsUpdate = true; // 強制更新管道
+       // 切換旗標：告別後處理，回歸原生渲染
+        isPostProcessingActive = false;
+
+        // 【關鍵】釋放 RenderPipeline 佔用的 GPU 記憶體資源
+        if (renderPipeline) {
+            renderPipeline.dispose();
+            renderPipeline = null;
+        }
+
+        console.log("轉場結束，已切換回原生 Renderer，畫質達最高原生銳利度！");
+    
     }
 });
 }
