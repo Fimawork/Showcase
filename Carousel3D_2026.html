@@ -779,56 +779,63 @@ function FocusToItem(i)
 function SceneFocusInEffect(thisScene,thisCamera,thisDuration = 5)
 {
     
-	// --- TSL Uniforms 動態控制參數 ---
-            // 焦距 (Distance from camera)：相機到主體的距離 (camera at z=8, object at z=0 ➔ 距離約 8)
-            let focusDistance = uniform(0.1);  // 初始聚焦在極近處 (主體將處於極度失焦狀態)
-            let focusRange = uniform(1.5);     // 清晰景深範圍
-            let blurSize = uniform(8.0);       // 模糊運算大小
+	// --- 1. TSL Uniforms 動態控制參數 ---
+let focusDistance = uniform(0.1);  // 初始焦距（極近處失焦）
+let focusRange = uniform(8.0);     // 擴大清晰景深過渡帶（從 1.5 加大到 8.0，過渡才會極度柔和）
+let transitionProgress = uniform(1.0); // 1.0 代表完全轉場前狀態（模糊），0.0 代表完全清晰
 
-            // --- 建構 TSL Pass ---
-            const scenePass = pass(thisScene, thisCamera);
-            const sceneColor = scenePass.getTextureNode();
-            const sceneViewZ = scenePass.getViewZNode(); // 取得 Scene View-Space 深度資訊
+// --- 2. 建構高品質模糊 (雙重 Pass 採樣) ---
+const scenePass = pass(thisScene, thisCamera);
+const sceneColor = scenePass.getTextureNode();
+const sceneViewZ = scenePass.getViewZNode(); // 取得 View-Space 深度
 
-            // 計算 Box Blur 模糊圖層
-            const sceneBlurred = boxBlur(sceneColor, { 
-                size: blurSize, 
-                separation: uniform(3.0) 
-            });
+// 兩次平行/垂直方向的 Box Blur 疊加，模擬高斯模糊 (Gaussian Blur) 的絲滑質感，徹底消除顆粒感
+const blurPass1 = boxBlur(sceneColor, { size: uniform(6.0), separation: uniform(1.5) });
+const sceneBlurred = boxBlur(blurPass1, { size: uniform(6.0), separation: uniform(1.5) });
 
-            // 計算當前像素與焦距的偏離程度：abs( viewZ - focusDistance )
-            const depthDiff = sceneViewZ.abs().sub(focusDistance).abs();
-            
-            // 使用 smoothstep 計算模糊權重 Factor (0.0 = 清晰，1.0 = 完全模糊)
-            const blurFactor = smoothstep(0.0, focusRange, depthDiff);
+// --- 3. 絲滑景深計算數學曲線 ---
+// 計算目前像素深度與對焦點的距離
+const depthDiff = sceneViewZ.abs().sub(focusDistance).abs();
 
-            // 混合原始畫面與模糊畫面
-            const dofPass = mix(sceneColor, sceneBlurred, blurFactor);
+// 基礎 DOF 權重 (使用 smoothstep + 平方運算，產生 S 型柔和 Fade-off)
+const rawBlurFactor = smoothstep(0.0, focusRange, depthDiff);
+const smoothBlurFactor = rawBlurFactor.mul(rawBlurFactor); // 平滑化邊界
 
-            // 輸出Pass 與 FXAA 抗鋸齒
-            const outputPass = renderOutput(dofPass);
-            const fxaaPass = fxaa(outputPass);
+// 結合全局轉場進度 (transitionProgress 歸零時，畫面強制呈現 100% 水晶般清晰)
+const finalBlurFactor = smoothBlurFactor.mul(transitionProgress);
 
-            // 設定 RenderPipeline
-            renderPipeline = new THREE.RenderPipeline(renderer);
-            renderPipeline.outputNode = fxaaPass;
+// --- 4. 混合與輸出 ---
+const dofPass = mix(sceneColor, sceneBlurred, finalBlurFactor);
 
-			// 攝影機位置在 z=8，主體在 z=0 ➔ 實際對焦距離為 8.0
-            const targetFocusDistance = 8.0;
+const outputPass = renderOutput(dofPass);
+const fxaaPass = fxaa(outputPass);
 
-            // 使用 GSAP 平滑變換 focusDistance Uniform
-            gsap.to(focusDistance, {
-                value: targetFocusDistance,
-                duration: thisDuration,
-                ease: "power2.out"
-            });
+renderPipeline = new THREE.RenderPipeline(renderer);
+renderPipeline.outputNode = fxaaPass;
 
-            // 適度收斂模糊強度，確保對焦點呈現極致銳利
-            gsap.to(blurSize, {
-                value: 0.0,
-                duration: thisDuration,
-                ease: "power2.out"
-            });
+// --- 5. GSAP 電影級動畫調校 ---
+const targetFocusDistance = 8.0;
+
+// 焦距移動：使用 expo.out 或 power3.out，模擬真實鏡頭馬達的減速感
+gsap.to(focusDistance, {
+    value: targetFocusDistance,
+    duration: thisDuration,
+    ease: "power3.out"
+});
+
+// 景深範圍動態放大（讓焦點接觸到目標時，清晰區域順暢擴散）
+gsap.to(focusRange, {
+    value: 12.0,
+    duration: thisDuration,
+    ease: "power2.out"
+});
+
+// 全局模糊總權重：平滑滑落至 0，確保結尾 100% 銳利無視窗殘影
+gsap.to(transitionProgress, {
+    value: 0.0,
+    duration: thisDuration,
+    ease: "power2.inOut"
+});
 }
 
 		</script>
