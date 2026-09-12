@@ -355,7 +355,6 @@ let renderPipeline;
 
 init();
 FXUI.InstLoadingEffect_Type_B(true);
-//SceneFadeInEffect(renderer, 7);
 
 async function init()
 {
@@ -593,7 +592,7 @@ async function init()
 		setTimeout(() => {item_06.rotation.y=divisionAngle*1;}, 600);
 		setTimeout(() => {SetupItemGroup();}, 650);
 		setTimeout(() => {carouselManu.position.x=25;FXUI.InstLoadingEffect_Type_B(false);}, 700); //模型生成位置不在中間，等材質更新完成-->x=0
-		setTimeout(() => {renderer.setAnimationLoop(animate);}, 800);
+		setTimeout(() => {renderer.setAnimationLoop(animate);SceneFocusInEffect(scene,camera,3);}, 800);
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -653,9 +652,9 @@ function onWindowResize()
 function animate(timestamp) 
 {
   	controls.update();
-  	renderer.render( scene, camera );
+  	//renderer.render( scene, camera );
 
-	//renderPipeline.render();
+	renderPipeline.render();
 
 	//影子工具
 	FX.UpdateWebGPUShadow(renderer, scene);
@@ -777,82 +776,59 @@ function FocusToItem(i)
     }
 }
 
-function SceneFadeInEffect(thisRenderer, thisDuration = 5) 
+function SceneFocusInEffect(thisScene,thisCamera,thisDuration = 5)
 {
     
-	const effectController = {
-		focusDistance: uniform( 500 ),
-		focalLength: uniform( 200 ),
-		bokehScale: uniform( 10 )
-	};
+	// --- TSL Uniforms 動態控制參數 ---
+            // 焦距 (Distance from camera)：相機到主體的距離 (camera at z=8, object at z=0 ➔ 距離約 8)
+            let focusDistance = uniform(0.1);  // 初始聚焦在極近處 (主體將處於極度失焦狀態)
+            let focusRange = uniform(1.5);     // 清晰景深範圍
+            let blurSize = uniform(8.0);       // 模糊運算大小
 
-	// post processing
+            // --- 建構 TSL Pass ---
+            const scenePass = pass(thisScene, thisCamera);
+            const sceneColor = scenePass.getTextureNode();
+            const sceneViewZ = scenePass.getViewZNode(); // 取得 Scene View-Space 深度資訊
 
-	renderPipeline = new THREE.RenderPipeline( thisRenderer );
-	renderPipeline.outputColorTransform = false;
+            // 計算 Box Blur 模糊圖層
+            const sceneBlurred = boxBlur(sceneColor, { 
+                size: blurSize, 
+                separation: uniform(3.0) 
+            });
 
-	// DOF uniforms
+            // 計算當前像素與焦距的偏離程度：abs( viewZ - focusDistance )
+            const depthDiff = sceneViewZ.abs().sub(focusDistance).abs();
+            
+            // 使用 smoothstep 計算模糊權重 Factor (0.0 = 清晰，1.0 = 完全模糊)
+            const blurFactor = smoothstep(0.0, focusRange, depthDiff);
 
-	let blurSize = uniform( 2 ); // determines the kernel size of the blur
-	let blurSpread = uniform( 4 ); // determines how far the blur is spread
-	let minDistance = uniform( 0 ); // all positions at or below minDistance will be completely in focus.
-	let maxDistance = uniform( 5 ); // all positions at or beyond maxDistance will be completely out of focus.
+            // 混合原始畫面與模糊畫面
+            const dofPass = mix(sceneColor, sceneBlurred, blurFactor);
 
-	const focusPointView = uniform( vec3() );
+            // 輸出Pass 與 FXAA 抗鋸齒
+            const outputPass = renderOutput(dofPass);
+            const fxaaPass = fxaa(outputPass);
 
-	// beauty and blur/out-of-focus pass
+            // 設定 RenderPipeline
+            renderPipeline = new THREE.RenderPipeline(renderer);
+            renderPipeline.outputNode = fxaaPass;
 
-	const scenePass = pass( scene, camera );
-			
-	const scenePassColor = scenePass.getTextureNode().toInspector( 'Color' );
-	const scenePassViewZ = scenePass.getViewZNode();
-	const scenePassBlurred = boxBlur( scenePassColor, { size: blurSize, separation: blurSpread } );
+			// 攝影機位置在 z=8，主體在 z=0 ➔ 實際對焦距離為 8.0
+            const targetFocusDistance = 8.0;
 
-	// simple DOF from https://lettier.github.io/3d-game-shaders-for-beginners/depth-of-field.html
+            // 使用 GSAP 平滑變換 focusDistance Uniform
+            gsap.to(focusDistance, {
+                value: targetFocusDistance,
+                duration: thisDuration,
+                ease: "power2.out"
+            });
 
-	const blur = smoothstep( minDistance, maxDistance, scenePassViewZ.sub( focusPointView.z ).abs() );
-	const dofPass = mix( scenePassColor, scenePassBlurred, blur );
-
-	const outputPass = renderOutput( dofPass );
-	const fxaaPass = fxaa( outputPass );
-
-	renderPipeline.outputNode = fxaaPass;
-
-	gsap.to(blurSize, {
-		value: 0.0,
-		duration: thisDuration,
-		ease: 'power2.inOut',
-		onComplete: () => {
-			blurSize = 0.0;
-		}
-	});
-
-	gsap.to(blurSpread, {
-		value: 0.0,
-		duration: thisDuration,
-		ease: 'power2.inOut',
-		onComplete: () => {
-			blurSpread = 0.0;
-		}
-	});
-
-	gsap.to(minDistance, {
-		value: 3.0,
-		duration: thisDuration,
-		ease: 'power2.inOut',
-		onComplete: () => {
-			minDistance = 3.0;
-		}
-	});
-
-	gsap.to(maxDistance, {
-		value: 5.0,
-		duration: thisDuration,
-		ease: 'power2.inOut',
-		onComplete: () => {
-			maxDistance = 5.0;
-		}
-	});
+            // 適度收斂模糊強度，確保對焦點呈現極致銳利
+            gsap.to(blurSize, {
+                value: 0.0,
+                duration: thisDuration,
+                ease: "power2.out"
+            });
 }
 
 		</script>
