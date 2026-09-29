@@ -15,7 +15,7 @@
 		<link rel="stylesheet" type="text/css" href="Main.css">
 
 		<style type="text/css">
-
+			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
 			/* ────────────────────────────────────────
 			   RESET & TOKENS
 			──────────────────────────────────────── */
@@ -290,7 +290,7 @@
 			}
 
 			.m-swatch-ebony    { background: radial-gradient(circle at 35% 35%, #2a2420, #0f0c0a); }
-			.m-swatch-cognac   { background: radial-gradient(circle at 35% 35%, #8b4a20, #5c2e0f); }
+			.m-swatch-cognac   { background: radial-gradient(circle at 35% 35%, #964B00, #5c2e0f); }
 			.m-swatch-caramel  { background: radial-gradient(circle at 35% 35%, #c8834a, #9a5c2a); }
 			.m-swatch-ivory    { background: radial-gradient(circle at 35% 35%, #e8e0d0, #cfc5b0); }
 
@@ -688,7 +688,6 @@
 
 		<!-- ── THREE.JS CONTAINER ── -->
 		<div id="threeContainer" class="SceneCrossEffect_anim"></div>
-		<div id="loadingUI" class="rotate_anim"></div>
 
 		<!-- ════════════════════════════════
 		     NAVBAR
@@ -727,13 +726,12 @@
 				<div class="price-original">NT$ 82,000</div>
 			</div>
 
-			<div style="display: none;">
+			<div>
 				<div class="section-label">Leather Finish</div>
 				<div class="material-swatches">
-					<div class="m-swatch m-swatch-ebony active"   data-mat="ebony"   title="Ebony Black"></div>
-					<div class="m-swatch m-swatch-cognac"         data-mat="cognac"  title="Cognac Brown"></div>
-					<div class="m-swatch m-swatch-caramel"        data-mat="caramel" title="Caramel"></div>
-					<div class="m-swatch m-swatch-ivory"          data-mat="ivory"   title="Ivory White"></div>
+					<div class="m-swatch m-swatch-ebony active"   data-mat="ebony"   title="Ebony Black" id="black_sofa"></div>
+					<div class="m-swatch m-swatch-cognac"         data-mat="cognac"  title="Cognac Brown" id="brown_sofa"></div>
+					<div class="m-swatch m-swatch-ivory"          data-mat="ivory"   title="Ivory White" id="white_sofa"></div>
 				</div>
 			</div>
 
@@ -854,7 +852,7 @@
 		</footer>
 
 		<!-- Vertical side label -->
-		<div class="side-label">FIMAWORK STUDIO · 3D FURNITURE SHOWCASE · 2026</div>
+		<div class="side-label">FIMAWORK · 3D FURNITURE SHOWCASE · 2026</div>
 
 		<!-- ════════════════════════════════
 		     THREE.JS — 原版邏輯完整保留
@@ -873,9 +871,35 @@ import { chair_20251216 } from './models/chair_20251216_slices.js';
 let scene, camera, renderer;
 let controls;
 
+///宣告轉場scene
+let scene_next;
+///宣告轉場物件
+let model_next  = new THREE.Object3D();
+let shadow_next = new THREE.Group();
+
+///依需求宣告mesh變數數量
+let current_wood_01, current_wood_02, current_wood_03, current_wood_04, current_sofa_01, current_sofa_02,current_sofa_03,current_sofa_04,current_sofa_05,current_sofa_06;
+let next_wood_01, next_wood_02, next_wood_03, next_wood_04, next_sofa_01, next_sofa_02,next_sofa_03,next_sofa_04,next_sofa_05,next_sofa_06;
+
+///依需求材質組合變數數量
+let wood_01_material_list = [];
+let wood_02_material_list = [];
+let wood_03_material_list = [];
+let wood_04_material_list = [];
+let sofa_01_material_list = [];
+let sofa_02_material_list = [];
+let sofa_03_material_list = [];
+let sofa_04_material_list = [];
+let sofa_05_material_list = [];
+let sofa_06_material_list = [];
+
 let labelRenderer;
 const threeContainer = document.getElementById("threeContainer");
 const _loadingUI     = document.getElementById("loadingUI");
+
+const _black_sofa= document.getElementById("black_sofa");
+const _brown_sofa= document.getElementById("brown_sofa");
+const _white_sofa= document.getElementById("white_sofa");
 
 // 2. 建立新版的 Timer（取代舊的 Clock）
 const timer = new THREE.Timer();
@@ -904,11 +928,18 @@ const content_04="Die-cast aluminum braces and five-legged base";
 const content_05="Hand stitched cushions, no staples or glue used";
 const content_06="Veneer is finished with a final 4-layer application of UV cured, no wax Italian Lacquer that protects the wood while giving it the most natural look and providing scratch resistance";
 
+let toggle_time=0;
+
 init();
+
+FXUI.InstLoadingEffect_Type_A(true);
 
 async function init() {
 	FX.SetupEnvironment("cloud");
 	scene = new THREE.Scene();
+
+	///創建scene
+	scene_next = new THREE.Scene();
 
 	camera   = new THREE.PerspectiveCamera(45, threeContainer.clientWidth / threeContainer.clientHeight, 0.1, 1000);
 	renderer =new THREE.WebGPURenderer({ antialias: true, alpha: true });
@@ -917,6 +948,10 @@ async function init() {
 	renderer.toneMapping = THREE.ACESFilmicToneMapping;
 	renderer.toneMappingExposure = 0.9;
 	threeContainer.appendChild(renderer.domElement);
+
+	///6.導入Transition工具模組，可更換texture產生不同轉場效果
+	FX.SetupTransitionModule(scene,scene_next,camera,renderer,'./textures/transition2.png')
+
 
 	labelRenderer = new CSS3DRenderer();
 	labelRenderer.setSize( threeContainer.clientWidth, threeContainer.clientHeight );
@@ -940,6 +975,7 @@ async function init() {
 	controls.update();
 
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg', scene);
+	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg', scene_next);
 
 	const loader = new GLTFLoader();
 	loader.setDRACOLoader(FX.dracoLoader);
@@ -950,29 +986,118 @@ async function init() {
 		const support_material = FXM.InstMaterial(0x000000, 0.5, 0.75, 0, 2.333, 1, false, 1, true);
 		const knob_material    = FXM.InstMaterial(0x000000, 0.15, 1, 0, 2.333, 1, false, 1, true);
 		sofa_material          = FXM.InstEtchingMaterial(0x080808, 0.4, 0.3, 0.75, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './textures/Leather.png', new THREE.Vector2(15, 15), 0);
-		const woodPanel_01     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, 0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);
-		const woodPanel_02     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './textures/Walnut.png', new THREE.Vector2(1, 1), 0);
 
-		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_01"),        woodPanel_01,   main_model, scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_02"),        woodPanel_01,   main_model, scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_03"),        woodPanel_01,   main_model, scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_04"),        woodPanel_02,   main_model, scene);
+
+		const woodPanel_01_a     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, 0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);
+		const woodPanel_02_a     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './textures/Walnut.png', new THREE.Vector2(1, 1), 0);
+
+		const woodPanel_01_b     = FXM.InstEtchingMaterial(0x984d10, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, 0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);
+		const woodPanel_02_b     = FXM.InstEtchingMaterial(0x984d10, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './textures/Walnut.png', new THREE.Vector2(1, 1), 0);
+
+		const woodPanel_01_c     = FXM.InstEtchingMaterial(0xE1D799,0.5,0.5,0.49999999999999983,false,1,"./textures/Walnut_culomn.png",new THREE.Vector2(0.8,0.8),new THREE.Vector2(0,0),"./textures/Walnut_culomn.png",new THREE.Vector2(1,1),0);
+		const woodPanel_02_c     = FXM.InstEtchingMaterial(0xE1D799,0.5,0.5,0.49999999999999983,false,1,"./textures/Walnut_culomn.png",new THREE.Vector2(0.8,0.8),new THREE.Vector2(0,0),"./textures/Walnut_culomn.png",new THREE.Vector2(1,1),0);
+
+		const black_sofa_material  = FXM.InstEtchingMaterial(0x080808, 0.4, 0.3, 0.75, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './textures/Leather.png', new THREE.Vector2(15, 15), 0);
+
+		const brown_sofa_material  = FXM.InstEtchingMaterial(0x964B00, 0.6, 0.15, 0.9, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './textures/Leather.png', new THREE.Vector2(15, 15), 0);
+
+		const white_sofa_material  = FXM.InstEtchingMaterial(0xF3F7DE,1,0.3,0.9000000000000001,false,1,"./textures/Leather.png",new THREE.Vector2(10,10),new THREE.Vector2(0,0),"./textures/Leather.png",new THREE.Vector2(15,15),0);
+
+		///1.進行Sheen處理(天鵝絨、絲綢或細微絨毛)
+		FXM.SheenEffect(white_sofa_material,1,0xffffff,1);
+
+		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_01"),        woodPanel_01_a,   main_model, scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_02"),        woodPanel_01_a,   main_model, scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_03"),        woodPanel_01_a,   main_model, scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_04"),        woodPanel_02_a,   main_model, scene);
 		FX.ReturnBufferGeometry(model.getObjectByName("support_back"),         support_material, main_model, scene);
 		FX.ReturnBufferGeometry(model.getObjectByName("support_buttom_main"),  support_material, main_model, scene);
 		FX.ReturnBufferGeometry(model.getObjectByName("support_buttom_sub"),   support_material, main_model, scene);
 		FX.ReturnBufferGeometry(model.getObjectByName("cap"),                  null,           main_model, scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("sofa_back_01"),         sofa_material,  main_model, scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("sofa_back_02"),         sofa_material,  main_model, scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("sofa_main"),            sofa_material,  main_model, scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("sofa_sub"),             sofa_material,  main_model, scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("sofa_hand_01"),         sofa_material,  main_model, scene);
-		FX.ReturnBufferGeometry(model.getObjectByName("sofa_hand_02"),         sofa_material,  main_model, scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("sofa_back_01"),         black_sofa_material,  main_model, scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("sofa_back_02"),         black_sofa_material,  main_model, scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("sofa_main"),            black_sofa_material,  main_model, scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("sofa_sub"),             black_sofa_material,  main_model, scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("sofa_hand_01"),         black_sofa_material,  main_model, scene);
+		FX.ReturnBufferGeometry(model.getObjectByName("sofa_hand_02"),         black_sofa_material,  main_model, scene);
 		FX.ReturnBufferGeometry(model.getObjectByName("knob"),                 knob_material,  main_model, scene);
+		
+
+		wood_01_material_list = [woodPanel_01_a,woodPanel_01_b,woodPanel_01_c];
+		wood_02_material_list = [woodPanel_01_a,woodPanel_01_b,woodPanel_01_c];
+		wood_03_material_list = [woodPanel_01_a,woodPanel_01_b,woodPanel_01_c];
+		wood_04_material_list = [woodPanel_02_a,woodPanel_02_b,woodPanel_02_c];
+		sofa_01_material_list = [black_sofa_material,brown_sofa_material,white_sofa_material];
+		sofa_02_material_list = [black_sofa_material,brown_sofa_material,white_sofa_material];
+		sofa_03_material_list = [black_sofa_material,brown_sofa_material,white_sofa_material];
+		sofa_04_material_list = [black_sofa_material,brown_sofa_material,white_sofa_material];
+		sofa_05_material_list = [black_sofa_material,brown_sofa_material,white_sofa_material];
+		sofa_06_material_list = [black_sofa_material,brown_sofa_material,white_sofa_material];
+
+
+		FX.material_list[0]=wood_01_material_list;
+		FX.material_list[1]=wood_02_material_list;
+		FX.material_list[2]=wood_03_material_list;
+		FX.material_list[3]=wood_04_material_list;
+		FX.material_list[4]=sofa_01_material_list;
+		FX.material_list[5]=sofa_02_material_list;
+		FX.material_list[6]=sofa_03_material_list;
+		FX.material_list[7]=sofa_04_material_list;
+		FX.material_list[8]=sofa_05_material_list;
+		FX.material_list[9]=sofa_06_material_list;
 
 		main_model.position.set(0, 1.4, 0);
 		main_model.rotation.set(0, FX.ToThreeEulerAngle(-90), 0);
 		main_model.scale.set(0.004, 0.004, 0.004);
 		scene.add(main_model);
+
+		///複製一份作為model_next，並加入第二個場景(scene_next)
+		model_next = main_model.clone();
+		scene_next.add(model_next);
+
+		// 執行預編譯 (在 Loading 畫面遮蓋時執行)
+		renderer.compile(scene, camera);
+
+		///9.綁定main_model的mesh變數，經ReturnBufferGeometry處理後名稱前方需加上"BufferGeometry_"
+		main_model.traverse(function (object) {
+			if (object.name === "BufferGeometry_wood_panel_01") current_wood_01 = object;
+			if (object.name === "BufferGeometry_wood_panel_02") current_wood_02 = object;
+			if (object.name === "BufferGeometry_wood_panel_03") current_wood_03 = object;
+			if (object.name === "BufferGeometry_wood_panel_04") current_wood_04 = object;
+			if (object.name === "BufferGeometry_sofa_back_01") current_sofa_01 = object;
+			if (object.name === "BufferGeometry_sofa_back_02") current_sofa_02 = object;
+			if (object.name === "BufferGeometry_sofa_main") current_sofa_03 = object;
+			if (object.name === "BufferGeometry_sofa_sub") current_sofa_04 = object;
+			if (object.name === "BufferGeometry_sofa_hand_01") current_sofa_05 = object;
+			if (object.name === "BufferGeometry_sofa_hand_02") current_sofa_06 = object;
+		});
+
+		///10.綁定main_model的mesh變數，經ReturnBufferGeometry處理後名稱前方需加上"BufferGeometry_"
+		model_next.traverse(function (object) {
+			if (object.name === "BufferGeometry_wood_panel_01") next_wood_01 = object;
+			if (object.name === "BufferGeometry_wood_panel_02") next_wood_02 = object;
+			if (object.name === "BufferGeometry_wood_panel_03") next_wood_03 = object;
+			if (object.name === "BufferGeometry_wood_panel_04") next_wood_04 = object;
+			if (object.name === "BufferGeometry_sofa_back_01") next_sofa_01 = object;
+			if (object.name === "BufferGeometry_sofa_back_02") next_sofa_02 = object;
+			if (object.name === "BufferGeometry_sofa_main") next_sofa_03 = object;
+			if (object.name === "BufferGeometry_sofa_sub") next_sofa_04 = object;
+			if (object.name === "BufferGeometry_sofa_hand_01") next_sofa_05 = object;
+			if (object.name === "BufferGeometry_sofa_hand_02") next_sofa_06 = object;
+		});
+
+		///設置mesh & 材質球組合，轉場時對應相同順序
+		///必須設定在模型生成的腳本內
+		FX.mesh_list[0]={current:current_wood_01,next:next_wood_01};
+		FX.mesh_list[1]={current:current_wood_02,next:next_wood_02};
+		FX.mesh_list[2]={current:current_wood_03,next:next_wood_03};
+		FX.mesh_list[3]={current:current_wood_04,next:next_wood_04};
+		FX.mesh_list[4]={current:current_sofa_01,next:next_sofa_01};
+		FX.mesh_list[5]={current:current_sofa_02,next:next_sofa_02};
+		FX.mesh_list[6]={current:current_sofa_03,next:next_sofa_03};
+		FX.mesh_list[7]={current:current_sofa_04,next:next_sofa_04};
+		FX.mesh_list[8]={current:current_sofa_05,next:next_sofa_05};
+		FX.mesh_list[9]={current:current_sofa_06,next:next_sofa_06};
 
 		// expose to UI bridge
 		window._furnitureScene = { camera, controls, sofa_material };
@@ -980,10 +1105,14 @@ async function init() {
 		renderer.setAnimationLoop(animate);
 
 		setTimeout(() => {
-			 _loadingUI.remove(); 
+			 FXUI.InstLoadingEffect_Type_A(false);
+			 //FX.Hierarchy(main_model,camera,scene,renderer,controls); 
 			}, 600);
 
 	}, (e) => console.error(e));
+
+
+	
 
 
 	//1.設定影子地板尺寸，影子攝影機高度(optional)
@@ -1001,6 +1130,9 @@ async function init() {
 
 	//3.設定影子位置(optional)
 	FX.shadowGroup.position.y=-0.95;
+	shadow_next=FX.shadowGroup.clone();
+
+	scene_next.add(shadow_next);
 
 	window.addEventListener('resize', onWindowResize);
 	window.addEventListener("pointerdown", () => { idleTime = 0; controls.autoRotate = false; });
@@ -1069,6 +1201,10 @@ async function init() {
 	window._camViews = camViews;
 
 	//FX.Camera_Inspector(camera,controls);
+
+	_black_sofa.addEventListener('click', () => {FX.SceneTransitionEffect(0);toggle_time++;});
+	_brown_sofa.addEventListener('click', () => {FX.SceneTransitionEffect(1);toggle_time++;});
+	_white_sofa.addEventListener('click', () => {FX.SceneTransitionEffect(2);toggle_time++;});
 }
 
 function onWindowResize() {
@@ -1084,16 +1220,23 @@ function animate(timestamp)
 {
 	controls.update();
 	renderer.render(scene, camera);
+	
+	///使用SceneTransitionEffect必須載入renderPipeline
+	FX.renderPipeline.render();
+
+	if(toggle_time%2===0)
+	{	
+		FX.UpdateWebGPUShadow(renderer, scene);
+	}
+
+	else
+	{
+		FX.UpdateWebGPUShadow(renderer, scene_next);
+	}
+	
+	
 	labelRenderer.render( scene, camera );
-
-	///4.繪製到主畫面上
-	FX.UpdateWebGPUShadow(renderer, scene);
-
-//	timer.update( timestamp );
-//
-//	const delta = timer.getDelta();// 兩幀之間的時間差
-//	idleTime += delta;
-//	if (idleTime > hold_time) { controls.autoRotate = true; }
+	
 }
 
 function InstHUDPanel(thislabelTarget,offset=new THREE.Vector2(0,0),thisCSS,thisContent)
@@ -1149,25 +1292,25 @@ function InstLineMesh(lineStart,lineEnd,thisScale,thisColor,thisScene)
 			ivory:   0xd8d0bc,
 		};
 
-		document.querySelectorAll('.m-swatch').forEach(sw => {
-			sw.addEventListener('click', () => {
-				document.querySelectorAll('.m-swatch').forEach(s => s.classList.remove('active'));
-				sw.classList.add('active');
-
-				const key = sw.dataset.mat;
-				const hex = leatherColors[key];
-
-				const tryApply = () => {
-					const sc = window._furnitureScene;
-					if (sc && sc.sofa_material && sc.sofa_material.color) {
-						sc.sofa_material.color.setHex(hex);
-					} else {
-						setTimeout(tryApply, 300);
-					}
-				};
-				tryApply();
-			});
-		});
+	//	document.querySelectorAll('.m-swatch').forEach(sw => {
+	//		sw.addEventListener('click', () => {
+	//			document.querySelectorAll('.m-swatch').forEach(s => s.classList.remove('active'));
+	//			sw.classList.add('active');
+//
+	//			const key = sw.dataset.mat;
+	//			const hex = leatherColors[key];
+//
+	//			const tryApply = () => {
+	//				const sc = window._furnitureScene;
+	//				if (sc && sc.sofa_material && sc.sofa_material.color) {
+	//					sc.sofa_material.color.setHex(hex);
+	//				} else {
+	//					setTimeout(tryApply, 300);
+	//				}
+	//			};
+	//			tryApply();
+	//		});
+	//	});
 
 		// ── Camera view tabs ─────────────────────────────────────────
 		function lerpV3(obj, to, dur) {
