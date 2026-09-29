@@ -930,6 +930,8 @@ const content_06="Veneer is finished with a final 4-layer application of UV cure
 
 let toggle_time=0;
 
+let woodPanel_01_a,woodPanel_02_a,woodPanel_01_b,woodPanel_02_b,woodPanel_01_c,woodPanel_02_c,black_sofa_material,brown_sofa_material,white_sofa_material;
+
 init();
 
 FXUI.InstLoadingEffect_Type_A(true);
@@ -974,9 +976,48 @@ async function init() {
 	controls.autoRotateSpeed = 0.3;
 	controls.update();
 
+	const setupMaterials=
+	[
+		()=>new Promise((resolve)=>setTimeout(()=>{woodPanel_01_a = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, 0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);resolve();},10)),
+
+		()=>new Promise((resolve)=>setTimeout(()=>{woodPanel_02_a     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './textures/Walnut.png', new THREE.Vector2(1, 1), 0);resolve();},20)),
+
+		()=>new Promise((resolve)=>setTimeout(()=>{woodPanel_01_b     = FXM.InstEtchingMaterial(0x984d10, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, 0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);resolve();},30)),
+
+		()=>new Promise((resolve)=>setTimeout(()=>{woodPanel_02_b     = FXM.InstEtchingMaterial(0x984d10, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './textures/Walnut.png', new THREE.Vector2(1, 1), 0);resolve();},10)),
+
+		()=>new Promise((resolve)=>setTimeout(()=>{woodPanel_01_c     = FXM.InstEtchingMaterial(0xE1D799,0.5,0.5,0.49999999999999983,false,1,"./textures/Walnut_culomn.png",new THREE.Vector2(0.8,0.8),new THREE.Vector2(0,0),"./textures/Walnut_culomn.png",new THREE.Vector2(1,1),0);resolve();},40)),
+
+		()=>new Promise((resolve)=>setTimeout(()=>{woodPanel_02_c     = FXM.InstEtchingMaterial(0xE1D799,0.5,0.5,0.49999999999999983,false,1,"./textures/Walnut_culomn.png",new THREE.Vector2(0.8,0.8),new THREE.Vector2(0,0),"./textures/Walnut_culomn.png",new THREE.Vector2(1,1),0);resolve();},50)),
+
+		()=>new Promise((resolve)=>setTimeout(()=>{black_sofa_material  = FXM.InstEtchingMaterial(0x080808, 0.4, 0.3, 0.75, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './textures/Leather.png', new THREE.Vector2(15, 15), 0);resolve();},60)),
+
+		()=>new Promise((resolve)=>setTimeout(()=>{brown_sofa_material  = FXM.InstEtchingMaterial(0x964B00, 0.6, 0.15, 0.9, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './textures/Leather.png', new THREE.Vector2(15, 15), 0);resolve();},70)),
+
+		()=>new Promise((resolve)=>setTimeout(()=>{white_sofa_material  = FXM.InstEtchingMaterial(0xF3F7DE,1,0.3,0.9000000000000001,false,1,"./textures/Leather.png",new THREE.Vector2(10,10),new THREE.Vector2(0,0),"./textures/Leather.png",new THREE.Vector2(15,15),0);resolve();},80)),
+
+		()=>new Promise((resolve)=>setTimeout(()=>{FXM.SheenEffect(white_sofa_material,1,0xffffff,1);resolve();},90)),
+
+		()=>new Promise((resolve)=>setTimeout(()=>{initModel();resolve();},100)),
+	]
+
+	async function SetupScene()
+	{
+		for(const task of setupMaterials)
+		{
+			await task();
+		}
+	}
+
+	SetupScene();
+
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg', scene);
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg', scene_next);
 
+	function initModel()
+	{
+
+	
 	const loader = new GLTFLoader();
 	loader.setDRACOLoader(FX.dracoLoader);
 	loader.parse(FX.Base64ToArrayBuffer(chair_20251216()), '', (gltf) => {
@@ -988,23 +1029,23 @@ async function init() {
 		sofa_material          = FXM.InstEtchingMaterial(0x080808, 0.4, 0.3, 0.75, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './textures/Leather.png', new THREE.Vector2(15, 15), 0);
 
 
-		const woodPanel_01_a     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, 0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);
-		const woodPanel_02_a     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './textures/Walnut.png', new THREE.Vector2(1, 1), 0);
-
-		const woodPanel_01_b     = FXM.InstEtchingMaterial(0x984d10, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, 0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);
-		const woodPanel_02_b     = FXM.InstEtchingMaterial(0x984d10, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './textures/Walnut.png', new THREE.Vector2(1, 1), 0);
-
-		const woodPanel_01_c     = FXM.InstEtchingMaterial(0xE1D799,0.5,0.5,0.49999999999999983,false,1,"./textures/Walnut_culomn.png",new THREE.Vector2(0.8,0.8),new THREE.Vector2(0,0),"./textures/Walnut_culomn.png",new THREE.Vector2(1,1),0);
-		const woodPanel_02_c     = FXM.InstEtchingMaterial(0xE1D799,0.5,0.5,0.49999999999999983,false,1,"./textures/Walnut_culomn.png",new THREE.Vector2(0.8,0.8),new THREE.Vector2(0,0),"./textures/Walnut_culomn.png",new THREE.Vector2(1,1),0);
-
-		const black_sofa_material  = FXM.InstEtchingMaterial(0x080808, 0.4, 0.3, 0.75, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './textures/Leather.png', new THREE.Vector2(15, 15), 0);
-
-		const brown_sofa_material  = FXM.InstEtchingMaterial(0x964B00, 0.6, 0.15, 0.9, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './textures/Leather.png', new THREE.Vector2(15, 15), 0);
-
-		const white_sofa_material  = FXM.InstEtchingMaterial(0xF3F7DE,1,0.3,0.9000000000000001,false,1,"./textures/Leather.png",new THREE.Vector2(10,10),new THREE.Vector2(0,0),"./textures/Leather.png",new THREE.Vector2(15,15),0);
-
-		///1.進行Sheen處理(天鵝絨、絲綢或細微絨毛)
-		FXM.SheenEffect(white_sofa_material,1,0xffffff,1);
+	//	const woodPanel_01_a     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, //0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);
+	//	const woodPanel_02_a     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './//textures/Walnut.png', new THREE.Vector2(1, 1), 0);
+//
+	//	const woodPanel_01_b     = FXM.InstEtchingMaterial(0x984d10, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, //0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);
+	//	const woodPanel_02_b     = FXM.InstEtchingMaterial(0x984d10, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './//textures/Walnut.png', new THREE.Vector2(1, 1), 0);
+//
+	//	const woodPanel_01_c     = FXM.InstEtchingMaterial(0xE1D799,0.5,0.5,0.49999999999999983,false,1,"./textures/Walnut_culomn.png",new THREE.Vector2(0.8,0.8),new THREE.Vector2//(0,0),"./textures/Walnut_culomn.png",new THREE.Vector2(1,1),0);
+	//	const woodPanel_02_c     = FXM.InstEtchingMaterial(0xE1D799,0.5,0.5,0.49999999999999983,false,1,"./textures/Walnut_culomn.png",new THREE.Vector2(0.8,0.8),new THREE.Vector2//(0,0),"./textures/Walnut_culomn.png",new THREE.Vector2(1,1),0);
+//
+	//	const black_sofa_material  = FXM.InstEtchingMaterial(0x080808, 0.4, 0.3, 0.75, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './//textures/Leather.png', new THREE.Vector2(15, 15), 0);
+//
+	//	const brown_sofa_material  = FXM.InstEtchingMaterial(0x964B00, 0.6, 0.15, 0.9, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './//textures/Leather.png', new THREE.Vector2(15, 15), 0);
+//
+	//	const white_sofa_material  = FXM.InstEtchingMaterial(0xF3F7DE,1,0.3,0.9000000000000001,false,1,"./textures/Leather.png",new THREE.Vector2(10,10),new THREE.Vector2(0,0),".///textures/Leather.png",new THREE.Vector2(15,15),0);
+//
+	//	///1.進行Sheen處理(天鵝絨、絲綢或細微絨毛)
+	//	FXM.SheenEffect(white_sofa_material,1,0xffffff,1);
 
 		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_01"),        woodPanel_01_a,   main_model, scene);
 		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_02"),        woodPanel_01_a,   main_model, scene);
@@ -1110,6 +1151,7 @@ async function init() {
 			}, 600);
 
 	}, (e) => console.error(e));
+}
 
 
 	
