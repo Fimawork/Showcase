@@ -636,6 +636,11 @@
 				color: white;
 				background-color: rgba(0,0,0,0.3);
 			}
+
+			.material-swatches-type_B
+			{
+				display: none;
+			}
 			/* ────────────────────────────────────────
 			   KEYFRAMES
 			──────────────────────────────────────── */
@@ -662,11 +667,40 @@
 			@media screen and (max-width: 960px) {
 				.right-panel { display: none; }
 				.left-panel  { width: clamp(200px, 42vw, 260px); }
+				.material-swatches-type_B
+				{
+					display: none;
+				}
 			}
 
 			@media screen and (max-width: 640px) {
 				.left-panel  { display: none; }
-				.stats-bar .stat-cell:nth-child(n+4) { display: none; }
+				.stats-bar  { display: none; }
+				.view-tabs 
+				{
+					width: 80%;
+					bottom: 18px;
+					border-radius: 50px;
+					padding: 5px;
+					justify-content: space-around;
+				}
+				.view-tab
+				{
+					font-size: 0.75rem;
+					font-weight: 500;
+					letter-spacing: 0.1em;
+				}
+				.material-swatches-type_B
+				{
+					position: fixed;
+					left: 50%;
+					bottom: 75px;
+					display: flex;
+					gap: 30px;
+					transform: translateX(-50%);
+					pointer-events: fill;
+					z-index: 99;
+				}
 			}
 
 		</style>
@@ -815,6 +849,12 @@
 
 		</aside>
 
+		<div class="material-swatches-type_B">
+			<div class="m-swatch m-swatch-ebony active"   data-mat="ebony"   title="Ebony Black" id="black_sofa_type_B"></div>
+			<div class="m-swatch m-swatch-cognac"         data-mat="cognac"  title="Cognac Brown" id="brown_sofa_type_B"></div>
+			<div class="m-swatch m-swatch-ivory"          data-mat="ivory"   title="Ivory White" id="white_sofa_type_B"></div>
+		</div>
+
 		<!-- ════════════════════════════════
 		     CAMERA VIEW TABS
 		════════════════════════════════ -->
@@ -900,6 +940,10 @@ const _loadingUI     = document.getElementById("loadingUI");
 const _black_sofa= document.getElementById("black_sofa");
 const _brown_sofa= document.getElementById("brown_sofa");
 const _white_sofa= document.getElementById("white_sofa");
+
+const _black_sofa_type_B= document.getElementById("black_sofa_type_B");
+const _brown_sofa_type_B= document.getElementById("brown_sofa_type_B");
+const _white_sofa_type_B= document.getElementById("white_sofa_type_B");
 
 // 2. 建立新版的 Timer（取代舊的 Clock）
 const timer = new THREE.Timer();
@@ -1027,25 +1071,6 @@ async function init() {
 		const support_material = FXM.InstMaterial(0x000000, 0.5, 0.75, 0, 2.333, 1, false, 1, true);
 		const knob_material    = FXM.InstMaterial(0x000000, 0.15, 1, 0, 2.333, 1, false, 1, true);
 		sofa_material          = FXM.InstEtchingMaterial(0x080808, 0.4, 0.3, 0.75, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './textures/Leather.png', new THREE.Vector2(15, 15), 0);
-
-
-	//	const woodPanel_01_a     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, //0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);
-	//	const woodPanel_02_a     = FXM.InstEtchingMaterial(0xc08854, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './//textures/Walnut.png', new THREE.Vector2(1, 1), 0);
-//
-	//	const woodPanel_01_b     = FXM.InstEtchingMaterial(0x984d10, 0.5, 0.5, 0.5, false, 1, './textures/Walnut_culomn.png', new THREE.Vector2(0.8, 0.8), new THREE.Vector2(0, //0), './textures/Walnut_culomn.png', new THREE.Vector2(1, 1), 0);
-	//	const woodPanel_02_b     = FXM.InstEtchingMaterial(0x984d10, 0.5, 0.5, 0.5, false, 1, './textures/Walnut.png', new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), './//textures/Walnut.png', new THREE.Vector2(1, 1), 0);
-//
-	//	const woodPanel_01_c     = FXM.InstEtchingMaterial(0xE1D799,0.5,0.5,0.49999999999999983,false,1,"./textures/Walnut_culomn.png",new THREE.Vector2(0.8,0.8),new THREE.Vector2//(0,0),"./textures/Walnut_culomn.png",new THREE.Vector2(1,1),0);
-	//	const woodPanel_02_c     = FXM.InstEtchingMaterial(0xE1D799,0.5,0.5,0.49999999999999983,false,1,"./textures/Walnut_culomn.png",new THREE.Vector2(0.8,0.8),new THREE.Vector2//(0,0),"./textures/Walnut_culomn.png",new THREE.Vector2(1,1),0);
-//
-	//	const black_sofa_material  = FXM.InstEtchingMaterial(0x080808, 0.4, 0.3, 0.75, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './//textures/Leather.png', new THREE.Vector2(15, 15), 0);
-//
-	//	const brown_sofa_material  = FXM.InstEtchingMaterial(0x964B00, 0.6, 0.15, 0.9, false, 1, './textures/Leather.png', new THREE.Vector2(10, 10), new THREE.Vector2(0, 0), './//textures/Leather.png', new THREE.Vector2(15, 15), 0);
-//
-	//	const white_sofa_material  = FXM.InstEtchingMaterial(0xF3F7DE,1,0.3,0.9000000000000001,false,1,"./textures/Leather.png",new THREE.Vector2(10,10),new THREE.Vector2(0,0),".///textures/Leather.png",new THREE.Vector2(15,15),0);
-//
-	//	///1.進行Sheen處理(天鵝絨、絲綢或細微絨毛)
-	//	FXM.SheenEffect(white_sofa_material,1,0xffffff,1);
 
 		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_01"),        woodPanel_01_a,   main_model, scene);
 		FX.ReturnBufferGeometry(model.getObjectByName("wood_panel_02"),        woodPanel_01_a,   main_model, scene);
@@ -1250,9 +1275,20 @@ async function init() {
 
 	//FX.Camera_Inspector(camera,controls);
 
-	_black_sofa.addEventListener('click', () => {FX.SceneTransitionEffect(0);toggle_time++;});
-	_brown_sofa.addEventListener('click', () => {FX.SceneTransitionEffect(1);toggle_time++;});
-	_white_sofa.addEventListener('click', () => {FX.SceneTransitionEffect(2);toggle_time++;});
+	_black_sofa.addEventListener('click', () => {FX.SceneTransitionEffect(0);ButtonUpdate(_black_sofa);toggle_time++;});
+	_brown_sofa.addEventListener('click', () => {FX.SceneTransitionEffect(1);ButtonUpdate(_brown_sofa);toggle_time++;});
+	_white_sofa.addEventListener('click', () => {FX.SceneTransitionEffect(2);ButtonUpdate(_white_sofa);toggle_time++;});
+
+	_black_sofa_type_B.addEventListener('click', () => {FX.SceneTransitionEffect(0);ButtonUpdate(_black_sofa_type_B);toggle_time++;});
+	_brown_sofa_type_B.addEventListener('click', () => {FX.SceneTransitionEffect(1);ButtonUpdate(_brown_sofa_type_B);toggle_time++;});
+	_white_sofa_type_B.addEventListener('click', () => {FX.SceneTransitionEffect(2);ButtonUpdate(_white_sofa_type_B);toggle_time++;});
+
+
+	function ButtonUpdate(thisBtn)
+	{
+		document.querySelectorAll('.m-swatch').forEach(s => s.classList.remove('active'));
+		thisBtn.classList.add('active');
+	}
 }
 
 function onWindowResize() {
@@ -1331,6 +1367,8 @@ function InstLineMesh(lineStart,lineEnd,thisScale,thisColor,thisScene)
 		     UI INTERACTION SCRIPT
 		════════════════════════════════ -->
 		<script>
+
+			
 
 		// ── Material colour map ──────────────────────────────────────
 		const leatherColors = {
