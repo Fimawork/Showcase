@@ -89,7 +89,7 @@
 		<div class="config-panel glass-effect">
 
 			<div class="config-section">
-				<span class="config-label">Fabric Finish</span>
+				<span class="config-label">Background</span>
 				<div class="color-options">
 					<div class="color-swatch">
 						<div class="color-dot active" data-color="#111" style="background:#111;" onclick="updateModelColor('#111',0x4c4c4c)"></div>
@@ -100,7 +100,7 @@
 						<div class="color-name">Slate</div>
 					</div>
 					<div class="color-swatch">
-						<div class="color-dot" data-color="#eee5c0" style="background:#eee5c0;" onclick="updateModelColor('#eee5c0',0xeee5c0)"></div>
+						<div class="color-dot" data-color="#eee5c0" style="background:#f2efe8;" onclick="updateModelColor('#f2efe8',0xf2efe8)"></div>
 						<div class="color-name">Sand</div>
 					</div>
 				</div>
@@ -115,7 +115,7 @@
 			</div>
 
 			<div class="config-section">
-				<span class="config-label">Background</span>
+				<span class="config-label">Fabric Color</span>
 				<div style="position:relative; height:28px;">
 					<div class="ColorChart"><input id="background_color" type="color" value="#0d0d0f"></div>
 					<div style="font-size:0.65rem; color:rgba(240,236,228,0.4); letter-spacing:0.1em; padding-top:6px;">Click to change scene color</div>
@@ -234,8 +234,9 @@ async function init()
 	const backgroundColorInput = document.getElementById( 'background_color' );
 	backgroundColorInput.addEventListener( 'input', function () {
 
-		scene.background.set( this.value );
-		scene.fog.color.set( this.value );
+		foam_material.color.set(this.value);
+		airMesh_material.color.set(this.value);
+		airMesh_material_02.color.set(this.value);
 
 	});
 
@@ -245,7 +246,7 @@ async function init()
 
   	//renderer.setClearColor(0xFFFFFF, 0.0);//需加入這一條，否則看不到CSS的底圖
   	renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  	renderer.toneMappingExposure = 0.9;
+  	renderer.toneMappingExposure = 1.0;
   	renderer.shadowMap.enabled = true;
   	threeContainer.appendChild( renderer.domElement );
 
@@ -381,25 +382,18 @@ async function init()
 
 	window.updateModelColor = (cssColor, hexColor) => {
 		document.querySelectorAll('.config-panel .color-dot').forEach(dot => {
-			
+
+			dot.classList.remove('active');
+
 			if(dot.dataset.color === cssColor)
 			{
 				dot.classList.add('active');
 			} 
 			
-			else if(!dot.parentNode.previousElementSibling.textContent.includes('Frame')) 
-			{
-				dot.classList.remove('active');
-			}
-
 		});
 
-		scene.traverse((child) => {
-			if (child.isMesh && child.name.includes("seat")) 
-			{
-				child.material.color.setHex(hexColor);
-			}
-		});
+		scene.background.set( hexColor );
+		scene.fog.color.set( hexColor );
 	};
 
 	window.updateFrameColor = (cssColor, hexColor) => {
@@ -408,11 +402,6 @@ async function init()
 			if(dot.dataset.color === cssColor) 
 			{
 				dot.classList.add('active');
-			}
-
-			else if(dot.parentNode.previousElementSibling.textContent.includes('Frame')) 
-			{
-				dot.classList.remove('active');
 			}
 
 		});
@@ -431,7 +420,6 @@ async function init()
 				{
 					child.material=polishMetal_material;
 				}
-				
 			}
 		});
 	};
