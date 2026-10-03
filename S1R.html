@@ -78,10 +78,10 @@
 			</h1>
 			<p class="product-tagline">Precision-engineered mesh back with dynamic lumbar support. Built for the way you work.</p>
 			<div class="hero-specs">
-				<div class="spec-pill"><span class="spec-pill-dot"></span>Air Mesh Back</div>
-				<div class="spec-pill"><span class="spec-pill-dot"></span>4D Armrest</div>
-				<div class="spec-pill"><span class="spec-pill-dot"></span>Lumbar Support</div>
-				<div class="spec-pill"><span class="spec-pill-dot"></span>Max 150 kg</div>
+				<div class="spec-pill">Air Mesh Back</div>
+				<div class="spec-pill">4D Armrest</div>
+				<div class="spec-pill">Lumbar Support</div>
+				<div class="spec-pill">Max 150 kg</div>
 			</div>
 		</div>
 
@@ -100,7 +100,7 @@
 						<div class="color-name">Slate</div>
 					</div>
 					<div class="color-swatch">
-						<div class="color-dot" data-color="#eee5c0" style="background:#f2efe8;" onclick="updateModelColor('#f2efe8',0xf2efe8)"></div>
+						<div class="color-dot" data-color="#eee5c0" style="background:#d8c5b2;" onclick="updateModelColor('#d8c5b2',0xd8c5b2)"></div>
 						<div class="color-name">Sand</div>
 					</div>
 				</div>
@@ -463,14 +463,14 @@ async function init()
 
 	//設定影子地板尺寸，影子攝影機高度(optional)
 	FX.UpdateShadowSpcaceSize({
-		ground_width:15,
-		ground_height:15,
-		camera_height:25
+		ground_width:25,
+		ground_height:25,
+		camera_height:50
 	});
 
 	///導入Shadow工具
 	FX.InitWebGPUShadow(scene, {
-	    shadow: { blur: 1.2, darkness: 0.2 },
+	    shadow: { blur: 1.0, darkness: 0.25 },
 	    plane: { color: '#ffffff', opacity: 1 }
 	});
 
