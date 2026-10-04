@@ -100,7 +100,7 @@
 						<div class="color-name">Slate</div>
 					</div>
 					<div class="color-swatch">
-						<div class="color-dot" data-color="#eee5c0" style="background:#d8c5b2;" onclick="updateModelColor('#d8c5b2',0xd8c5b2)"></div>
+						<div class="color-dot" data-color="#d8c5b2" style="background:#d8c5b2;" onclick="updateModelColor('#d8c5b2',0xd8c5b2)"></div>
 						<div class="color-name">Sand</div>
 					</div>
 				</div>
@@ -232,11 +232,6 @@ async function init()
 
 	//////顏色控制腳本
 	const backgroundColorInput = document.getElementById( 'background_color' );
-
-	// 阻止點擊顏色輸入框時事件冒泡到 window
-	backgroundColorInput.addEventListener('pointerdown', function (e) {
-	    e.stopPropagation();
-	});
 
 	backgroundColorInput.addEventListener( 'input', function (e) {
 
