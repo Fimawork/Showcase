@@ -31,7 +31,7 @@
 				opacity: 0;
 			}
 
-			#background_color
+			#fabric_color
 			{
 				width: 100%;
 				height: 100%;
@@ -92,15 +92,15 @@
 				<span class="config-label">Background</span>
 				<div class="color-options">
 					<div class="color-swatch">
-						<div class="color-dot active" data-color="#111" style="background:#111;" onclick="updateModelColor('#111',0x4c4c4c)"></div>
+						<div class="color-dot active" data-color="#111" style="background:#111;" onclick="SwichBackgroundColor('#111',0x4c4c4c)"></div>
 						<div class="color-name">Onyx</div>
 					</div>
 					<div class="color-swatch">
-						<div class="color-dot" data-color="#9c9c9c" style="background:#9c9c9c;" onclick="updateModelColor('#9c9c9c',0x9c9c9c)"></div>
+						<div class="color-dot" data-color="#9c9c9c" style="background:#9c9c9c;" onclick="SwichBackgroundColor('#9c9c9c',0x9c9c9c)"></div>
 						<div class="color-name">Slate</div>
 					</div>
 					<div class="color-swatch">
-						<div class="color-dot" data-color="#d8c5b2" style="background:#d8c5b2;" onclick="updateModelColor('#d8c5b2',0xd8c5b2)"></div>
+						<div class="color-dot" data-color="#d8c5b2" style="background:#d8c5b2;" onclick="SwichBackgroundColor('#d8c5b2',0xd8c5b2)"></div>
 						<div class="color-name">Sand</div>
 					</div>
 				</div>
@@ -117,7 +117,7 @@
 			<div class="config-section">
 				<span class="config-label">Fabric Color</span>
 				<div style="position:relative; height:28px;">
-					<div class="ColorChart"><input id="background_color" type="color" value="#0d0d0f"></div>
+					<div class="ColorChart"><input id="fabric_color" type="color" value="#0d0d0f"></div>
 					<div style="font-size:0.65rem; color:rgba(240,236,228,0.4); letter-spacing:0.1em; padding-top:6px;">Click to change scene color</div>
 				</div>
 			</div>
@@ -149,6 +149,86 @@
 			</div>
 			<button class="buy-button" onclick="parent.open('https://fimawork.tw/')">Customize Now</button>
 		</div>
+
+		<!-- ── MOBILE BOTTOM NAV & PANELS ── -->
+		<div class="mobile-bottom-nav glass-effect">
+			<button class="m-nav-btn" onclick="openMobilePanel('panel-reset')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+				<span>Reset</span>
+			</button>
+			<button class="m-nav-btn" onclick="openMobilePanel('panel-bg')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+				<span>Background</span>
+			</button>
+			<button class="m-nav-btn" onclick="openMobilePanel('panel-frame')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+				<span>Frame</span>
+			</button>
+			<button class="m-nav-btn" onclick="openMobilePanel('panel-fabric')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/></svg>
+				<span>Fabric</span>
+			</button>
+		</div>
+
+		<div id="panel-reset" class="mobile-panel glass-effect">
+			<div class="m-panel-header">
+				<span class="m-panel-title">Reset Camera</span>
+				<button class="m-panel-close" onclick="closeMobilePanel('panel-reset')">✕</button>
+			</div>
+			<div class="m-panel-body">
+				<button class="buy-button" style="width:100%; text-align:center;" onclick="RESETCAMERA(); closeMobilePanel('panel-reset')">Confirm Reset</button>
+			</div>
+		</div>
+
+		<div id="panel-bg" class="mobile-panel glass-effect">
+			<div class="m-panel-header">
+				<span class="m-panel-title">Background Color</span>
+				<button class="m-panel-close" onclick="closeMobilePanel('panel-bg')">✕</button>
+			</div>
+			<div class="m-panel-body">
+				<div class="color-options" style="justify-content:center;">
+					<div class="color-swatch">
+						<div class="color-dot active" data-color="#111" style="background:#111;" onclick="SwichBackgroundColor('#111',0x4c4c4c)"></div>
+						<div class="color-name">Onyx</div>
+					</div>
+					<div class="color-swatch">
+						<div class="color-dot" data-color="#9c9c9c" style="background:#9c9c9c;" onclick="SwichBackgroundColor('#9c9c9c',0x9c9c9c)"></div>
+						<div class="color-name">Slate</div>
+					</div>
+					<div class="color-swatch">
+						<div class="color-dot" data-color="#d8c5b2" style="background:#d8c5b2;" onclick="SwichBackgroundColor('#d8c5b2',0xd8c5b2)"></div>
+						<div class="color-name">Sand</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="panel-frame" class="mobile-panel glass-effect">
+			<div class="m-panel-header">
+				<span class="m-panel-title">Frame Style</span>
+				<button class="m-panel-close" onclick="closeMobilePanel('panel-frame')">✕</button>
+			</div>
+			<div class="m-panel-body">
+				<div class="frame-options" style="width:100%;">
+					<button class="frame-btn active" onclick="updateFrameColor('#111',0x6e6e6e); setFrameActive(this)">Graphite</button>
+					<button class="frame-btn" onclick="updateFrameColor('#ccc',0xcccccc); setFrameActive(this)">Chrome</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="panel-fabric" class="mobile-panel glass-effect">
+			<div class="m-panel-header">
+				<span class="m-panel-title">Fabric Color</span>
+				<button class="m-panel-close" onclick="closeMobilePanel('panel-fabric')">✕</button>
+			</div>
+			<div class="m-panel-body">
+				<div style="text-align:center;">
+					<input id="fabric_color_mobile" type="color" value="#0d0d0f" style="width:60px; height:60px; border:none; border-radius:8px; cursor:pointer; background:none;">
+					<div style="font-size:0.65rem; color:rgba(240,236,228,0.4); letter-spacing:0.1em; margin-top:10px;">Select fabric color</div>
+				</div>
+			</div>
+		</div>
+
 
 		<!-- Side label -->
 		<div class="side-label-right">FIMAWORK STUDIO · S1R OFFICE CHAIR · 2026</div>
@@ -231,9 +311,9 @@ async function init()
 	scene.fog = new THREE.Fog( 0x0d0d0f, 1, 50 );
 
 	//////顏色控制腳本
-	const backgroundColorInput = document.getElementById( 'background_color' );
+	const fabricColorInput = document.getElementById( 'fabric_color' );
 
-	backgroundColorInput.addEventListener( 'input', function (e) {
+	fabricColorInput.addEventListener( 'input', function (e) {
 
 		foam_material.color.set(this.value);
 		airMesh_material.color.set(this.value);
@@ -381,7 +461,7 @@ async function init()
 	}
 	
 
-	window.updateModelColor = (cssColor, hexColor) => {
+	window.SwichBackgroundColor = (cssColor, hexColor) => {
 		document.querySelectorAll('.config-panel .color-dot').forEach(dot => {
 
 			dot.classList.remove('active');
@@ -454,6 +534,29 @@ async function init()
 		}
 	};
 
+	// Mobile panel logic
+	window.openMobilePanel = (id) => {
+		document.querySelectorAll('.mobile-panel').forEach(p => p.classList.remove('open'));
+		const panel = document.getElementById(id);
+		if (panel) panel.classList.add('open');
+	};
+
+	window.closeMobilePanel = (id) => {
+		const panel = document.getElementById(id);
+		if (panel) panel.classList.remove('open');
+	};
+
+	// Sync mobile fabric color input with the main logic
+	setTimeout(() => {
+		const fabricMobileInput = document.getElementById('fabric_color_mobile');
+		const fabricInput = document.getElementById('fabric_color');
+		if (fabricMobileInput && fabricInput) {
+			fabricMobileInput.addEventListener('input', function() {
+				fabricInput.value = this.value;
+				fabricInput.dispatchEvent(new Event('input', { bubbles: true }));
+			});
+		}
+	}, 100);
 
 
 
@@ -472,7 +575,7 @@ async function init()
 
 	FX.shadowGroup.position.y=0;
 
-
+	window.addEventListener('resize', onWindowResize);
 	///EventListener
 	PointerEvent();
 }
