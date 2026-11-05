@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 	<head>
 		<meta charset="utf-8">
 		<meta name="google-site-verification" content="我是費馬工作室，專注於3D網頁介面與使用者體驗設計。" />
@@ -9,6 +9,9 @@
 		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 		<title>3D網頁範例| 費馬工作室 | fimawork | 3D網頁設計、3D Website Design</title>
 		<link rel="stylesheet" type="text/css" href="Main.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,600;0,700;0,900;1,300&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 		<style type="text/css">
 			@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
@@ -36,6 +39,291 @@
 
 		</style>
 
+		<!-- ================= VOGUE COVER UI（純 HTML/CSS 疊層，不改動任何 3D 顏色） ================= -->
+		<style type="text/css">
+			@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+			:root
+			{
+				--vg-ink: #111111;
+				--vg-ink-soft: rgba(17,17,17,0.62);
+				--vg-rule: rgba(17,17,17,0.85);
+				--vg-accent: #b0121b;
+				--vg-paper: #f8f7f4;
+				--vg-serif: 'Playfair Display', 'Didot', serif;
+				--vg-sans: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+				--vg-body: 'Cormorant Garamond', Georgia, serif;
+				--vg-gutter: clamp(16px, 3.2vw, 48px);
+				--vg-mast-top: clamp(30px, 5vh, 54px);
+				--vg-mast-size: clamp(64px, 17vw, 280px);
+			}
+
+			.vg-layer
+			{
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+				user-select: none;
+				color: var(--vg-ink);
+				font-family: var(--vg-sans);
+				overflow: hidden;
+			}
+
+			/* 刊頭放在 3D 畫布後面（z-index 5 < threeContainer 6），模型壓在字上，呈現封面人物壓字效果 */
+			.vg-masthead-layer { z-index: 5; }
+			.vg-ui-layer { z-index: 10; }
+
+			.vg-topbar
+			{
+				position: absolute;
+				top: clamp(12px, 2.2vh, 24px);
+				left: var(--vg-gutter);
+				right: var(--vg-gutter);
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				font-size: 11px;
+				letter-spacing: 0.22em;
+				text-transform: uppercase;
+				padding-bottom: 8px;
+				border-bottom: 1px solid var(--vg-rule);
+			}
+			.vg-topbar b { font-weight: 700; }
+			.vg-home
+			{
+				pointer-events: auto;
+				cursor: pointer;
+				color: inherit;
+				text-decoration: none;
+				border-bottom: 1px solid transparent;
+				transition: border-color .25s ease, color .25s ease;
+			}
+			@media (hover: hover) { .vg-home:hover { color: var(--vg-accent); border-bottom-color: var(--vg-accent); } }
+
+			.vg-masthead
+			{
+				position: absolute;
+				top: var(--vg-mast-top);
+				left: 0; right: 0;
+				text-align: center;
+				font-family: var(--vg-serif);
+				font-weight: 400;
+				font-optical-sizing: auto;
+				font-size: var(--vg-mast-size);
+				line-height: 0.92;
+				letter-spacing: -0.02em;
+				color: var(--vg-ink);
+				white-space: nowrap;
+			}
+
+			.vg-edition
+			{
+				position: absolute;
+				top: calc(var(--vg-mast-top) + var(--vg-mast-size) * 0.92 + 6px);
+				left: var(--vg-gutter);
+				right: var(--vg-gutter);
+				display: flex;
+				justify-content: space-between;
+				font-size: 11px;
+				letter-spacing: 0.24em;
+				text-transform: uppercase;
+			}
+			.vg-red { color: var(--vg-accent); font-weight: 700; }
+
+
+			.vg-kicker
+			{
+				font-size: 11px;
+				letter-spacing: 0.28em;
+				text-transform: uppercase;
+				color: var(--vg-accent);
+				font-weight: 700;
+			}
+
+			/* 右下封面主標（未選取時顯示） */
+			.vg-feature
+			{
+				position: absolute;
+				right: var(--vg-gutter);
+				bottom: 15%;
+				width: min(320px, 28vw);
+				text-align: right;
+				transition: opacity .5s ease, transform .5s ease;
+			}
+			.vg-feature .vg-big
+			{
+				font-family: var(--vg-serif);
+				font-size: clamp(34px, 4.2vw, 68px);
+				line-height: 0.95;
+				font-weight: 900;
+				margin: 8px 0 10px;
+			}
+			.vg-feature .vg-big em { font-weight: 400; font-style: italic; }
+			.vg-feature p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--vg-ink-soft); }
+			.vg-hidden { opacity: 0; transform: translateY(12px); }
+
+			/* 頁尾 */
+			.vg-footer
+			{
+				position: absolute;
+				left: var(--vg-gutter);
+				right: var(--vg-gutter);
+				bottom: clamp(12px, 2.2vh, 24px);
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-end;
+				font-size: 10px;
+				letter-spacing: 0.22em;
+				text-transform: uppercase;
+				padding-top: 8px;
+				border-top: 1px solid var(--vg-rule);
+			}
+			.vg-hint { display: flex; gap: 18px; }
+			.vg-barcode
+			{
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 3px;
+				background: #fff;
+				padding: 5px 7px 3px;
+				font-size: 8px;
+				letter-spacing: 0.18em;
+			}
+			.vg-barcode i
+			{
+				display: block;
+				width: 74px;
+				height: 26px;
+				background: repeating-linear-gradient(90deg,
+					#111 0 2px, transparent 2px 3px, #111 3px 4px, transparent 4px 6px,
+					#111 6px 9px, transparent 9px 10px, #111 10px 11px, transparent 11px 14px);
+			}
+
+			/* =========== 功能介紹面板（雜誌內頁專欄風格） =========== */
+			.vg-panel
+			{
+				pointer-events: auto;
+				user-select: text;
+				position: absolute;
+				right: var(--vg-gutter);
+				top: 61%;
+				width: min(380px, 32vw);
+				max-height: 58vh;
+				z-index: 3;
+				overflow-y: auto;
+				box-sizing: border-box;
+				background: var(--vg-paper);
+				border-top: 4px solid var(--vg-ink);
+				padding: 20px 26px 24px;
+				box-shadow: 0 18px 50px rgba(0,0,0,0.12);
+				opacity: 0;
+				visibility: hidden;
+				transform: translate(24px, -50%);
+				transition: opacity .45s ease, transform .55s cubic-bezier(.2,.8,.2,1), visibility 0s linear .55s;
+			}
+			.vg-panel.is-open
+			{
+				opacity: 1;
+				visibility: visible;
+				transform: translate(0, -50%);
+				transition: opacity .45s ease, transform .55s cubic-bezier(.2,.8,.2,1), visibility 0s;
+			}
+			.vg-panel-head { display: flex; justify-content: space-between; align-items: center; }
+			.vg-close
+			{
+				cursor: pointer;
+				background: none;
+				border: 1px solid var(--vg-ink);
+				width: 28px; height: 28px;
+				padding: 0;
+				font-size: 15px;
+				line-height: 1;
+				color: var(--vg-ink);
+				transition: background .2s ease, color .2s ease;
+			}
+			@media (hover: hover) { .vg-close:hover { background: var(--vg-ink); color: #fff; } }
+			.vg-panel-no
+			{
+				font-family: var(--vg-serif);
+				font-style: italic;
+				font-size: 64px;
+				line-height: 1;
+				color: var(--vg-accent);
+				margin: 10px 0 0;
+			}
+			.vg-panel-title
+			{
+				font-family: var(--vg-serif);
+				font-weight: 700;
+				font-size: clamp(28px, 2.6vw, 40px);
+				line-height: 1.02;
+				margin: 6px 0 4px;
+			}
+			.vg-panel-tc { font-family: var(--vg-sans); font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--vg-ink-soft); }
+			.vg-panel-deck
+			{
+				font-family: var(--vg-serif);
+				font-style: italic;
+				font-size: 18px;
+				line-height: 1.35;
+				margin: 16px 0 12px;
+				padding-top: 12px;
+				border-top: 1px solid var(--vg-rule);
+			}
+			.vg-panel-body
+			{
+				font-family: var(--vg-body);
+				font-size: 17px;
+				line-height: 1.6;
+				margin: 0 0 16px;
+				text-align: justify;
+			}
+			.vg-specs { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--vg-rule); }
+			.vg-specs li
+			{
+				display: flex;
+				justify-content: space-between;
+				gap: 12px;
+				padding: 7px 0;
+				border-bottom: 1px solid rgba(17,17,17,0.18);
+				font-size: 12px;
+			}
+			.vg-specs li span:first-child { letter-spacing: 0.2em; text-transform: uppercase; color: var(--vg-ink-soft); font-size: 10px; white-space: nowrap; }
+			.vg-specs li span:last-child { font-family: var(--vg-body); font-size: 15px; font-style: italic; text-align: right; }
+
+			.vg-panel-inner { transition: opacity .25s ease; }
+			.vg-panel-inner.is-swapping { opacity: 0; }
+
+			/* ---------------- 平板 ---------------- */
+			@media screen and (max-width:1024px)
+			{
+				.vg-panel { width: min(340px, 40vw); }
+			}
+
+			/* ---------------- 手機 ---------------- */
+			@media screen and (max-width:768px)
+			{
+				.vg-topbar { font-size: 9px; letter-spacing: 0.16em; }
+				.vg-hide-sm { display: none; }
+				.vg-edition { font-size: 9px; letter-spacing: 0.16em; }
+				.vg-feature { display: none; }
+				.vg-barcode { display: none; }
+
+				.vg-panel
+				{
+					left: 0; right: 0; top: auto; bottom: 0;
+					width: auto;
+					max-height: 52vh;
+					padding: 16px var(--vg-gutter) 22px;
+					transform: translateY(100%);
+				}
+				.vg-panel.is-open { transform: translateY(0); }
+				.vg-panel-no { font-size: 40px; margin-top: 4px; }
+				.vg-panel-deck { font-size: 16px; margin: 10px 0 8px; padding-top: 8px; }
+			}
+		</style>
+
 		<script type="importmap">
 			{
 			  "imports": {
@@ -53,6 +341,59 @@
 	
 
 		<div id="threeContainer"></div> 
+
+		<!-- ================= VOGUE COVER：刊頭（位於 3D 畫布後方） ================= -->
+		<div class="vg-layer vg-masthead-layer" aria-hidden="true">
+			<div class="vg-masthead">espresso</div>
+		</div>
+
+		<!-- ================= VOGUE COVER：封面文字與功能介紹面板 ================= -->
+		<div class="vg-layer vg-ui-layer" id="vgUI">
+			<div class="vg-topbar">
+				<a class="vg-home" id="vgHome" href="https://fimawork.tw/" target="_blank" rel="noopener"><b>fimawork</b> · 3D Web Design Studio</a>
+				<span class="vg-hide-sm">The Anatomy Issue</span>
+				<span>3D Showcase Edition</span>
+			</div>
+
+			<div class="vg-edition">
+				<span><span class="vg-red">No. 11</span> · November 2026</span>
+				<span class="vg-hide-sm">Interactive · Immersive · Industrial</span>
+			</div>
+
+
+			<div class="vg-feature" id="vgFeature">
+				<div class="vg-kicker">Cover Story</div>
+				<div class="vg-big">The Art<br><em>of the</em><br>Pull</div>
+				<p>Redefining product presentation —<br>tap any part to read its story.</p>
+			</div>
+
+			<aside class="vg-panel" id="vgPanel" aria-live="polite">
+				<div class="vg-panel-head">
+					<span class="vg-kicker" id="vgPanelKicker"></span>
+					<button class="vg-close" id="vgClose" aria-label="Close">✕</button>
+				</div>
+				<div class="vg-panel-inner" id="vgPanelInner">
+					<div class="vg-panel-no" id="vgPanelNo"></div>
+					<div class="vg-panel-title" id="vgPanelTitle"></div>
+					<div class="vg-panel-tc" id="vgPanelTc"></div>
+					<div class="vg-panel-deck" id="vgPanelDeck"></div>
+					<p class="vg-panel-body" id="vgPanelBody"></p>
+					<ul class="vg-specs" id="vgPanelSpecs"></ul>
+				</div>
+			</aside>
+
+			<div class="vg-footer">
+				<div class="vg-hint">
+					<span>fimawork.tw</span>
+					<span class="vg-hide-sm">Powered by WebGPU</span>
+				</div>
+				<div class="vg-hint">
+					<span>Drag to rotate</span>
+					<span>Tap a part</span>
+				</div>
+				<div class="vg-barcode" style="display: none;"><i></i>0 11 2026</div>
+			</div>
+		</div>
 	
 
 		<script type="module">
@@ -95,6 +436,111 @@ let knob= new THREE.Group();
 let idleTime=0;
 const hold_time=6;
 
+
+///==================== VOGUE UI：零件功能介紹資料 ====================
+const PART_INFO = {
+	portafilter: {
+		no: "01", kicker: "Extraction", title: "The Portafilter", tc: "Group Head & Handle",
+		deck: "Where pressure becomes flavour.",
+		body: "The heart of the machine. A stainless steel group head paired with a sculpted black handle: dose, tamp and lock it in, and hot water is driven evenly through the coffee puck under steady pressure to pull an espresso crowned with rich crema. The handle is weighted and angled to sit securely in the palm as you lock it into place.",
+		specs: [["Position","Front, below the group head"],["Material","Stainless steel / black handle"],["Function","Holds the coffee and extracts the shot"]]
+	},
+	tank: {
+		no: "02", kicker: "Hydration", title: "The Water Tank", tc: "Clear Reservoir",
+		deck: "Clarity you can see.",
+		body: "Set at the back of the machine, the transparent tank shows the water level at a glance. Lift the fill cap to top it up, or remove the whole tank for cleaning. Fresh, clean water is where every good cup begins — and here you can always see it.",
+		specs: [["Position","Rear of the machine"],["Material","Clear resin / black fill cap"],["Function","Supplies water for brewing and steam"]]
+	},
+	drip: {
+		no: "03", kicker: "Detail", title: "The Drip Tray", tc: "Polished Base Tray",
+		deck: "Catches every stray drop.",
+		body: "A polished metal tray beneath the brewing area catches drips from extraction, pre-infusion and group-head flushing. It slides out to empty, and its top doubles as a cup stand — keeping the countertop clean and the silhouette sharp.",
+		specs: [["Position","Base, below the brewing area"],["Material","Polished metal"],["Function","Catches drips / holds the cup"]]
+	},
+	warmer: {
+		no: "04", kicker: "Ritual", title: "The Cup Warmer", tc: "Top Warming Plate",
+		deck: "Warmth, before the first sip.",
+		body: "The polished plate on top of the machine gathers residual heat while it runs. Rest your cups here to preheat them, so a cold cup never steals the espresso's warmth — the aroma and crema last noticeably longer.",
+		specs: [["Position","Top of the machine"],["Material","Polished metal"],["Function","Preheats cups with residual heat"]]
+	},
+	wand: {
+		no: "05", kicker: "Texture", title: "The Steam Wand", tc: "Frothing Nozzle",
+		deck: "Silk, on demand.",
+		body: "A stainless steel wand releases high-pressure steam to heat milk and spin it into fine, velvety microfoam — essential for lattes, cappuccinos and latte art. It swivels to suit milk pitchers of any size.",
+		specs: [["Position","Side of the machine"],["Material","Stainless steel"],["Function","Heats and froths milk"]]
+	},
+	gauge: {
+		no: "06", kicker: "Precision", title: "The Pressure Gauge", tc: "Illuminated Dial",
+		deck: "Read the shot as it happens.",
+		body: "Centred on the front panel, the gauge tracks pressure in real time during extraction, telling you whether grind size, dose and tamp are on point. An illuminated dial behind a glass window keeps it legible in any light — and makes it the machine's signature detail.",
+		specs: [["Position","Centre of the front panel"],["Material","Illuminated dial / glass window"],["Function","Shows extraction pressure live"]]
+	},
+	knob: {
+		no: "07", kicker: "Control", title: "The Steam Knob", tc: "Steam Control Dial",
+		deck: "Turn for control.",
+		body: "The side knob meters the flow of steam — turn to open, turn back to close. A knurled outer ring gives a confident grip, while the radially brushed metal face adds a note of precision, so you can fine-tune the steam as you froth.",
+		specs: [["Position","Side of the machine"],["Material","Polished metal / radial-brushed face"],["Function","Adjusts steam flow"]]
+	}
+};
+const PART_ORDER = ["portafilter","tank","drip","warmer","wand","gauge","knob"];
+
+const _vgUI = document.getElementById("vgUI");
+const _vgPanel = document.getElementById("vgPanel");
+const _vgPanelInner = document.getElementById("vgPanelInner");
+const _vgFeature = document.getElementById("vgFeature");
+let currentPartKey = null;
+
+
+///避免在 UI 上的點擊穿透到 3D Raycaster
+["pointerdown","pointerup","click","wheel"].forEach((type) => {
+	_vgPanel.addEventListener(type, (e) => e.stopPropagation());
+	document.getElementById("vgHome").addEventListener(type, (e) => e.stopPropagation());
+});
+
+function FillInfoPanel(key)
+{
+	const p = PART_INFO[key];
+	document.getElementById("vgPanelKicker").textContent = `${p.kicker} · ${p.no} / 0${PART_ORDER.length}`;
+	document.getElementById("vgPanelNo").textContent = p.no;
+	document.getElementById("vgPanelTitle").textContent = p.title;
+	document.getElementById("vgPanelTc").textContent = p.tc;
+	document.getElementById("vgPanelDeck").textContent = p.deck;
+	document.getElementById("vgPanelBody").textContent = p.body;
+	document.getElementById("vgPanelSpecs").innerHTML = p.specs.map(([k,v]) => `<li><span>${k}</span><span>${v}</span></li>`).join("");
+}
+
+///開啟功能介紹面板
+function OpenInfoPanel(key)
+{
+	if (!PART_INFO[key]) return;
+
+	if (currentPartKey && currentPartKey !== key && _vgPanel.classList.contains("is-open"))
+	{
+		//已開啟時切換內容：淡出 → 換字 → 淡入
+		_vgPanelInner.classList.add("is-swapping");
+		setTimeout(() => { FillInfoPanel(key); _vgPanelInner.classList.remove("is-swapping"); _vgPanel.scrollTop = 0; }, 220);
+	}
+	else
+	{
+		FillInfoPanel(key);
+		_vgPanel.scrollTop = 0;
+	}
+
+	currentPartKey = key;
+	_vgPanel.classList.add("is-open");
+	_vgUI.classList.add("has-panel");
+	_vgFeature.classList.add("vg-hidden");
+}
+
+///關閉功能介紹面板
+function CloseInfoPanel()
+{
+	currentPartKey = null;
+	_vgPanel.classList.remove("is-open");
+	_vgUI.classList.remove("has-panel");
+	_vgFeature.classList.remove("vg-hidden");
+}
+///==================================================================
 
 init();
 //FX.Camera_Inspector(camera,controls);
@@ -293,48 +739,48 @@ async function init()
 				
 	  	if (target) 
 		{
-	  	  	console.log('選中了物件：', target.name, target);
+	  	  	console.log('Selected object:', target.name, target);
 
 			if(target.name.includes("GroupHead")||target.name.includes("HandleBar"))
 			{
 				FX.SetOutlineEffect( portafilter );
-				//顯示說明面板 Portafilter
+				OpenInfoPanel('portafilter');//顯示說明面板 Portafilter
 			}
 
 			if(target.name.includes("Tank")||target.name.includes("FillCap"))
 			{
 				FX.SetOutlineEffect( tank );
-				//顯示說明面板 Water Tank
+				OpenInfoPanel('tank');//顯示說明面板 Water Tank
 			}
 
 			if(target.name.includes("BottomTray"))
 			{
 				FX.SetOutlineEffect( target );
-				//顯示說明面板 Drip Tray
+				OpenInfoPanel('drip');//顯示說明面板 Drip Tray
 			}
 
 			if(target.name.includes("TopTray"))
 			{
 				FX.SetOutlineEffect( target );
-				//顯示說明面板 Cup Warming Plate
+				OpenInfoPanel('warmer');//顯示說明面板 Cup Warming Plate
 			}
 
 			if(target.name.includes("SteamWand"))
 			{
 				FX.SetOutlineEffect( target );
-				//顯示說明面板 Frothing Nozzle
+				OpenInfoPanel('wand');//顯示說明面板 Frothing Nozzle
 			}
 
 			if(target.name.includes("Window")||target.name.includes("Screen"))
 			{
 				FX.SetOutlineEffect( gauge_window );
-				//顯示說明面板 Pressure Gauge
+				OpenInfoPanel('gauge');//顯示說明面板 Pressure Gauge
 			}
 
 			if(target.name.includes("Knob")||target.name.includes("Tooth")||target.name.includes("Dish"))
 			{
 				FX.SetOutlineEffect( knob );
-				//顯示說明面板 Steam Controlling Knob
+				OpenInfoPanel('knob');//顯示說明面板 Steam Controlling Knob
 			}
 
 			if(target.parent.name==="floor")
@@ -349,10 +795,14 @@ async function init()
 
 	function ResetFuntion()
 	{
-		console.log("取消選取物件");
+		console.log("Selection cleared");
 
 		FX.SetOutlineEffect( null );
+		CloseInfoPanel();
 	}
+
+
+	document.getElementById('vgClose').addEventListener('click', ResetFuntion);
 
 	///EventListener
   	window.addEventListener( 'resize', onWindowResize );  
