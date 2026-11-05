@@ -61,16 +61,15 @@ import * as THREE from 'three';
 
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.56/fx_functions.js';
-import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.56/fx_materials.js';
-import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.56/fx_hud.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.57/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.57/fx_materials.js';
+import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.57/fx_hud.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { CoffeeMachine_2026 } from './models/CoffeeMachine_2026_slices.js';
 import { Inspector } from 'three/addons/inspector/Inspector.js';
-
 
 let scene, camera, renderer, stats, mixer;
 
@@ -88,6 +87,10 @@ const CameraDefaultPos=new THREE.Vector3(-10.157,4.267,-4.991);
 const ControlsTargetDefaultPos=new THREE.Vector3(-0.087,1.503,-0.211);
 
 let main_model= new THREE.Object3D();
+let portafilter= new THREE.Group();
+let tank= new THREE.Group();
+let gauge_window= new THREE.Group();
+let knob= new THREE.Group();
 
 let idleTime=0;
 const hold_time=6;
@@ -170,35 +173,42 @@ async function init()
 
 		model.traverse( function ( object ) {	
                   
-            if (object.name.includes("Tank")) FX.ReturnBufferGeometry(object, tank_material, model, scene);
-			if (object.name.includes("BlackPlastic")) FX.ReturnBufferGeometry(object, black_plastic_material, model, scene);
-			if (object.name.includes("HandleBar")) FX.ReturnBufferGeometry(object, handlebar_material, model, scene);
-			if (object.name.includes("ElectroplatingTop")) FX.ReturnBufferGeometry(object, brush_stainless_material, model, scene);
-			if (object.name.includes("ElectroplatingBase")) FX.ReturnBufferGeometry(object, brush_stainless_02_material, model, scene);
-			if (object.name.includes("TopTray")) FX.ReturnBufferGeometry(object,polish_plate_material, model, scene);
-			if (object.name.includes("BottomTray")) FX.ReturnBufferGeometry(object, polish_plate_material, model, scene);
-			if (object.name.includes("GroupHead")) FX.ReturnBufferGeometry(object, stainlessSteel_material, model, scene);
-			if (object.name.includes("SteamWand")) FX.ReturnBufferGeometry(object, stainlessSteel_material, model, scene);
-			if (object.name.includes("MainBottom")) FX.ReturnBufferGeometry(object, null, model, scene);
-			if (object.name.includes("Screen")) FX.ReturnBufferGeometry(object, screen_material, model, scene);
-			if (object.name==="Inner_A") FX.ReturnBufferGeometry(object, stainlessSteel_material, model, scene);
-			if (object.name==="Inner_B") FX.ReturnBufferGeometry(object, stainlessSteel_material, model, scene);
-			if (object.name==="Inner_C") FX.ReturnBufferGeometry(object, stainlessSteel_material, model, scene);
-			if (object.name==="PressureGauge") FX.ReturnBufferGeometry(object, PressureGauge_material, model, scene);
-			if (object.name==="Gauge") FX.ReturnBufferGeometry(object, null, model, scene);
-			if (object.name.includes("Knob")) FX.ReturnBufferGeometry(object, polish_plate_material, model, scene);
-			if (object.name.includes("Tooth")) FX.ReturnBufferGeometry(object, polish_plate_material, model, scene);
-			if (object.name.includes("Dish")) FX.ReturnBufferGeometry(object, radial_brush_material, model, scene);
+            if (object.name.includes("Tank")) FX.ReturnBufferGeometry(object, tank_material, tank, scene);
+			if (object.name.includes("BlackPlastic")) FX.ReturnBufferGeometry(object, black_plastic_material, main_model, scene);
+			if (object.name.includes("HandleBar")) FX.ReturnBufferGeometry(object, handlebar_material, portafilter, scene);
+			if (object.name.includes("ElectroplatingTop")) FX.ReturnBufferGeometry(object, brush_stainless_material, main_model, scene);
+			if (object.name.includes("ElectroplatingBase")) FX.ReturnBufferGeometry(object, brush_stainless_02_material,main_model, scene);
+			if (object.name.includes("TopTray")) FX.ReturnBufferGeometry(object,polish_plate_material, main_model, scene);
+			if (object.name.includes("BottomTray")) FX.ReturnBufferGeometry(object, polish_plate_material, main_model, scene);
+			if (object.name.includes("GroupHead")) FX.ReturnBufferGeometry(object, stainlessSteel_material, portafilter, scene);
+			if (object.name.includes("SteamWand")) FX.ReturnBufferGeometry(object, stainlessSteel_material, main_model, scene);
+			if (object.name.includes("MainBottom")) FX.ReturnBufferGeometry(object, null, main_model, scene);
+			if (object.name.includes("Screen")) FX.ReturnBufferGeometry(object, screen_material, main_model, scene);
+			if (object.name==="Inner_A") FX.ReturnBufferGeometry(object, stainlessSteel_material, portafilter, scene);
+			//if (object.name==="Inner_B") FX.ReturnBufferGeometry(object, stainlessSteel_material, portafilter, scene);
+			if (object.name==="Inner_C") FX.ReturnBufferGeometry(object, black_plastic_material, portafilter, scene);
+			if (object.name==="PressureGauge") FX.ReturnBufferGeometry(object, PressureGauge_material, main_model, scene);
+			if (object.name==="Gauge") FX.ReturnBufferGeometry(object, null, main_model, scene);
+			if (object.name.includes("Knob")) FX.ReturnBufferGeometry(object, polish_plate_material, knob, scene);
+			if (object.name.includes("Tooth")) FX.ReturnBufferGeometry(object, polish_plate_material, knob, scene);
+			if (object.name.includes("Dish")) FX.ReturnBufferGeometry(object, radial_brush_material, knob, scene);
+			if (object.name.includes("Window")) FX.ReturnBufferGeometry(object, null, gauge_window, scene);
+			if (object.name.includes("Connector")) FX.ReturnBufferGeometry(object, handlebar_material, main_model, scene);
+			if (object.name.includes("FillCap")) FX.ReturnBufferGeometry(object, black_plastic_material, tank, scene);
         })
 
+		main_model.add(tank).add(portafilter).add(gauge_window).add(knob);
 		scene.add(main_model);
-		scene.add(model);
+		//scene.add(model);
 		
 		setTimeout(() => {
 			// 2. 模型套用新材質與生成後，再啟動動畫循環（避免出現黑色模型）
+
+			//portafilter.position.set(-2,0,0);
 			renderer.setAnimationLoop( animate );
 			FXUI.InstLoadingEffect_Type_A(false);
-			//FX.Hierarchy(model,camera,scene,renderer,controls) 
+			//FX.Hierarchy(main_model,camera,scene,renderer,controls); 
+			
 		}, 1000);
 
     },
@@ -254,40 +264,98 @@ async function init()
 	switch_icon.rotation.y = FX.ToThreeEulerAngle(0); 
 	switch_icon.rotation.z = FX.ToThreeEulerAngle(0); 
 
-	scene.add(power_icon).add(cup_icon).add(steamWand_icon).add(pressureGauge_icon).add(switch_icon);
-
-	//FX.Hierarchy(pressureGauge_icon,camera,scene,renderer,controls) 
+	main_model.add(power_icon).add(cup_icon).add(steamWand_icon).add(pressureGauge_icon).add(switch_icon);
 
 	//影子工具
 	FX.InitWebGPUShadow(scene, {
      shadow: { blur: 0.5, darkness: 0.25 },
      plane: { color: '#ffffff', opacity: 1 }
-});
+	});
 
+	FX.shadowGroup.name="floor";
+
+	///1.導入Raycaster工具
+	FX.SetupRaycasterEvent(scene,camera,renderer);
+
+	///2.接收事件(選取到物件時)，觸發目標任務
+	window.addEventListener('Select', ShowInfoPanel);
+
+	///3.接收事件(取消選取時)，觸發目標任務
+	window.addEventListener('Deselect', ResetFuntion);
+
+	///4.範本以Outline效果為例，可自行定義任務，例如開啟 UI 屬性面板
+	FX.SetupOutlinePass({edgeStrength_value:5.0,thisScene:scene,thisCamera:camera,thisRenderer:renderer});
+
+	function ShowInfoPanel(event) 
+	{
+		// 透過 event.detail 取得被選取的物件
+	 	const target = event.detail?.selectedTarget;
+				
+	  	if (target) 
+		{
+	  	  	console.log('選中了物件：', target.name, target);
+
+			if(target.name.includes("GroupHead")||target.name.includes("HandleBar"))
+			{
+				FX.SetOutlineEffect( portafilter );
+				//顯示說明面板 Portafilter
+			}
+
+			if(target.name.includes("Tank")||target.name.includes("FillCap"))
+			{
+				FX.SetOutlineEffect( tank );
+				//顯示說明面板 Water Tank
+			}
+
+			if(target.name.includes("BottomTray"))
+			{
+				FX.SetOutlineEffect( target );
+				//顯示說明面板 Drip Tray
+			}
+
+			if(target.name.includes("TopTray"))
+			{
+				FX.SetOutlineEffect( target );
+				//顯示說明面板 Cup Warming Plate
+			}
+
+			if(target.name.includes("SteamWand"))
+			{
+				FX.SetOutlineEffect( target );
+				//顯示說明面板 Frothing Nozzle
+			}
+
+			if(target.name.includes("Window")||target.name.includes("Screen"))
+			{
+				FX.SetOutlineEffect( gauge_window );
+				//顯示說明面板 Pressure Gauge
+			}
+
+			if(target.name.includes("Knob")||target.name.includes("Tooth")||target.name.includes("Dish"))
+			{
+				FX.SetOutlineEffect( knob );
+				//顯示說明面板 Steam Controlling Knob
+			}
+
+			if(target.parent.name==="floor")
+			{
+				ResetFuntion();
+				//取消選取
+			}
+
+		    //FX.SetOutlineEffect( target );
+	  	} 
+	}
+
+	function ResetFuntion()
+	{
+		console.log("取消選取物件");
+
+		FX.SetOutlineEffect( null );
+	}
 
 	///EventListener
   	window.addEventListener( 'resize', onWindowResize );  
-
-  		window.addEventListener("pointerdown", (event) => {
-		
-		idleTime=0;
-		controls.autoRotate=false;
-	
-	});
-
-	window.addEventListener( 'pointermove', function(e) {
-		
-		idleTime=0;
-		controls.autoRotate=false;
-		
-	});
-
-  	window.addEventListener("wheel", (event) => {
-		
-		idleTime=0;
-		controls.autoRotate=false;
-		
-	});
 	
 }
 
@@ -312,16 +380,11 @@ function animate(timestamp)
 
 	if ( mixer ) mixer.update( delta );
 
-//	idleTime+=delta;
-//	
-//	if(idleTime>hold_time)
-//	{
-//		controls.autoRotate=true;
-//	}
+	//影子工具
+	FX.UpdateWebGPUShadow(renderer, scene);
 
-
-//影子工具
-FX.UpdateWebGPUShadow(renderer, scene);
+	///5.使用Outline時必須載入renderPipeline
+	FX.renderPipeline.render();
 
 }
 
