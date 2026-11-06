@@ -641,6 +641,7 @@ async function init()
 			if (object.name.includes("Window")) FX.ReturnBufferGeometry(object, null, gauge_window, scene);
 			if (object.name.includes("Connector")) FX.ReturnBufferGeometry(object, handlebar_material, main_model, scene);
 			if (object.name.includes("FillCap")) FX.ReturnBufferGeometry(object, black_plastic_material, tank, scene);
+			if (object.name.includes("Sleeve")) FX.ReturnBufferGeometry(object, null, portafilter, scene);
         })
 
 		main_model.add(tank).add(portafilter).add(gauge_window).add(knob);
