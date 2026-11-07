@@ -14,6 +14,9 @@
 		<meta property="og:url" content="https://fimawork.github.io/Showcase/Keyboard_2026.html">
 		<meta property="og:type" content="website">
 		<link rel="stylesheet" type="text/css" href="Main.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 		<style type="text/css">
 			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
 
@@ -41,6 +44,268 @@
 				z-index: -1;
 				pointer-events: none;
 			}
+
+			/* =========================================================
+			   HUD 介面（純 HTML/CSS 疊層，不接收滑鼠事件，不影響 3D 操作）
+			   ========================================================= */
+			:root
+			{
+				--hud: #6dff2a;
+				--hud-soft: rgba(109,255,42,0.55);
+				--hud-dim: rgba(109,255,42,0.22);
+				--hud-faint: rgba(109,255,42,0.08);
+				--hud-text: #d9ffc4;
+				--hud-mono: 'Share Tech Mono', 'Consolas', monospace;
+				--hud-title: 'Orbitron', 'Share Tech Mono', sans-serif;
+				--hud-inset: clamp(14px, 2vw, 28px);
+			}
+
+			#hud
+			{
+				position: fixed;
+				inset: 0;
+				z-index: 20;
+				pointer-events: none;
+				user-select: none;
+				color: var(--hud-text);
+				font-family: var(--hud-mono);
+				font-size: 12px;
+				letter-spacing: 0.08em;
+				text-shadow: 0 0 6px rgba(109,255,42,0.45);
+				overflow: hidden;
+			}
+
+			/* 開機動畫：模型載入完成後依序出現 */
+			#hud .hud-block
+			{
+				opacity: 0;
+				transform: translateY(6px);
+				transition: opacity .6s ease, transform .6s ease;
+			}
+			#hud.hud-on .hud-block { opacity: 1; transform: none; }
+			#hud.hud-on .hud-block:nth-child(2) { transition-delay: .10s; }
+			#hud.hud-on .hud-block:nth-child(3) { transition-delay: .20s; }
+			#hud.hud-on .hud-block:nth-child(4) { transition-delay: .30s; }
+			#hud.hud-on .hud-block:nth-child(5) { transition-delay: .40s; }
+			#hud.hud-on .hud-block:nth-child(6) { transition-delay: .50s; }
+			#hud.hud-on .hud-block:nth-child(7) { transition-delay: .60s; }
+
+			/* 掃描線 */
+			#hud .hud-scan
+			{
+				position: absolute;
+				inset: 0;
+				background: repeating-linear-gradient(0deg, rgba(109,255,42,0.025) 0 1px, transparent 1px 3px);
+			}
+			#hud .hud-sweep
+			{
+				position: absolute;
+				left: 0; right: 0;
+				height: 18vh;
+				background: linear-gradient(180deg, transparent, rgba(109,255,42,0.035), transparent);
+				animation: hudSweep 9s linear infinite;
+			}
+			@keyframes hudSweep { from { top: -20vh; } to { top: 110vh; } }
+
+			/* 四角框線 */
+			#hud .hud-corner
+			{
+				position: absolute;
+				width: clamp(28px, 4vw, 54px);
+				height: clamp(28px, 4vw, 54px);
+				border: 0 solid var(--hud-soft);
+				filter: drop-shadow(0 0 4px rgba(109,255,42,0.5));
+			}
+			#hud .hud-corner.tl { top: var(--hud-inset); left: var(--hud-inset); border-top-width: 2px; border-left-width: 2px; }
+			#hud .hud-corner.tr { top: var(--hud-inset); right: var(--hud-inset); border-top-width: 2px; border-right-width: 2px; }
+			#hud .hud-corner.bl { bottom: var(--hud-inset); left: var(--hud-inset); border-bottom-width: 2px; border-left-width: 2px; }
+			#hud .hud-corner.br { bottom: var(--hud-inset); right: var(--hud-inset); border-bottom-width: 2px; border-right-width: 2px; }
+
+			/* 中央對焦框 */
+			#hud .hud-focus
+			{
+				position: absolute;
+				left: 50%; top: 50%;
+				width: min(46vw, 640px);
+				height: min(46vh, 420px);
+				transform: translate(-50%, -50%);
+				opacity: .55;
+			}
+			#hud .hud-focus i
+			{
+				position: absolute;
+				width: 18px; height: 18px;
+				border: 0 solid var(--hud-dim);
+			}
+			#hud .hud-focus i:nth-child(1) { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
+			#hud .hud-focus i:nth-child(2) { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; }
+			#hud .hud-focus i:nth-child(3) { bottom: 0; left: 0; border-bottom-width: 1px; border-left-width: 1px; }
+			#hud .hud-focus i:nth-child(4) { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; }
+
+			/* 左上：標題 */
+			#hud .hud-title
+			{
+				position: absolute;
+				top: calc(var(--hud-inset) + 16px);
+				left: calc(var(--hud-inset) + 18px);
+			}
+			#hud .hud-title .t1
+			{
+				font-family: var(--hud-title);
+				font-weight: 700;
+				font-size: clamp(20px, 2.2vw, 30px);
+				letter-spacing: 0.18em;
+				color: var(--hud);
+				text-shadow: 0 0 12px rgba(109,255,42,0.65);
+				pointer-events: all;
+			}
+
+			#hud .hud-title .t1:hover
+			{
+				opacity: 0.5;
+			}
+
+			#hud .hud-title .t2 { margin-top: 4px; font-size: 11px; color: var(--hud-soft); letter-spacing: 0.24em; }
+			#hud .hud-status { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 11px; }
+			#hud .hud-dot
+			{
+				width: 7px; height: 7px; border-radius: 50%;
+				background: var(--hud);
+				box-shadow: 0 0 8px var(--hud);
+				animation: hudBlink 1.6s steps(2, start) infinite;
+			}
+			@keyframes hudBlink { to { visibility: hidden; } }
+
+			/* 右上：時間 */
+			#hud .hud-clock
+			{
+				position: absolute;
+				top: calc(var(--hud-inset) + 16px);
+				right: calc(var(--hud-inset) + 18px);
+				text-align: right;
+			}
+			#hud .hud-clock .time { font-family: var(--hud-title); font-size: clamp(16px, 1.6vw, 22px); color: var(--hud); letter-spacing: 0.12em; }
+			#hud .hud-clock .date { margin-top: 4px; font-size: 11px; color: var(--hud-soft); letter-spacing: 0.2em; }
+
+			/* 面板通用 */
+			#hud .hud-panel
+			{
+				position: absolute;
+				width: 210px;
+				padding: 12px 14px;
+				border: 1px solid var(--hud-dim);
+				background: linear-gradient(135deg, rgba(10,24,6,0.55), rgba(0,0,0,0.25));
+				clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+			}
+			#hud .hud-panel-head
+			{
+				display: flex;
+				justify-content: space-between;
+				font-size: 10px;
+				color: var(--hud);
+				letter-spacing: 0.22em;
+				padding-bottom: 6px;
+				margin-bottom: 8px;
+				border-bottom: 1px solid var(--hud-dim);
+			}
+			#hud .hud-row { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 0 2px; font-size: 11px; }
+			#hud .hud-row span:first-child { color: var(--hud-soft); }
+			#hud .hud-row b { font-weight: 400; color: var(--hud-text); font-size: 13px; }
+			#hud .hud-bar { height: 3px; background: var(--hud-faint); position: relative; }
+			#hud .hud-bar i
+			{
+				position: absolute; left: 0; top: 0; bottom: 0;
+				width: 0%;
+				background: var(--hud);
+				box-shadow: 0 0 6px var(--hud);
+				transition: width .25s ease;
+			}
+
+			/* 左側：鏡頭遙測 */
+			#hud .hud-left { left: calc(var(--hud-inset) + 18px); top: 50%; transform: translateY(-50%); }
+			#hud.hud-on .hud-left { transform: translateY(-50%); }
+
+			/* 右側：雷達 */
+			#hud .hud-right { right: calc(var(--hud-inset) + 18px); top: 50%; transform: translateY(-50%); }
+			#hud.hud-on .hud-right { transform: translateY(-50%); }
+			#hud .hud-radar { display: block; width: 100%; height: auto; margin: 4px 0 6px; }
+			#hud .hud-radar .sweep { transform-origin: 90px 90px; animation: hudRadar 4s linear infinite; }
+			@keyframes hudRadar { to { transform: rotate(360deg); } }
+
+			/* 下方：羅盤刻度帶 */
+			#hud .hud-compass
+			{
+				position: absolute;
+				left: 50%;
+				bottom: calc(var(--hud-inset) + 14px);
+				width: min(560px, 60vw);
+				height: 40px;
+				transform: translateX(-50%);
+				overflow: hidden;
+				-webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+				        mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+			}
+			#hud.hud-on .hud-compass { transform: translateX(-50%); }
+			#hud .hud-tape { position: absolute; left: 0; top: 0; height: 100%; white-space: nowrap; will-change: transform; }
+			#hud .hud-tick
+			{
+				position: absolute;
+				bottom: 0;
+				width: 1px;
+				height: 7px;
+				background: var(--hud-dim);
+			}
+			#hud .hud-tick.major { height: 13px; background: var(--hud-soft); }
+			#hud .hud-tick em
+			{
+				position: absolute;
+				bottom: 16px;
+				left: 50%;
+				transform: translateX(-50%);
+				font-style: normal;
+				font-size: 10px;
+				color: var(--hud-soft);
+			}
+			#hud .hud-tick.cardinal em { color: var(--hud); font-size: 12px; }
+			#hud .hud-caret
+			{
+				position: absolute;
+				left: 50%;
+				top: 0;
+				transform: translateX(-50%);
+				width: 0; height: 0;
+				border-left: 5px solid transparent;
+				border-right: 5px solid transparent;
+				border-top: 7px solid var(--hud);
+				filter: drop-shadow(0 0 4px var(--hud));
+			}
+			#hud .hud-heading
+			{
+				position: absolute;
+				left: 50%;
+				bottom: calc(var(--hud-inset) + 58px);
+				transform: translateX(-50%);
+				font-family: var(--hud-title);
+				font-size: 13px;
+				color: var(--hud);
+				letter-spacing: 0.2em;
+			}
+			#hud.hud-on .hud-heading { transform: translateX(-50%); }
+
+			/* 平板 */
+			@media screen and (max-width:1100px)
+			{
+				#hud .hud-panel { width: 180px; }
+			}
+
+			/* 手機：只保留角框、標題、時間與羅盤 */
+			@media screen and (max-width:768px)
+			{
+				#hud .hud-left, #hud .hud-right, #hud .hud-focus, #hud .hud-clock .date { display: none; }
+				#hud .hud-title .t2 { font-size: 9px; }
+				#hud .hud-compass { width: 78vw; bottom: calc(var(--hud-inset) + 44px); }
+				#hud .hud-heading { bottom: calc(var(--hud-inset) + 88px); }
+			}
 		</style>
 
 		<script type="importmap">
@@ -58,7 +323,72 @@
 
 	<body>
 		<canvas id="spaceBackdrop"></canvas>
-		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
+		<!--<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>-->
+
+		<!-- ================= HUD ================= -->
+		<div id="hud" aria-hidden="true">
+			<div class="hud-scan"></div>
+			<div class="hud-sweep"></div>
+			<div class="hud-corner tl"></div>
+			<div class="hud-corner tr"></div>
+			<div class="hud-corner bl"></div>
+			<div class="hud-corner br"></div>
+			<div class="hud-focus"><i></i><i></i><i></i><i></i></div>
+
+			<div class="hud-block hud-title">
+				<div class="t1" onclick="parent.open('https://fimawork.tw/')">FIMAWORK</div>
+				<div class="t2">MECHANICAL INTERFACE UNIT</div>
+				<div class="hud-status"><span class="hud-dot"></span><span id="hudMode">SYSTEM ONLINE</span></div>
+			</div>
+
+			<div class="hud-block hud-clock">
+				<div class="time" id="hudTime">00:00:00</div>
+				<div class="date" id="hudDate">----.--.--</div>
+			</div>
+
+			<div class="hud-block hud-panel hud-left">
+				<div class="hud-panel-head"><span>CAMERA TELEMETRY</span><span>01</span></div>
+				<div class="hud-row"><span>AZIMUTH</span><b id="hudAz">000.0°</b></div>
+				<div class="hud-bar"><i id="hudAzBar"></i></div>
+				<div class="hud-row"><span>ELEVATION</span><b id="hudEl">00.0°</b></div>
+				<div class="hud-bar"><i id="hudElBar"></i></div>
+				<div class="hud-row"><span>RANGE</span><b id="hudDist">00.00 m</b></div>
+				<div class="hud-bar"><i id="hudDistBar"></i></div>
+				<div class="hud-row"><span>FRAME RATE</span><b id="hudFps">-- FPS</b></div>
+				<div class="hud-bar"><i id="hudFpsBar"></i></div>
+			</div>
+
+			<div class="hud-block hud-panel hud-right">
+				<div class="hud-panel-head"><span>ORBIT TRACKING</span><span>02</span></div>
+				<svg class="hud-radar" viewBox="0 0 180 180">
+					<defs>
+						<linearGradient id="hudSweepGrad" x1="0" y1="0" x2="1" y2="0">
+							<stop offset="0" stop-color="#6dff2a" stop-opacity="0"/>
+							<stop offset="1" stop-color="#6dff2a" stop-opacity="0.35"/>
+						</linearGradient>
+					</defs>
+					<circle cx="90" cy="90" r="84" fill="none" stroke="rgba(109,255,42,0.35)" stroke-width="1"/>
+					<circle cx="90" cy="90" r="56" fill="none" stroke="rgba(109,255,42,0.18)" stroke-width="1"/>
+					<circle cx="90" cy="90" r="28" fill="none" stroke="rgba(109,255,42,0.18)" stroke-width="1"/>
+					<line x1="90" y1="4" x2="90" y2="176" stroke="rgba(109,255,42,0.15)"/>
+					<line x1="4" y1="90" x2="176" y2="90" stroke="rgba(109,255,42,0.15)"/>
+					<path class="sweep" d="M90 90 L174 90 A84 84 0 0 0 149.4 30.6 Z" fill="url(#hudSweepGrad)"/>
+					<rect x="84" y="86" width="12" height="8" fill="none" stroke="#6dff2a" stroke-width="1"/>
+					<g id="hudBlip">
+						<circle r="4" fill="#6dff2a"/>
+						<circle r="9" fill="none" stroke="#6dff2a" stroke-opacity="0.5"/>
+					</g>
+				</svg>
+				<div class="hud-row"><span>TARGET</span><b>LOCKED</b></div>
+				<div class="hud-row"><span>ORBIT</span><b id="hudOrbit">MANUAL</b></div>
+			</div>
+
+			<div class="hud-block hud-heading" id="hudHeading">HDG 000</div>
+			<div class="hud-block hud-compass">
+				<div class="hud-tape" id="hudTape"></div>
+				<div class="hud-caret"></div>
+			</div>
+		</div>
 		<script type="module">
 
 import * as THREE from 'three';
@@ -104,8 +434,17 @@ const SPACE = {
 	rimIntensity: 5          //綠色輪廓光強度
 };
 
+///HUD 狀態（需在 SetupHUD() 呼叫前宣告）
+const HUD = {
+	root: document.getElementById('hud'),
+	el: (id) => document.getElementById(id),
+	acc: 0, frames: 0, fpsAcc: 0, fps: 0,
+	pxPerDeg: 4
+};
+
 
 DrawSpaceBackdrop();
+SetupHUD();
 init();
 FXUI.InstLoadingEffect_Type_A(true);
 
@@ -234,6 +573,7 @@ async function init()
 		AddRimLight(model);
 
 		FXUI.InstLoadingEffect_Type_A(false)
+		HUD.root.classList.add('hud-on');//模型載入完成，HUD 開機動畫
         //FX.Material_Inspector(scene);
 
     },
@@ -292,6 +632,8 @@ function animate(timestamp)
 
 	if ( mixer ) mixer.update( delta );
 
+	UpdateHUD(delta);
+
 	idleTime+=delta;
 
 	if(idleTime>hold_time)
@@ -333,6 +675,79 @@ function InstEmissiveWords(target,thisColor)
     //});
 
 	FX.ReturnBufferGeometry(target,keyMaterial,null,scene);
+}
+
+///==================== HUD：即時資訊 ====================
+
+function SetupHUD()
+{
+	///建立羅盤刻度帶（-360° ~ 720°，可無縫滑動）
+	const tape = HUD.el('hudTape');
+	const names = { 0:'N', 45:'NE', 90:'E', 135:'SE', 180:'S', 225:'SW', 270:'W', 315:'NW' };
+	let html = '';
+	for (let d = -360; d <= 720; d += 5)
+	{
+		const n = ((d % 360) + 360) % 360;
+		const major = n % 15 === 0;
+		const cardinal = names[n] !== undefined;
+		const label = cardinal ? names[n] : (n % 30 === 0 ? String(n).padStart(3, '0') : '');
+		html += `<span class="hud-tick${major ? ' major' : ''}${cardinal ? ' cardinal' : ''}" style="left:${(d + 360) * HUD.pxPerDeg}px">${label ? `<em>${label}</em>` : ''}</span>`;
+	}
+	tape.innerHTML = html;
+
+	HUD.time = HUD.el('hudTime'); HUD.date = HUD.el('hudDate');
+	HUD.az = HUD.el('hudAz'); HUD.azBar = HUD.el('hudAzBar');
+	HUD.elv = HUD.el('hudEl'); HUD.elBar = HUD.el('hudElBar');
+	HUD.dist = HUD.el('hudDist'); HUD.distBar = HUD.el('hudDistBar');
+	HUD.fpsTxt = HUD.el('hudFps'); HUD.fpsBar = HUD.el('hudFpsBar');
+	HUD.orbit = HUD.el('hudOrbit'); HUD.mode = HUD.el('hudMode');
+	HUD.heading = HUD.el('hudHeading'); HUD.tape = tape;
+	HUD.blip = HUD.el('hudBlip');
+	HUD.compass = tape.parentElement;
+}
+
+function UpdateHUD(delta)
+{
+	if (!controls || !HUD.tape) return;
+
+	//FPS 每 0.5 秒計算一次
+	HUD.frames++; HUD.fpsAcc += delta;
+	if (HUD.fpsAcc >= 0.5) { HUD.fps = HUD.frames / HUD.fpsAcc; HUD.frames = 0; HUD.fpsAcc = 0; }
+
+	//鏡頭方位：每幀更新羅盤與雷達，讓動作順暢
+	const heading = (THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()) + 360) % 360;
+	const tapeX = HUD.compass.clientWidth / 2 - (heading + 360) * HUD.pxPerDeg;
+	HUD.tape.style.transform = `translateX(${tapeX}px)`;
+
+	const a = controls.getAzimuthalAngle();
+	HUD.blip.setAttribute('transform', `translate(${90 + Math.sin(a) * 64} ${90 + Math.cos(a) * 64})`);
+
+	//文字數值每 0.1 秒更新一次
+	HUD.acc += delta;
+	if (HUD.acc < 0.1) return;
+	HUD.acc = 0;
+
+	const elev = 90 - THREE.MathUtils.radToDeg(controls.getPolarAngle());
+	const dist = controls.getDistance();
+	const now = new Date();
+	const pad = (n) => String(n).padStart(2, '0');
+
+	HUD.time.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+	HUD.date.textContent = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}`;
+
+	HUD.az.textContent = `${heading.toFixed(1).padStart(5, '0')}°`;
+	HUD.azBar.style.width = `${heading / 360 * 100}%`;
+	HUD.elv.textContent = `${elev >= 0 ? '+' : ''}${elev.toFixed(1)}°`;
+	HUD.elBar.style.width = `${Math.min(100, Math.max(0, (elev + 15) / 105 * 100))}%`;
+	HUD.dist.textContent = `${dist.toFixed(2)} m`;
+	HUD.distBar.style.width = `${(dist - controls.minDistance) / (controls.maxDistance - controls.minDistance) * 100}%`;
+	HUD.fpsTxt.textContent = `${Math.round(HUD.fps)} FPS`;
+	HUD.fpsBar.style.width = `${Math.min(100, HUD.fps / 120 * 100)}%`;
+	HUD.heading.textContent = `HDG ${String(Math.round(heading) % 360).padStart(3, '0')}`;
+
+	const auto = controls.autoRotate;
+	HUD.orbit.textContent = auto ? 'AUTO' : 'MANUAL';
+	HUD.mode.textContent = auto ? 'AUTO ORBIT ENGAGED' : 'SYSTEM ONLINE';
 }
 
 ///==================== 太空場景：綠色輪廓光 ====================
