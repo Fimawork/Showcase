@@ -415,8 +415,8 @@ let threeContainer = document.getElementById("threeContainer");
 const timer = new THREE.Timer();
 
 
-const CameraDefaultPos=new THREE.Vector3(-13.217,5.203,11.497);
-const ControlsTargetDefaultPos=new THREE.Vector3(-4.236,0.614,1.933);
+const CameraDefaultPos=new THREE.Vector3(-11.186,2.526,13.033);
+const ControlsTargetDefaultPos=new THREE.Vector3(0,0,0);
 
 let idleTime=0;
 const hold_time=6;
@@ -582,7 +582,7 @@ async function init()
     }
 	);
 
-	//FX.Camera_Inspector(camera,controls);
+	FX.Camera_Inspector(camera,controls);
 
 	///EventListener
   	window.addEventListener( 'resize', onWindowResize );
