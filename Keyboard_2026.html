@@ -14,241 +14,33 @@
 		<meta property="og:url" content="https://fimawork.github.io/Showcase/Keyboard_2026.html">
 		<meta property="og:type" content="website">
 		<link rel="stylesheet" type="text/css" href="Main.css">
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 		<style type="text/css">
 			@import url('https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@main/fx_ui.css');
 
 			body
 			{
 				margin: 0;
-				padding:0; 
-				background: radial-gradient(circle at 50% 50%, #1a2a47 0%, #080d1a 100%);
+				padding:0;
+				background: #000;
 				overflow: hidden;
-				font-family: 'Rajdhani', sans-serif;
-				color: #fff;
 			}
-			
+
 			canvas
 			{
 				width: 100%;
    				height: 100%;
 			}
 
-			:root {
-				--neon-cyan: #00f2ff;
-				--neon-magenta: #ff00ea;
-				--bg-glass: rgba(10, 20, 40, 0.6);
-				--border-glass: rgba(0, 242, 255, 0.3);
-				--font-main: 'Rajdhani', sans-serif;
-				--font-tech: 'Orbitron', sans-serif;
-			}
-
-			/* UI Layer Positioning */
-			.ui-overlay {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-				pointer-events: none;
-				z-index: 10;
-				display: flex;
-				flex-direction: column;
-				justify-content: space-between;
-				padding: 30px;
-				box-sizing: border-box;
-			}
-
-			.ui-overlay * {
-				/*pointer-events: auto;*/
-			}
-
-			/* Glassmorphism Panel */
-			.glass-panel {
-				background: var(--bg-glass);
-				backdrop-filter: blur(12px);
-				-webkit-backdrop-filter: blur(12px);
-				border: 1px solid var(--border-glass);
-				border-radius: 4px;
-				padding: 20px;
-				box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-			}
-
-			/* Header Styles */
-			.header {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				margin-bottom: 20px;
-			}
-
-			.brand-title {
-				font-family: var(--font-tech);
-				font-weight: 700;
-				font-size: 24px;
-				letter-spacing: 4px;
-				background: linear-gradient(90deg, #fff, var(--neon-cyan));
-				-webkit-background-clip: text;
-				-webkit-text-fill-color: transparent;
-				text-transform: uppercase;
-			}
-
-			.model-name {
-				font-family: var(--font-tech);
-				font-size: 14px;
-				color: var(--neon-magenta);
-				letter-spacing: 2px;
-				border-left: 2px solid var(--neon-magenta);
-				padding-left: 15px;
-			}
-
-			/* Main Layout */
-			.main-content {
-				display: flex;
-				justify-content: space-between;
-				flex-grow: 1;
-				align-items: center;
-			}
-
-			.side-panel {
-				width: 280px;
-				display: flex;
-				flex-direction: column;
-				gap: 20px;
-			}
-
-			.panel-title {
-				font-family: var(--font-tech);
-				font-size: 12px;
-				text-transform: uppercase;
-				letter-spacing: 2px;
-				color: var(--neon-cyan);
-				margin-bottom: 15px;
-				display: flex;
-				align-items: center;
-				gap: 10px;
-			}
-
-			.panel-title::after {
-				content: '';
-				flex-grow: 1;
-				height: 1px;
-				background: linear-gradient(90deg, var(--neon-cyan), transparent);
-			}
-
-			/* Stats List */
-			.stat-item {
-				display: flex;
-				justify-content: space-between;
-				margin-bottom: 12px;
-				font-size: 14px;
-				border-bottom: 1px solid rgba(255,255,255,0.05);
-				padding-bottom: 5px;
-			}
-
-			.stat-label {
-				color: rgba(255, 255, 255, 0.6);
-				text-transform: uppercase;
-			}
-
-			.stat-value {
-				color: #fff;
-				font-weight: 700;
-			}
-
-			/* Buttons */
-			.control-btn {
-				background: rgba(255, 255, 255, 0.05);
-				border: 1px solid rgba(255, 255, 255, 0.2);
-				color: #fff;
-				padding: 10px 15px;
-				font-family: var(--font-tech);
-				font-size: 10px;
-				text-transform: uppercase;
-				cursor: pointer;
-				transition: all 0.3s ease;
-				text-align: center;
-				border-radius: 2px;
-				margin-bottom: 10px;
-				letter-spacing: 1px;
-			}
-
-			.control-btn:hover {
-				background: var(--neon-cyan);
-				color: #000;
-				box-shadow: 0 0 15px var(--neon-cyan);
-				border-color: var(--neon-cyan);
-			}
-
-			.control-btn.active {
-				background: var(--neon-magenta);
-				border-color: var(--neon-magenta);
-				box-shadow: 0 0 10px var(--neon-magenta);
-			}
-
-			/* Footer */
-			.footer {
-				display: flex;
-				justify-content: space-between;
-				align-items: flex-end;
-				margin-top: 20px;
-			}
-
-			.cta-button {
-				background: linear-gradient(135deg, var(--neon-cyan), #00a2ff);
-				color: #000;
-				padding: 15px 40px;
-				font-family: var(--font-tech);
-				font-weight: 700;
-				text-transform: uppercase;
-				border: none;
-				clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
-				cursor: pointer;
-				transition: transform 0.2s ease, box-shadow 0.2s ease;
-			}
-
-			.cta-button:hover {
-				transform: skew(-2deg) scale(1.05);
-				box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
-			}
-
-			/* Animations */
-			@keyframes scanline {
-				0% { transform: translateY(-100%); }
-				100% { transform: translateY(1000%); }
-			}
-
-			.scan {
-				position: fixed;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 2px;
-				background: rgba(0, 242, 255, 0.1);
-				opacity: 0.5;
-				pointer-events: none;
-				z-index: 100;
-				animation: scanline 8s linear infinite;
-			}
-
-			@media (max-width: 900px) {
-				.side-panel {
-					width: 200px;
-				}
-				.brand-title {
-					font-size: 18px;
-				}
-			}
-
-			@media screen and (max-width:768px)/*手機*/
+			/* 太空場景背景（2D Canvas 繪製，固定在 3D 畫布後方） */
+			#spaceBackdrop
 			{
-				.ui-overlay {
-					display: none;
-				}
+				position: fixed;
+				inset: 0;
+				width: 100vw;
+				height: 100vh;
+				z-index: -1;
+				pointer-events: none;
 			}
-
 		</style>
 
 		<script type="importmap">
@@ -263,92 +55,16 @@
 		</script>
 
 	</head>
-	
+
 	<body>
+		<canvas id="spaceBackdrop"></canvas>
 		<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>
-		
-		<!-- UI Overlay -->
-		<div class="ui-overlay">
-			<!-- Top Section -->
-			<div class="header">
-				<div class="brand-title">VANGUARD K-2026</div>
-				<div class="model-name">PRO SERIES // MECHANICAL</div>
-			</div>
-
-			<!-- Middle Section -->
-			<div class="main-content">
-				<!-- Left Stats -->
-				<div class="side-panel">
-					<div class="glass-panel">
-						<div class="panel-title">System Specs</div>
-						<div class="stat-item">
-							<span class="stat-label">Polling Rate</span>
-							<span class="stat-value">8000Hz</span>
-						</div>
-						<div class="stat-item">
-							<span class="stat-label">Response Time</span>
-							<span class="stat-value">0.125ms</span>
-						</div>
-						<div class="stat-item">
-							<span class="stat-label">Switch Type</span>
-							<span class="stat-value">Optical Gold</span>
-						</div>
-						<div class="stat-item">
-							<span class="stat-label">Lifecycle</span>
-							<span class="stat-value">100M Clicks</span>
-						</div>
-					</div>
-
-					<div class="glass-panel">
-						<div class="panel-title">Connectivity</div>
-						<div class="stat-item">
-							<span class="stat-label">Latency</span>
-							<span class="stat-value">Ultra-Low</span>
-						</div>
-						<div class="stat-item">
-							<span class="stat-label">Protocol</span>
-							<span class="stat-value">HyperSpeed 2.0</span>
-						</div>
-					</div>
-				</div>
-
-				<!-- Right Controls -->
-				<div class="side-panel">
-					<div class="glass-panel">
-						<div class="panel-title">Lighting Engine</div>
-						<div class="control-btn active" onclick="setLighting('rgb', event)">Neural RGB</div>
-						<div class="control-btn" onclick="setLighting('static', event)">Static Frost</div>
-						<div class="control-btn" onclick="setLighting('breathe', event)">Heartbeat</div>
-						<div class="control-btn" onclick="setLighting('pulse', event)">Gamma Pulse</div>
-					</div>
-
-					<div class="glass-panel">
-						<div class="panel-title">Performance Mode</div>
-						<div class="control-btn" onclick="togglePerformance(event)">Standard</div>
-						<div class="control-btn active" onclick="togglePerformance(event)">Overclocked</div>
-					</div>
-				</div>
-
-				<div class="model_info" style="top: 75%;">
-					<div class="titlePanel">
-						<p class="detail_title">Model</p>
-						<p class="detail_title">Author</p>
-						<p class="detail_title">Link</p>
-					</div>
-					<div class="detailPanel">
-						<p class="detail_value">keyboard</p>
-						<p class="detail_value">SIMONS</p>
-						<p class="detail_value">https://grabcad.com/library/keyboard-43</p>
-					</div>
-				</div>
-			</div>
-		</div>
 		<script type="module">
 
 import * as THREE from 'three';
 
 //RenderPipeline工具
-import { pass } from 'three/tsl';
+import { pass, vec4 } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -382,7 +98,14 @@ const params = {
 	exposure: 0.6
 };
 
+///太空場景色彩設定（參考：黑色 + 螢光綠）
+const SPACE = {
+	neon: 0x6dff2a,          //輪廓光顏色
+	rimIntensity: 5          //綠色輪廓光強度
+};
 
+
+DrawSpaceBackdrop();
 init();
 FXUI.InstLoadingEffect_Type_A(true);
 
@@ -414,14 +137,16 @@ async function init()
 	const scenePass = pass( scene, camera );
 	const scenePassColor = scenePass.getTextureNode( 'output' ).toInspector( 'Color' );
 	const bloomPass = bloom( scenePassColor ).toInspector( 'Bloom' );
-	renderPipeline.outputNode = scenePassColor.add( bloomPass );
+	//保留場景的透明度：沒有物件的地方維持透明，才看得到後方的星球背景；
+	//bloom 光暈以加法疊在背景上（canvas 為 premultiplied alpha）
+	renderPipeline.outputNode = vec4( scenePassColor.rgb.add( bloomPass.rgb ), scenePassColor.a );
 
 	bloomPass.threshold.value = params.threshold;
 	bloomPass.strength.value = params.strength;
 	bloomPass.radius.value = params.radius;
 
   	camera.position.copy(CameraDefaultPos);
-  
+
   	///利用座標設定旋轉中心及鏡頭焦點，camera不須另外設定初始角度
   	controls = new OrbitControls( camera, renderer.domElement );
   	controls.enablePan = true;//右鍵平移效果
@@ -440,20 +165,14 @@ async function init()
 
   	///hdri 環境光源
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
+	scene.environmentIntensity = 0.8;//太空場景較暗，略降環境反射
 
-	const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 1.5 );
+	const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x0b120a, 0.6 );
 	hemiLight.position.set( 0, 20, 0 );
 	scene.add( hemiLight );
 
-	const dirLight = new THREE.DirectionalLight( 0xffffff,6 );
+	const dirLight = new THREE.DirectionalLight( 0xffffff,4 );
 	dirLight.position.set( - 3, 10, - 10 );
-	dirLight.castShadow = true;
-	dirLight.shadow.camera.top = 2;
-	dirLight.shadow.camera.bottom = - 2;
-	dirLight.shadow.camera.left = - 2;
-	dirLight.shadow.camera.right = 2;
-	dirLight.shadow.camera.near = 0.1;
-	dirLight.shadow.camera.far = 40;
 	scene.add( dirLight );
 
 	const loader_keyboard = new GLTFLoader();
@@ -462,7 +181,7 @@ async function init()
     FX.Base64ToArrayBuffer(keyboard_2026()),
     '',
     (gltf) => {
-        
+
 		const model = gltf.scene;
 
 		model.position.set(0,0,0);
@@ -509,11 +228,14 @@ async function init()
 
 		scene.add(model);
 
-		scene.environmentRotation.y = FX.ToThreeEulerAngle(-30); 
+		scene.environmentRotation.y = FX.ToThreeEulerAngle(-30);
+
+		///太空場景：綠色輪廓光（依模型實際範圍自動定位）
+		AddRimLight(model);
 
 		FXUI.InstLoadingEffect_Type_A(false)
         //FX.Material_Inspector(scene);
-		
+
     },
     (error) => {
         console.error('Failed to load model:', error);
@@ -523,7 +245,7 @@ async function init()
 	//FX.Camera_Inspector(camera,controls);
 
 	///EventListener
-  	window.addEventListener( 'resize', onWindowResize );  
+  	window.addEventListener( 'resize', onWindowResize );
 
   		window.addEventListener("pointerdown", (event) => {
 
@@ -540,55 +262,25 @@ async function init()
 	});
 
   	window.addEventListener("wheel", (event) => {
-		
+
 		idleTime=0;
 		controls.autoRotate=false;
 
 	});
-
-	// UI Interaction Links
-	window.setLighting = function(mode, e) {
-		console.log("Lighting mode:", mode);
-		document.querySelectorAll('.glass-panel:nth-child(1) .control-btn').forEach(btn => btn.classList.remove('active'));
-		e.currentTarget.classList.add('active');
-		
-		if(mode === 'rgb') {
-			bloomPass.strength = 2.1;
-		} else if(mode === 'static') {
-			bloomPass.strength = 0.5;
-		} else if(mode === 'breathe') {
-			bloomPass.strength = 1.0;
-		} else {
-			bloomPass.strength = 1.5;
-		}
-	};
-
-	window.togglePerformance = function(e) {
-		const btn = e.currentTarget;
-		const isActive = btn.classList.contains('active');
-		
-		const btns = document.querySelectorAll('.glass-panel:nth-child(2) .control-btn');
-		btns.forEach(b => b.classList.remove('active'));
-		btn.classList.add('active');
-
-		if(btn.innerText.includes("Overclocked")) {
-			controls.autoRotate = true;
-			controls.autoRotateSpeed = 2.0;
-		} else {
-			controls.autoRotate = false;
-		}
-	};
 }
 
 
-function onWindowResize() 
+function onWindowResize()
 {
     camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight);
+
+	clearTimeout(onWindowResize._t);
+	onWindowResize._t = setTimeout(DrawSpaceBackdrop, 150);//背景重繪（防抖）
 }
 
-function animate(timestamp) 
+function animate(timestamp)
 {
 
   	controls.update();
@@ -601,7 +293,7 @@ function animate(timestamp)
 	if ( mixer ) mixer.update( delta );
 
 	idleTime+=delta;
-	
+
 	if(idleTime>hold_time)
 	{
 		controls.autoRotate=true;
@@ -620,7 +312,7 @@ function InstLight(target,thisColor)
         // 只計算有幾何體且可見的網格 (Mesh)
         if (child.isMesh) {
             child.material=keyMaterial;
-           
+
         }
     });
 }
@@ -641,6 +333,180 @@ function InstEmissiveWords(target,thisColor)
     //});
 
 	FX.ReturnBufferGeometry(target,keyMaterial,null,scene);
+}
+
+///==================== 太空場景：綠色輪廓光 ====================
+function AddRimLight(model)
+{
+	const box = new THREE.Box3().setFromObject(model);
+	const size = box.getSize(new THREE.Vector3());
+	const center = box.getCenter(new THREE.Vector3());
+	const span = Math.max(size.x, size.z);
+
+	///放在預設鏡頭視線的後上方，勾出鍵盤外框輪廓（呼應背景行星的綠色大氣光）
+	const viewDir = new THREE.Vector3().subVectors(ControlsTargetDefaultPos, CameraDefaultPos).setY(0).normalize();
+	const rimLight = new THREE.DirectionalLight(SPACE.neon, SPACE.rimIntensity);
+	rimLight.position.copy(center).addScaledVector(viewDir, span * 2).add(new THREE.Vector3(0, span * 0.8, 0));
+	rimLight.target.position.copy(center);
+	scene.add(rimLight);
+	scene.add(rimLight.target);
+}
+
+///==================== 太空場景：行星背景（2D Canvas） ====================
+function DrawSpaceBackdrop()
+{
+	const cvs = document.getElementById('spaceBackdrop');
+	const dpr = Math.min(window.devicePixelRatio || 1, 2);
+	const W = Math.round(window.innerWidth * dpr);
+	const H = Math.round(window.innerHeight * dpr);
+	cvs.width = W; cvs.height = H;
+	const ctx = cvs.getContext('2d');
+
+	///---- noise 工具 ----
+	const hash = (x, y) => {
+		let h = Math.imul(x, 374761393) ^ Math.imul(y, 668265263);
+		h = Math.imul(h ^ (h >>> 13), 1274126177);
+		return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+	};
+	const vnoise = (x, y) => {
+		const xi = Math.floor(x), yi = Math.floor(y);
+		const xf = x - xi, yf = y - yi;
+		const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+		const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+		return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+	};
+	const fbm = (x, y, oct) => {
+		let s = 0, amp = 0.5, f = 1;
+		for (let i = 0; i < oct; i++) { s += amp * vnoise(x * f, y * f); f *= 2.03; amp *= 0.5; }
+		return s;
+	};
+	let seed = 7;
+	const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+
+	///---- 底色 ----
+	ctx.fillStyle = '#000';
+	ctx.fillRect(0, 0, W, H);
+
+	//行星位置與大小（參考圖構圖：左側巨大行星，下緣延伸出畫面）
+	const portrait = W < H;
+	const pr = portrait ? W * 0.72 : Math.max(W * 0.27, H * 0.58);
+	const px = portrait ? W * 0.32 : W * 0.30;
+	const py = portrait ? H * 0.70 : H * 0.80;
+	const hazeY = H * 0.72;//右側綠色大氣散射的高度
+
+	//右側綠色大氣散射
+	let g = ctx.createRadialGradient(W * 0.80, hazeY, 0, W * 0.80, hazeY, W * 0.55);
+	g.addColorStop(0, 'rgba(90,150,45,0.30)');
+	g.addColorStop(0.45, 'rgba(40,80,25,0.14)');
+	g.addColorStop(1, 'rgba(0,0,0,0)');
+	ctx.fillStyle = g;
+	ctx.fillRect(0, 0, W, H);
+
+	///---- 星點 ----
+	for (let i = 0; i < 320; i++)
+	{
+		const x = rand() * W, y = rand() * H;
+		if (Math.hypot(x - px, y - py) < pr * 1.08) continue;
+		ctx.fillStyle = `rgba(255,255,255,${0.08 + rand() * 0.45})`;
+		ctx.beginPath();
+		ctx.arc(x, y, (0.35 + rand() * 0.8) * dpr, 0, Math.PI * 2);
+		ctx.fill();
+	}
+
+	///---- 行星表面（程序化紋理 + 背光照明） ----
+	const N = Math.min(768, Math.round(pr * 2));
+	const tex = document.createElement('canvas');
+	tex.width = tex.height = N;
+	const tctx = tex.getContext('2d');
+	const img = tctx.createImageData(N, N);
+	const L = (() => { const v = [0.62, -0.42, -0.66]; const m = Math.hypot(...v); return v.map(c => c / m); })();//光源：右上後方
+
+	for (let j = 0; j < N; j++)
+	{
+		for (let i = 0; i < N; i++)
+		{
+			const nx = (i + 0.5) / N * 2 - 1;
+			const ny = (j + 0.5) / N * 2 - 1;
+			const r2 = nx * nx + ny * ny;
+			const idx = (j * N + i) * 4;
+			const edge = (1 - Math.sqrt(r2)) * N * 0.5;//距離邊緣的像素數，用於邊緣抗鋸齒
+			if (edge <= 0) { img.data[idx + 3] = 0; continue; }
+
+			const nz = Math.sqrt(1 - r2);
+			const k = 1.8 / (0.35 + nz);
+			const u = nx * k, v = ny * k;
+
+			const detail = fbm(u * 2.2 + 11.3, v * 2.2 + 4.7, 5);
+			const maria = Math.max(0, fbm(u * 0.7 + 3.1, v * 0.7 + 8.2, 3) - 0.45) * 2.2;
+			let albedo = 0.22 + detail * 0.55 - maria * 0.18;
+
+			const lam = Math.max(0, nx * L[0] + ny * L[1] + nz * L[2]);
+			const ambient = 0.10 + 0.10 * Math.max(0, nx * 0.6 - ny * 0.8);//微弱的表面可見度
+			const shade = ambient + lam * 1.1;
+
+			const limb = Math.pow(1 - nz, 2.5);
+			const rimDir = Math.max(0, (nx * L[0] + ny * L[1]) / Math.hypot(L[0], L[1]));
+			const rim = limb * Math.pow(rimDir, 1.5);
+
+			const base = albedo * shade * 255;
+			img.data[idx]     = Math.min(255, base * 0.92 + rim * 60);
+			img.data[idx + 1] = Math.min(255, base * 0.98 + rim * 140);
+			img.data[idx + 2] = Math.min(255, base * 0.90 + rim * 35);
+			img.data[idx + 3] = Math.round(255 * Math.min(1, edge / 1.5));
+		}
+	}
+	tctx.putImageData(img, 0, 0);
+	ctx.imageSmoothingQuality = 'high';
+	ctx.drawImage(tex, px - pr, py - pr, pr * 2, pr * 2);
+
+	///---- 大氣輪廓光（螢光綠，集中在右上側） ----
+	const glowCanvas = document.createElement('canvas');
+	glowCanvas.width = W; glowCanvas.height = H;
+	const gctx = glowCanvas.getContext('2d');
+
+	g = gctx.createRadialGradient(px, py, pr * 0.985, px, py, pr * 1.10);
+	g.addColorStop(0, 'rgba(160,255,90,0)');
+	g.addColorStop(0.12, 'rgba(200,255,130,0.85)');
+	g.addColorStop(0.30, 'rgba(110,210,55,0.35)');
+	g.addColorStop(1, 'rgba(60,140,30,0)');
+	gctx.fillStyle = g;
+	gctx.fillRect(0, 0, W, H);
+
+	const peak = -0.35;//輪廓光最亮的角度（弧度，0 = 右方）
+	if (gctx.createConicGradient)
+	{
+		const mask = gctx.createConicGradient(peak - Math.PI, px, py);
+		mask.addColorStop(0.00, 'rgba(0,0,0,0)');
+		mask.addColorStop(0.22, 'rgba(0,0,0,0.12)');
+		mask.addColorStop(0.50, 'rgba(0,0,0,1)');
+		mask.addColorStop(0.66, 'rgba(0,0,0,0.55)');
+		mask.addColorStop(0.80, 'rgba(0,0,0,0.05)');
+		mask.addColorStop(1.00, 'rgba(0,0,0,0)');
+		gctx.globalCompositeOperation = 'destination-in';
+		gctx.fillStyle = mask;
+		gctx.fillRect(0, 0, W, H);
+	}
+	else
+	{
+		gctx.globalCompositeOperation = 'destination-in';
+		gctx.fillStyle = 'rgba(0,0,0,0.35)';
+		gctx.fillRect(0, 0, W, H);
+	}
+	ctx.globalCompositeOperation = 'lighter';
+	ctx.drawImage(glowCanvas, 0, 0);
+	ctx.globalCompositeOperation = 'source-over';
+
+	///---- 右上角小衛星 ----
+	const mx = W * 0.985, my = H * 0.025, mr = H * 0.07;
+	g = ctx.createRadialGradient(mx - mr * 0.35, my + mr * 0.3, mr * 0.1, mx, my, mr);
+	g.addColorStop(0, '#2a2d2a');
+	g.addColorStop(1, '#0a0b0a');
+	ctx.fillStyle = g;
+	ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2); ctx.fill();
+	ctx.strokeStyle = 'rgba(150,170,150,0.25)';
+	ctx.lineWidth = 1 * dpr;
+	ctx.beginPath(); ctx.arc(mx, my, mr, Math.PI * 0.55, Math.PI * 1.05); ctx.stroke();
+
 }
 		</script>
     </body>
