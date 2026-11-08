@@ -34,8 +34,8 @@
    				height: 100%;
 			}
 
-			/* 太空場景背景（2D Canvas 繪製，固定在 3D 畫布後方） */
-			#spaceBackdrop
+			/* 太空場景背景（2D Canvas 繪製，固定在 3D 畫布後方）；#starLayer 為閃爍星星與流星層 */
+			#spaceBackdrop, #starLayer
 			{
 				position: fixed;
 				inset: 0;
@@ -323,6 +323,7 @@
 
 	<body>
 		<canvas id="spaceBackdrop"></canvas>
+		<canvas id="starLayer"></canvas>
 		<!--<div class="fimawork_logo" onclick="parent.open('https://fimawork.tw/')"></div>-->
 
 		<!-- ================= HUD ================= -->
@@ -398,9 +399,9 @@ import { pass, vec4 } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.2/fx_functions.js';
-import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v1.5/fx_materials.js';
-import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.41/fx_hud.js';
+import * as FX from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.57/fx_functions.js';
+import * as FXM from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@v2.57/fx_materials.js';
+import * as FXUI from 'https://cdn.jsdelivr.net/gh/Fimawork/threejs_tools@2.57/fx_hud.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TIFFLoader } from 'three/addons/loaders/TIFFLoader.js';
@@ -415,8 +416,8 @@ let threeContainer = document.getElementById("threeContainer");
 const timer = new THREE.Timer();
 
 
-const CameraDefaultPos=new THREE.Vector3(-11.186,2.526,13.033);
-const ControlsTargetDefaultPos=new THREE.Vector3(0,0,0);
+const CameraDefaultPos=new THREE.Vector3(12.466,12.947,16.488);
+const ControlsTargetDefaultPos=new THREE.Vector3(1.215,-0.285,-0.436);
 
 let idleTime=0;
 const hold_time=6;
@@ -425,14 +426,26 @@ const params = {
 	threshold: 1,
 	strength: 2.4,
 	radius: 1,
-	exposure: 0.6
+	exposure: 1
 };
 
 ///太空場景色彩設定（參考：黑色 + 螢光綠）
 const SPACE = {
 	neon: 0x6dff2a,          //輪廓光顏色
-	rimIntensity: 5          //綠色輪廓光強度
+	rimIntensity: 5,         //綠色輪廓光強度
+	meteorMin: 3,            //流星出現間隔（秒）最短
+	meteorMax: 9             //流星出現間隔（秒）最長
 };
+
+///星星 / 流星狀態（需在 DrawSpaceBackdrop() 呼叫前宣告）
+const STARS = [];
+const METEORS = [];
+let starCtx = null;
+let PLANET = null;           //行星位置，讓流星從行星後方經過
+let STAR_DPR = 1;
+let nextMeteor = 3;          //幾秒後出現下一顆流星
+let lastStarTime = 0;
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;//系統設定減少動態效果時保持靜止
 
 ///HUD 狀態（需在 SetupHUD() 呼叫前宣告）
 const HUD = {
@@ -457,7 +470,7 @@ async function init()
 
   	scene = new THREE.Scene();
 
-  	camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );//非全螢幕比例設定
+  	camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 0.1, 1000 );//非全螢幕比例設定
   	renderer = new THREE.WebGPURenderer( { antialias: true } );
   	renderer.setSize( window.innerWidth, window.innerHeight);
 
@@ -506,9 +519,12 @@ async function init()
 	FX.LoadUltraHDRForWebGPU('./textures/hdri/studio_small_09_2k.jpg',scene);
 	scene.environmentIntensity = 0.8;//太空場景較暗，略降環境反射
 
-	const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x0b120a, 0.6 );
+	//scene.environmentRotation.x = FX.ToThreeEulerAngle(-60); 
+	//scene.environmentRotation.z = FX.ToThreeEulerAngle(-30); 
+
+	const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x000000, 1 );
 	hemiLight.position.set( 0, 20, 0 );
-	scene.add( hemiLight );
+	scene.add( hemiLight )
 
 	const dirLight = new THREE.DirectionalLight( 0xffffff,4 );
 	dirLight.position.set( - 3, 10, - 10 );
@@ -524,10 +540,10 @@ async function init()
 		const model = gltf.scene;
 
 		model.position.set(0,0,0);
-		model.rotation.set(FX.ToThreeEulerAngle(45),FX.ToThreeEulerAngle(0), FX.ToThreeEulerAngle(0));
+		model.rotation.set(FX.ToThreeEulerAngle(0),FX.ToThreeEulerAngle(0), FX.ToThreeEulerAngle(0));
 		model.scale.set(0.05,0.05,0.05);
 
-		const button_material=FXM.InstMaterial(0x000000,0.5,0.5,0,1.27,1,false,1,true);
+		const button_material=FXM.InstMaterial(0x000000,0.5,0.9,0,1.27,1,false,1,true);
 		const padding_material=FXM.InstMaterial(0x545454,0.9,0.6,0,1.27,1,false,1,true);
 
 		model.traverse( function ( object ) {
@@ -570,11 +586,11 @@ async function init()
 		scene.environmentRotation.y = FX.ToThreeEulerAngle(-30);
 
 		///太空場景：綠色輪廓光（依模型實際範圍自動定位）
-		AddRimLight(model);
+		//AddRimLight(model);
 
 		FXUI.InstLoadingEffect_Type_A(false)
 		HUD.root.classList.add('hud-on');//模型載入完成，HUD 開機動畫
-        //FX.Material_Inspector(scene);
+        //FX.Hierarchy(model,camera,scene,renderer,controls); 
 
     },
     (error) => {
@@ -631,6 +647,8 @@ function animate(timestamp)
 	if ( mixer ) mixer.update( delta );
 
 	UpdateHUD(delta);
+
+	DrawStars(timestamp / 1000);//閃爍星星 + 流星
 
 	idleTime+=delta;
 
@@ -765,6 +783,113 @@ function AddRimLight(model)
 	scene.add(rimLight.target);
 }
 
+///==================== 太空場景：閃爍星星 + 流星（#starLayer，每幀更新） ====================
+function DrawStars(time)
+{
+	if (!starCtx) return;
+	const c = starCtx;
+	c.clearRect(0, 0, c.canvas.width, c.canvas.height);
+
+	//閃爍星星：每顆星有自己的速度與相位，亮度在原本的 20%～100% 之間變化
+	c.fillStyle = '#fff';
+	for (const s of STARS)
+	{
+		c.globalAlpha = REDUCED_MOTION ? s.base : s.base * (0.6 + 0.4 * Math.sin(time * s.speed + s.phase));
+		c.beginPath();
+		c.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+		c.fill();
+	}
+	c.globalAlpha = 1;
+
+	//距離上一幀的時間（限制最大 0.1 秒，避免切換分頁回來時流星瞬間跳一大段）
+	const dt = Math.min(0.1, Math.max(0, time - lastStarTime));
+	lastStarTime = time;
+
+	if (!REDUCED_MOTION) DrawMeteors(c, dt);
+}
+
+function SpawnMeteor(W, H)
+{
+	const angle = Math.PI * (0.75 + Math.random() * 0.12);   //約 135°～157°：往左下方劃過
+	METEORS.push({
+		x: W * (0.35 + Math.random() * 0.75),                 //從畫面上半部、偏右的位置出發
+		y: H * (-0.05 + Math.random() * 0.35),
+		dx: Math.cos(angle),
+		dy: Math.sin(angle),
+		speed: W * (0.45 + Math.random() * 0.45),
+		len: (90 + Math.random() * 120) * STAR_DPR,
+		life: 0.7 + Math.random() * 0.6,
+		age: 0
+	});
+}
+
+function DrawMeteors(c, dt)
+{
+	const W = c.canvas.width, H = c.canvas.height;
+
+	//隨機間隔產生流星
+	nextMeteor -= dt;
+	if (nextMeteor <= 0)
+	{
+		SpawnMeteor(W, H);
+		nextMeteor = SPACE.meteorMin + Math.random() * (SPACE.meteorMax - SPACE.meteorMin);
+	}
+	if (METEORS.length === 0) return;
+
+	c.save();
+
+	//裁切掉行星範圍：流星會從行星「後方」經過，增加景深
+	if (PLANET)
+	{
+		c.beginPath();
+		c.rect(0, 0, W, H);
+		c.arc(PLANET.px, PLANET.py, PLANET.pr, 0, Math.PI * 2, true);   //反向畫圓 = 挖洞
+		c.clip();
+	}
+
+	c.globalCompositeOperation = 'lighter';   //加法混合，發光效果
+	c.lineCap = 'round';
+
+	for (let i = METEORS.length - 1; i >= 0; i--)
+	{
+		const m = METEORS[i];
+		m.age += dt;
+		if (m.age >= m.life) { METEORS.splice(i, 1); continue; }
+
+		m.x += m.dx * m.speed * dt;
+		m.y += m.dy * m.speed * dt;
+
+		const t = m.age / m.life;
+		const fade = Math.sin(Math.PI * t);                    //淡入 → 最亮 → 淡出
+		const tail = m.len * Math.min(1, m.age / 0.15);        //尾巴在出現時逐漸拉長
+		const tx = m.x - m.dx * tail, ty = m.y - m.dy * tail;
+
+		//尾巴：頭部白綠色，往後漸變成透明的螢光綠
+		const g = c.createLinearGradient(m.x, m.y, tx, ty);
+		g.addColorStop(0, `rgba(235,255,220,${fade})`);
+		g.addColorStop(0.25, `rgba(150,255,100,${0.45 * fade})`);
+		g.addColorStop(1, 'rgba(109,255,42,0)');
+		c.strokeStyle = g;
+		c.lineWidth = 1.6 * STAR_DPR;
+		c.beginPath();
+		c.moveTo(m.x, m.y);
+		c.lineTo(tx, ty);
+		c.stroke();
+
+		//流星頭的光點
+		const hr = 6 * STAR_DPR;
+		const hg = c.createRadialGradient(m.x, m.y, 0, m.x, m.y, hr);
+		hg.addColorStop(0, `rgba(240,255,230,${fade})`);
+		hg.addColorStop(1, 'rgba(109,255,42,0)');
+		c.fillStyle = hg;
+		c.beginPath();
+		c.arc(m.x, m.y, hr, 0, Math.PI * 2);
+		c.fill();
+	}
+
+	c.restore();
+}
+
 ///==================== 太空場景：行星背景（2D Canvas） ====================
 function DrawSpaceBackdrop()
 {
@@ -807,6 +932,10 @@ function DrawSpaceBackdrop()
 	const py = portrait ? H * 0.70 : H * 0.80;
 	const hazeY = H * 0.72;//右側綠色大氣散射的高度
 
+	PLANET = { px, py, pr };
+	STAR_DPR = dpr;
+	METEORS.length = 0;//視窗大小改變時清掉畫到一半的流星
+
 	//右側綠色大氣散射
 	let g = ctx.createRadialGradient(W * 0.80, hazeY, 0, W * 0.80, hazeY, W * 0.55);
 	g.addColorStop(0, 'rgba(90,150,45,0.30)');
@@ -815,16 +944,24 @@ function DrawSpaceBackdrop()
 	ctx.fillStyle = g;
 	ctx.fillRect(0, 0, W, H);
 
-	///---- 星點 ----
+	///---- 星點（只記錄資料，實際繪製在 #starLayer，由 DrawStars() 每幀更新） ----
+	STARS.length = 0;
 	for (let i = 0; i < 320; i++)
 	{
 		const x = rand() * W, y = rand() * H;
 		if (Math.hypot(x - px, y - py) < pr * 1.08) continue;
-		ctx.fillStyle = `rgba(255,255,255,${0.08 + rand() * 0.45})`;
-		ctx.beginPath();
-		ctx.arc(x, y, (0.35 + rand() * 0.8) * dpr, 0, Math.PI * 2);
-		ctx.fill();
+		STARS.push({
+			x, y,
+			r: (0.35 + rand() * 0.8) * dpr,
+			base: 0.08 + rand() * 0.45,      //原本的亮度
+			speed: 0.5 + rand() * 2.5,       //閃爍速度
+			phase: rand() * Math.PI * 2      //起始相位，讓每顆星不同步
+		});
 	}
+	const sc = document.getElementById('starLayer');
+	sc.width = W; sc.height = H;
+	starCtx = sc.getContext('2d');
+	DrawStars(lastStarTime);//立即畫一次，避免 3D 尚未初始化前看不到星星
 
 	///---- 行星表面（程序化紋理 + 背光照明） ----
 	const N = Math.min(768, Math.round(pr * 2));
