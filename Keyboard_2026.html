@@ -338,7 +338,7 @@
 
 			<div class="hud-block hud-title">
 				<div class="t1" onclick="parent.open('https://fimawork.tw/')">FIMAWORK</div>
-				<div class="t2">MECHANICAL INTERFACE UNIT</div>
+				<div class="t2">WEB 3D CONCEPT</div>
 				<div class="hud-status"><span class="hud-dot"></span><span id="hudMode">SYSTEM ONLINE</span></div>
 			</div>
 
@@ -543,14 +543,15 @@ async function init()
 		model.rotation.set(FX.ToThreeEulerAngle(0),FX.ToThreeEulerAngle(0), FX.ToThreeEulerAngle(0));
 		model.scale.set(0.05,0.05,0.05);
 
-		const button_material=FXM.InstMaterial(0x000000,0.5,0.9,0,1.27,1,false,1,true);
-		const padding_material=FXM.InstMaterial(0x545454,0.9,0.6,0,1.27,1,false,1,true);
+		const button_material=FXM.InstEtchingMaterial(0x212121,0.5,0.75,0.6,false,1,"./textures/Gravel.png",new THREE.Vector2(60,60),new THREE.Vector2(0,0),"./textures/Gravel.png",new THREE.Vector2(150,150),1);
 
+		const padding_material=FXM.InstMaterial(0x545454,0.9,0.6,0,1.27,1,false,1,true);
+		
 		model.traverse( function ( object ) {
 
 			if(object.name.includes("button")||object.name.includes("base"))
         	{
-			  FX.ReturnBufferGeometry(object,button_material,null,scene);
+			  FX.ReturnBufferGeometry(object,button_material,model,scene);
         	}
 
 			if(object.name.includes("padding"))
